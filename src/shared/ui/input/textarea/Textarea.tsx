@@ -1,12 +1,12 @@
 "use client";
 
-import { forwardRef, ComponentPropsWithoutRef } from "react";
+import { forwardRef, ComponentPropsWithoutRef, ReactNode } from "react";
 import clsx from "clsx";
 import * as s from "../input/Input.css";
 
 interface TextareaFieldProps
   extends Omit<ComponentPropsWithoutRef<"textarea">, "size"> {
-  label?: string;
+  label?: ReactNode;
   size?: "sm" | "md" | "lg";
   isError?: boolean;
   errorMessage?: string;
@@ -28,7 +28,6 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
     return (
       <div className={s.wrapper}>
         {label && <label className={s.label}>{label}</label>}
-
         <textarea
           ref={ref}
           placeholder={placeholder}

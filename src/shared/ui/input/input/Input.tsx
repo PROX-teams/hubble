@@ -1,11 +1,11 @@
 "use client";
 
-import { forwardRef, ComponentPropsWithoutRef } from "react";
+import { forwardRef, ComponentPropsWithoutRef, ReactNode } from "react";
 import clsx from "clsx";
 import * as S from "./Input.css";
 
 interface InputFieldProps extends Omit<ComponentPropsWithoutRef<"input">, "size"> {
-  label?: string;
+  label?: ReactNode;
   size?: "sm" | "md" | "lg";
   isError?: boolean;
   errorMessage?: string; 

@@ -16,11 +16,15 @@ const meta = {
       control: "radio",
       options: ["sm", "md", "lg"],
     },
-  errorMessage: {
-      control: "text",
-      description: "true면 invalid 상태(border 색 등)로 표시",
+    isError: {
+      control: "boolean",
+      description: "에러 상태 여부",
     },
-  className: { control: false },
+    errorMessage: {
+      control: "text",
+      description: "에러 상태일 때 표시할 메시지",
+    },
+    className: { control: false },
   },
   args: {
     placeholder: "내용을 입력해 주세요",
@@ -34,22 +38,23 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 
-export const OnBoarding: Story = {
+export const Default: Story = {};
+
+export const Label: Story = {
   args: {
-    label: "소개",
-    size: "lg"
+    label: "계정",
   },
 };
 
-export const Note: Story = {
+export const error: Story = {
   args: {
-    label: "노트 소개",
+    isError:true
   },
 };
 
-export const Comment: Story = {
+export const Focused: Story = {
   args: {
-    size: "sm"
+    autoFocus: true,  
   },
 };
 

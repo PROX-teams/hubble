@@ -18,8 +18,8 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     {
       value,
       onChange,
-      icon = <AddIcon/>,
       onSearch,
+      icon = <AddIcon/>,
       className,
       ...props
     },
@@ -29,7 +29,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        onSearch?.(value);
+        onSearch?.(e.currentTarget.value);
       }
     };
     return (
@@ -41,7 +41,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           value={value}
           onChange={onChange}
           onKeyDown={handleKeyDown}
-          className={S.inputBare}
+          className={clsx(S.baseField, className)}
           {...props}
         />
       </div>

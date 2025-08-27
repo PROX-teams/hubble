@@ -20,16 +20,18 @@ const meta = {
       options: ["sm", "md", "lg"],
     },
     placeholder: { control: "text" },
+    isError: {
+      control: "boolean",
+      description: "에러 상태 여부",
+    },
     errorMessage: {
       control: "text",
-      description: "true면 invalid 상태(border 색 등)로 표시",
+      description: "에러 상태일 때 표시할 메시지",
     },
     className: { control: false },
   },
   args: {
-    label: "라벨",
     placeholder: "내용을 입력해 주세요",
-    type: "text",
     errorMessage: "에러메세지 입니다."
   },
 } satisfies Meta<typeof Input>;
@@ -39,23 +41,23 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 
-export const OnBoarding: Story = {
-  args: {
-    label: "계정",
-    size: "sm"
-  },
-};
+export const Default: Story = {};
 
-export const Profile: Story = {
+export const Label: Story = {
   args: {
     label: "계정",
   },
 };
 
-export const Series: Story = {
+export const error: Story = {
   args: {
-    label: "시리즈명",
-    size: "sm"
+    isError:true
+  },
+};
+
+export const Focused: Story = {
+  args: {
+    autoFocus: true,  
   },
 };
 
