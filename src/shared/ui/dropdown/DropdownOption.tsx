@@ -1,15 +1,13 @@
 'use client' 
 
-import { HTMLAttributes} from "react";
+import { ComponentPropsWithoutRef} from "react";
 import { useContext } from "react";
 import clsx from "clsx";
 import { DropdownContext } from "@/shared/model/dropdown/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";
 
-interface DropdownOptionProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, "onClick"> {
+interface DropdownOptionProps extends ComponentPropsWithoutRef<'div'> {
   optionId: number;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function DropdownOption({

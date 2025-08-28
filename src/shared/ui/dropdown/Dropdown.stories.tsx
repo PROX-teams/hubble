@@ -1,19 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Dropdown } from "./Dropdown";
 
-type Layout = "rightSm" | "rightLg" | "left" | "flush";
-type Width = "auto" | "w232" | "w332" | "w450" | "full";
-type Appearance = "solid" | "ghost";
+type iconPlacement = "right" | "both" | "left" | "none";
+type variant = "solid" | "ghost" | "none";
 type Placement = "left" | "center" | "right";
 
 type DropdownStoryProps = {
-  layout: Layout;
-  width: Width;
-  appearance: Appearance;
-  icon: "left" | "right" | "none";
+  iconPlacement: iconPlacement;
+  variant: variant;
   placeholder: string;
   placement: Placement;
   independent:boolean;
+  icon: "left" | "right" | "both"
 };
 
 const OPTIONS = [
@@ -26,19 +24,17 @@ function DropdownTemplate(props: DropdownStoryProps) {
   return (
     <Dropdown>
       <Dropdown.Trigger
-        layout={props.layout}
-        width={props.width}
-        appearance={props.appearance}
+        iconPlacement={props.iconPlacement}
+        variant={props.variant}
       >
-        {props.icon === "left" && <Dropdown.Icon/>}
+        {(props.icon === "left" || props.icon === "both") && <Dropdown.Icon />}
         <Dropdown.Value>
           {({ selectedOption }) =>
-            selectedOption ? (selectedOption) : props.placeholder
+            selectedOption ? selectedOption : props.placeholder
           }
         </Dropdown.Value>
-        {props.icon === "right" && <Dropdown.Icon/>}
+        {(props.icon === "right" || props.icon === "both") && <Dropdown.Icon />}
       </Dropdown.Trigger>
-
       <Dropdown.Menu placement={props.placement} independent={props.independent}>
         {OPTIONS.map((item) => (
           <Dropdown.Option key={item.id} optionId={item.id}>
@@ -53,7 +49,6 @@ function DropdownTemplate(props: DropdownStoryProps) {
 const meta = {
   title: "Dropdown/Dropdown",
   component: DropdownTemplate,
-  // 필요 시 서브컴포넌트 문서화:
   subcomponents: {
     Trigger: (Dropdown).Trigger,
     Menu: (Dropdown).Menu,
@@ -66,38 +61,32 @@ const meta = {
     docs: {
       description: {
         component:
-          "실사용 패턴 기준의 Template(=Facade) 컴포넌트. Args로 Trigger/Menu 조합을 제어합니다.",
+          "",
       },
     },
   },
   tags: ["autodocs"], 
   argTypes: {
-    layout: {
-      control: "select",
-      options: ["rightSm", "rightLg", "left", "flush"],
-      table: { category: "Trigger" },
-    },
-    width: {
-      control: "select",
-      options: ["auto", "w232", "w332", "w450", "full"],
-      table: { category: "Trigger" },
-    },
-    appearance: {
-      control: "select",
-      options: ["solid", "ghost"],
-      table: { category: "Trigger" },
-    },
-    icon: {
+    iconPlacement: {
       control: "radio",
-      options: ["left", "right", "none"],
-      table: { category: "Trigger" },
+      options: ["right", "both", "left", "none"],
+      table: { category: "Trigger" }
+    },
+    variant: {
+      control: "radio",
+      options: ["solid", "ghost", "none"],
+      table: { category: "Trigger" }
     },
     placeholder: { control: "text", table: { category: "Trigger" } },
     placement: {
       control: "radio",
-      options: ["start", "center", "end"],
-      table: { category: "Menu" },
+      options: ["left", "center", "right"],
+      table: { category: "Menu" }
     },
+    independent: {
+      control: "boolean",
+      table: {category: "Menu"}
+    }
   },
 } satisfies Meta<typeof DropdownTemplate>;
 
@@ -105,84 +94,45 @@ export default meta;
 
 type Story = StoryObj<typeof DropdownTemplate>;
 
-export const Category: Story = {
+export const Default: Story = {
   args: {
-    layout: "rightLg",
-    appearance: "solid",
     icon: "right",
     placeholder: "카테고리 선택",
-    placement: "left",
   },
 };
 
-export const Public: Story = {
+export const Icon: Story = {
   args: {
-    layout: "rightLg",
-    appearance: "solid",
+    placeholder: "전체 공개",
+  },
+  render: (args) => (
+    <div style={{ display: "flex", gap: "1rem" }}>
+      <DropdownTemplate {...args} iconPlacement="left" icon="left" />
+      <DropdownTemplate {...args} iconPlacement="right" icon="right" />
+      <DropdownTemplate {...args} iconPlacement="both" icon="both" />
+    </div>
+  ),
+};
+
+export const Placement: Story = {
+  args: {
     icon: "right",
     placeholder: "전체 공개",
-    placement: "center",
   },
+  render: (args) => (
+    <div style={{ display: "flex", gap: "10rem" }}>
+      <DropdownTemplate {...args} placement="left"/>
+      <DropdownTemplate {...args} placement="center"/>
+      <DropdownTemplate {...args} placement="right"/>
+    </div>
+  ),
 };
 
-export const Series: Story = {
+export const Variant: Story = {
   args: {
-    layout: "rightSm",
-    appearance: "solid",
-    icon: "right",
-    placeholder: "시리즈 선택",
-    placement: "center",
-  },
-};
-
-export const Mode: Story = {
-  args: {
-    layout: "rightLg",
-    appearance: "solid",
-    icon: "right",
-    placeholder: "Light Mode",
-    placement: "right",
-  },
-};
-
-export const View: Story = {
-  args: {
-    layout: "left",
-    appearance: "solid",
-    icon: "left",
-    placeholder: "Most Viwed",
-    placement: "left",
-  },
-};
-
-
-export const Ghost: Story = {
-  args: {
-    layout: "flush",
-    appearance: "ghost",
-    icon: "right",
-    placeholder: "전체",
-    placement: "right",
-  },
-};
-
-export const Date: Story = {
-  args: {
-    layout: "flush",
-    appearance: "ghost",
-    icon: "right",
+    variant: "ghost",
+    iconPlacement: "none",
     placeholder: "For Week",
-    placement: "right",
-  },
-};
-
-export const Series2: Story = {
-  args: {
-    layout: "rightSm",
-    appearance: "solid",
-    icon: "right",
-    placeholder: "시리즈 선택",
-    placement: "center",
   },
 };
 
@@ -201,36 +151,3 @@ export const OnlyMenu: Story = {
   ),
 };
 
-export const CustomRender: Story = {
-  args: {
-    layout: "rightSm",
-    width: "w232",
-    appearance: "solid",
-    placeholder: "Custom render",
-    icon: "right",
-    placement: "center",
-  },
-  render: (props) => (
-    <Dropdown>
-      <Dropdown.Trigger
-        layout={props.layout}
-        width={props.width}
-        appearance={props.appearance}
-      >
-        {props.icon === "left" && <Dropdown.Icon/>}
-        <Dropdown.Value>
-          {() => <div>{props.placeholder} {"저장된 노트 32개"}</div>}
-        </Dropdown.Value>
-        {props.icon === "right" && <Dropdown.Icon/>}
-      </Dropdown.Trigger>
-
-      <Dropdown.Menu placement={props.placement} independent={props.independent}>
-        {OPTIONS.map((item) => (
-          <Dropdown.Option key={item.id} optionId={item.id}>
-            {item.label}
-          </Dropdown.Option>
-        ))}
-      </Dropdown.Menu>
-    </Dropdown>
-  ),
-};

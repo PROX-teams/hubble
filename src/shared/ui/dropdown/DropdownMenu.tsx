@@ -1,5 +1,5 @@
 import { HTMLAttributes, useContext } from "react";
-import type { RecipeVariants } from "@vanilla-extract/recipes";
+import { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
 import { DropdownContext } from "@/shared/model/dropdown/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";

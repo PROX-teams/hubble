@@ -1,45 +1,43 @@
-import { HTMLAttributes,useContext } from "react";
+import { ComponentPropsWithoutRef,useContext } from "react";
+import type { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
 import { DropdownContext } from "@/shared/model/dropdown/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";
 
+type TriggerVariants = NonNullable<RecipeVariants<typeof S.trigger>>;
+type IconPlacement = NonNullable<TriggerVariants["iconPlacement"]>;
+type Variant = NonNullable<TriggerVariants["variant"]>;
 
-type Layout = "rightLg" | "rightSm" | "left" | "flush"; // a1/a2/a3/a4 대응
-type Width  = "auto" | "w232" | "w332" | "w450" | "full";
-type Appearance = "solid" | "ghost";
-
-interface DropdownTriggerProps extends HTMLAttributes<HTMLDivElement> {
-  layout?: Layout;
-  width?: Width;
-  appearance?: Appearance;
+interface DropdownTriggerProps extends ComponentPropsWithoutRef<"button">{
+  iconPlacement?: IconPlacement;
+  variant ?: Variant;
 }
 
 function DropdownTrigger({
-  layout,
-  width = "auto",
-  appearance = "solid",
+  iconPlacement = "right",
+  variant  = "none",
   className,
   children,
   ...props
 }: DropdownTriggerProps) {
   const { toggleBoxOpen } = useContext(DropdownContext);
 
-  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault?.();
+  const handleClick = () => {
     toggleBoxOpen();
   };
 
   return (
-    <div
+    <button
       className={clsx(
-        S.trigger({ layout: layout, width, appearance }),
+        S.trigger({ iconPlacement, variant }),
         className
       )}
       onClick={handleClick}
+      type="button" 
       {...props}
     >
       {children}
-    </div>
+    </button>
   );
 }
 
