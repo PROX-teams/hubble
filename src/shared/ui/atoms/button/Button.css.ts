@@ -1,4 +1,3 @@
-import { tx } from "@/shared/styles/textStyle.css";
 import { lightTheme, vars } from "@/shared/styles/theme.css";
 import { style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
@@ -20,11 +19,11 @@ export const buttonBaseStyle = style({
 });
 
 export const buttonStyle = recipe({
-  base: [buttonBaseStyle, tx.t2_sb],
+  base: [buttonBaseStyle],
 
   variants: {
     size: {
-      xs: { width: 76, height: 24, borderRadius: 5 },
+      xs: { height: 24, borderRadius: 5 },
       sm: { width: 66, height: 28 },
       md: { height: 32 },
       lg: { height: 44 },
@@ -42,6 +41,7 @@ export const buttonStyle = recipe({
           color: vars.color.gray_400,
           backgroundColor: vars.color.main_disabled,
           border: `1px solid ${vars.color.stroke_main_disabled}`,
+          cursor: "not-allowed",
         },
       },
       neutral: {

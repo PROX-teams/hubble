@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import LoginButton from "./LoginButton";
+import SaveDraftButton from "./SaveDraftButton";
 
 const meta = {
-  title: "Button/Auth/Login",
-  component: LoginButton,
+  title: "Button/Action/Draft",
+  component: SaveDraftButton,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
-
   argTypes: {
     children: { control: "text", description: "버튼 내부에 표시할 콘텐츠" },
     variants: {
@@ -22,15 +21,14 @@ const meta = {
       description: "크기",
     },
   },
-
   args: {
-    children: "로그인",
-    variants: "colored",
-    size: "sm",
+    children: "임시 저장",
+    variants: "neutral",
+    size: "md",
   },
-} satisfies Meta<typeof LoginButton>;
+} satisfies Meta<typeof SaveDraftButton>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Save_Draft: Story = {};

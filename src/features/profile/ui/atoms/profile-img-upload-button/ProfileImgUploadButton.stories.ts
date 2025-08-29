@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import LoginButton from "./LoginButton";
+import ProfileImgUploadButton from "./ProfileImgUploadButton";
 
 const meta = {
-  title: "Button/Auth/Login",
-  component: LoginButton,
+  title: "Button/Action/Upload",
+  component: ProfileImgUploadButton,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
-
   argTypes: {
     children: { control: "text", description: "버튼 내부에 표시할 콘텐츠" },
     variants: {
@@ -22,15 +21,14 @@ const meta = {
       description: "크기",
     },
   },
-
   args: {
-    children: "로그인",
-    variants: "colored",
-    size: "sm",
+    children: "프로필 이미지 변경",
+    variants: "neutral",
+    size: "md",
   },
-} satisfies Meta<typeof LoginButton>;
+} satisfies Meta<typeof ProfileImgUploadButton>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Profile_Image_Upload: Story = {};
