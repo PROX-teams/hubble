@@ -31,7 +31,7 @@ const meta = {
       description: {
         component:
           "페이지 경로를 단계적으로 보여주는 내비게이션 컴포넌트." +
-          "`Breadcrumb.List`의 `separator`로 구분자를 변경하고, `Breadcrumb.Item`의 `active`로 현재 위치를 표시합니다.",
+          "`Breadcrumb.List`의 `separator`로 구분자를 변경합니다."
       },
     },
   },
