@@ -1,17 +1,12 @@
 'use client'
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useContext } from "react";
+import { useContext, ComponentPropsWithoutRef } from "react";
 import { AccordionContext } from "@/shared/model/accordion/contexts/AccordionContextProvider";
 import clsx from "clsx";
 import * as S from "@/shared/ui/accordion/Accordion.css";
 
-interface HeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const AccordionContent = ({ children, className }: HeaderProps) => {
+export const AccordionContent = ({ children, className }: ComponentPropsWithoutRef<'div'>) => {
   const { isOpen } = useContext(AccordionContext);
 
   return (

@@ -1,8 +1,6 @@
-// styles/accordion.css.ts
 import { style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 import { vars } from "@/shared/styles/theme.css";
-
 
 export const wrapper = style({
   backgroundColor: "transparent", 
@@ -11,7 +9,6 @@ export const wrapper = style({
   display: "flex",                
   flexDirection: "column",
   gap:"8px"
-
 })
 
 export const content = style({
@@ -29,13 +26,13 @@ export const header = recipe({
     },
   ],
   variants: {
-    layout: {
+    justify: {
       inline: { justifyContent: "flex-start" },  
       spread: { justifyContent: "space-between" } 
     },
   },
   defaultVariants: {
-    layout: "inline",
+    justify: "inline",
   },
 });
 
@@ -53,7 +50,7 @@ export const triggerIcon = recipe({
     display: "inline-flex",
     transition: "transform 200ms ease",
     transform: "rotate(0deg)",
-    color:vars.color.stroke_500
+    color:vars.color.stroke_500,
   },
   variants: {
     enabled: {

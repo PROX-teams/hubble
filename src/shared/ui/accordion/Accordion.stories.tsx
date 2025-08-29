@@ -3,14 +3,14 @@ import { Accordion } from "./Accordion";
 import Arrow from "@/shared/assets/icons/common/accordionArrow.svg";
 
 type StoryArgs = {
-  layout: "inline" | "spread";
+  justify: "inline" | "spread";
   enabled: boolean;
 };
 
-const AccordionTemplate = ({ layout, enabled }: StoryArgs) => (
+const AccordionTemplate = ({ justify, enabled }: StoryArgs) => (
   <div style={{ width: 232 }}>
     <Accordion>
-      <Accordion.Header layout={layout}>
+      <Accordion.Header justify={justify}>
         아코디언 헤더
         <Accordion.Trigger enabled={enabled}>
           <Arrow />
@@ -27,7 +27,7 @@ const meta = {
   parameters: { layout: "centered" },
   tags: ["autodocs"],
   argTypes: {
-    layout: {
+    justify: {
       control: "radio",
       options: ["inline", "spread"],
       description:
@@ -46,13 +46,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Spread: Story = {
-  args: { layout: "spread", enabled: false },
+  args: { justify: "spread", enabled: false },
 };
 
 export const Rotate: Story = {
-  args: { layout: "inline", enabled: true },
+  args: { justify: "inline", enabled: true },
 };
 
 export const Stop: Story = {
-  args: { layout: "inline", enabled: false },
+  args: { justify: "inline", enabled: false },
 };
