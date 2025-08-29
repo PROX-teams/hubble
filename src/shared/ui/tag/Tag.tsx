@@ -1,6 +1,6 @@
 import React, { forwardRef, ComponentPropsWithoutRef, ReactNode } from "react";
 import clsx from "clsx";
-import * as s from "./Tag.css";
+import * as S from "./Tag.css";
 import TagRemoveIcon from "@/shared/assets/icons/common/remove-tag.svg";
 
 export interface TagProps extends ComponentPropsWithoutRef<"div"> {
@@ -26,14 +26,14 @@ export interface TagProps extends ComponentPropsWithoutRef<"div"> {
 const Tag = forwardRef<HTMLDivElement, TagProps>(
   ({ className, label, icon, count, onRemove, ...props }, ref) => {
     return (
-      <div ref={ref}className={clsx(s.tagBox({ hasRemove: !!onRemove }), className)} {...props}>
-        {icon && <span className={s.tagIcon}>{icon}</span>}
-        <span className={s.tagLabel}>{label}</span>
-        {count && <span className={s.tagCount}>{count}</span>}
+      <div ref={ref}className={clsx(S.tagBox, className)} {...props}>
+        {icon && <span className={S.tagIcon}>{icon}</span>}
+        <span className={S.tagLabel}>{label}</span>
+        {count && <span className={S.tagCount}>{count}</span>}
         {onRemove && (
           <button
             type="button"
-            className={s.removeIcon}
+            className={S.removeIcon}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

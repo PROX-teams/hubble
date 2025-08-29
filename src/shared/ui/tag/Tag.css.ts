@@ -1,10 +1,8 @@
 import { style } from "@vanilla-extract/css";
-import { recipe } from "@vanilla-extract/recipes";
 import { vars } from "@/shared/styles/theme.css"; 
 import { tx } from "@/shared/styles/textStyle.css";
 
-export const tagBox = recipe({
-  base: [
+export const tagBox = style([
     tx.cap1_md,
     {
       backgroundColor: vars.color.gray_200,
@@ -13,39 +11,25 @@ export const tagBox = recipe({
       width: "fit-content",
       minHeight: "1.625rem",
       display: "inline-flex",
-      alignItems: "center",
       gap: "0.2rem",
       borderRadius: "0.375rem",
-    },
-  ],
-  variants: {
-    hasRemove: {
-      true: { paddingRight: "0.4rem" }, // 8px
-      false: {},
-    },
-  },
-  defaultVariants: {
-    hasRemove: false,
-  },
-});
-
-export const tagBoxWithRemove = style({
-  paddingRight: "0.5rem", 
-});
+      verticalAlign: "middle"
+    }
+]);
 
 export const tagLabel = style({
   color: vars.color.white,
 });
 
 export const removeIcon = style({
+  marginInlineEnd: "-0.125rem",
   width: "1rem",
   height: "1rem",
-  border: "none",
-  background: "transparent",
   cursor: "pointer",
 });
 
 export const tagIcon = style({
+  marginInlineStart: "-0.125rem",
   width: "1rem",
   height: "1rem",
 });
