@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Dropdown } from "./Dropdown";
 
 type Side = "right" | "left" ;
-type Variant = "solid" | "ghost" | "none";
+type Variant = "solid" | "ghost" | "surface" | "muted";
 type Placement = "left" | "center" | "right";
 type TriggerSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "2xl-tall" | "4xl";
 type MenuSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
@@ -65,7 +65,9 @@ const meta = {
     docs: {
       description: {
         component:
-          "",
+          "Dropdown 컴포넌트는 Trigger, Menu, Option, Value, Icon으로 구성된 Compound Component입니다. " +
+          "Trigger를 눌러 Menu를 열고, Option을 선택하면 Value에 반영됩니다. " +
+          "variant와 size를 조정하여 다양한 UI 스타일을 적용할 수 있습니다.",
       },
     },
   },
@@ -74,32 +76,39 @@ const meta = {
     triggerSize:{
       control: "radio",
       options: ["sm" , "md" , "lg" , "xl" , "2xl" , "3xl" , "2xl-tall" , "4xl"],
-      table: { category: "Trigger" }
+      table: { category: "Trigger" },
+      description: "Trigger 버튼의 크기를 지정합니다."
     },
     variant: {
       control: "radio",
-      options: ["solid", "ghost", "none"],
-      table: { category: "Trigger" }
+      options: ["solid", "ghost", "surface", "muted"],
+      table: { category: "Trigger" },
+      description: "Trigger의 배경 및 border스타일을 지정합니다."
     },
     placeholder: { control: "text", table: { category: "Trigger" } },
     menuSize:{
       control: "radio",
       options: ["sm", "md", "lg", "xl", "2xl", "3xl"],
-      table: { category: "Menu" }
+      table: { category: "Menu" },
+      description: "드롭다운 메뉴의 크기를 지정합니다."
+
     },
     side: {
       control: "radio",
       options: ["right", "left",],
-      table: { category: "Icon" }
+      table: { category: "Icon" },
+      description: "아이콘의 위치를 지정합니다."
     },
     placement: {
       control: "radio",
       options: ["left", "center", "right"],
-      table: { category: "Menu" }
+      table: { category: "Menu" },
+      description: "메뉴가 열리는 방향을 지정합니다."
     },
     independent: {
       control: "boolean",
-      table: {category: "Menu"}
+      table: {category: "Menu"},
+      description: "Context 상태와 무관하게 메뉴를 독립적으로 열 수 있습니다."
     }
   },
 } satisfies Meta<typeof DropdownTemplate>;

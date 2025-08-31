@@ -1,6 +1,6 @@
 import { recipe } from "@vanilla-extract/recipes";
 import { style } from "@vanilla-extract/css";
-import { vars } from "@/shared/styles/theme.css";
+import { lightTheme,vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
 //화이트 모드 적용
@@ -17,11 +17,16 @@ export const trigger = recipe({
       width: "100%", 
       justifyContent:"space-between",
       padding: "0.53rem 0.75rem",
-      border: `0.063rem solid ${vars.color.stroke_400}`, 
+      border: `0.063rem solid ${vars.color.stroke_200}`, 
       borderRadius: "0.38rem",
-      backgroundColor: vars.color.gray_100,
+      backgroundColor: vars.color.black,
       cursor: "pointer",
       color: vars.color.gray_500,
+      selectors: {
+        [`${lightTheme} &`]: {
+          backgroundColor: vars.color.white,
+        },
+      },
     }
   ],
   variants: {
@@ -37,20 +42,26 @@ export const trigger = recipe({
     },
     variant: {
       solid: {
-        backgroundColor: vars.color.black,
-        border: `0.063rem solid ${vars.color.stroke_200}`, 
+        backgroundColor: vars.color.gray_100,
+        border: `0.063rem solid ${vars.color.stroke_400}`, 
+      },
+      surface: {
+        backgroundColor: vars.color.gray_200,
+        border: `0.063rem solid ${vars.color.stroke_400}`, 
+      },
+      muted: {
+        backgroundColor: vars.color.gray_100,
+        border: `0.063rem solid ${vars.color.stroke_300}`, 
       },
       ghost: {
         padding:"0",
         backgroundColor: "transparent",
         border: "none",             
       },
-      none: {}
     },
   },
   defaultVariants: {
       size:"md",
-      variant: "none",
     },
   });
 
@@ -66,6 +77,11 @@ export const value = recipe({
     selected: {
       true: {
         color: vars.color.white,
+        selectors: {
+            [`${lightTheme} &`]: {
+              color: vars.color.black,
+            },
+          },
       },
       false: {},
     },
@@ -145,5 +161,11 @@ export const optionSelected = style({
   backgroundColor: vars.color.gray_300,
   color: vars.color.white,
   fontSize: "0.75rem",
+  selectors: {
+    [`${lightTheme} &`]: {
+      color: vars.color.black,
+    },
+  },
+  
 });
 
