@@ -17,6 +17,7 @@ export const fontVars = createThemeContract({
     b2: null,
     b3: null,
     cap1: null,
+    cap2: null,
     m1: null,
     m2: null,
     m3: null,
@@ -53,6 +54,8 @@ export const font = {
     b2: "0.8125rem", // 13px
     b3: "0.75rem", // 12px
     cap1: "0.8125rem", // 13px
+    cap2: "0.75rem", // 12px
+    cap3: "0.6875rem", // 11px
     m1: "2.25rem", // 36px
     m2: "1.875rem", // 30px
     m3: "1.5rem", // 24px

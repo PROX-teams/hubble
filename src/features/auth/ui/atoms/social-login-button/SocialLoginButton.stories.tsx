@@ -14,10 +14,19 @@ const meta = {
   argTypes: {
     provider: {
       control: "select",
+      options: ["Google", "Kakao", "Naver"],
       description: "인증 제공업체(provider) 지정",
     },
-    size: { control: "select", description: "크기" },
-    variants: { control: "select", description: "스타일" },
+    variants: {
+      control: "inline-radio",
+      options: ["colored", "neutral", "danger"],
+      description: "버튼 유형 및 스타일",
+    },
+    size: {
+      control: "inline-radio",
+      options: ["xs", "sm", "md", "lg"],
+      description: "크기",
+    },
     children: { control: "text", description: "버튼 텍스트" },
     icon: { control: false, description: "소셜 로그인 아이콘" },
   },

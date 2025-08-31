@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react";
-import * as S from "./Switchtoggle.css";
+import * as S from "./SwitchToggle.css";
 
 interface SwitchToggleProps {
   /** 현재 토글이 활성화(ON) 상태인지 여부 */
@@ -10,7 +10,7 @@ interface SwitchToggleProps {
 
 /**
  * SwitchToggle 컴포넌트는 ON/OFF 상태를 토글할 수 있는 UI 스위치입니다.
- * @example
+ * ```jsx
  * const { isActive, toggle } = useToggle(false);
  *
  * return (
@@ -19,9 +19,13 @@ interface SwitchToggleProps {
  *     onToggle={(checked) => toggle(checked)}
  *   />
  * );
+ * ```
  */
 
-function SwitchToggle({ isActive, onToggle }: SwitchToggleProps) {
+export default function SwitchToggle({
+  isActive,
+  onToggle,
+}: SwitchToggleProps) {
   return (
     // label 클릭 시 내부 input 요소를 자동으로 포커싱하여 토글 (기능적 요소)
     <label className={S.label}>
@@ -39,5 +43,3 @@ function SwitchToggle({ isActive, onToggle }: SwitchToggleProps) {
     </label>
   );
 }
-
-export { SwitchToggle };

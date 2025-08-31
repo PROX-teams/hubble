@@ -10,8 +10,16 @@ const meta = {
   tags: ["autodocs"],
   argTypes: {
     children: { control: "text", description: "버튼 내부에 표시할 콘텐츠" },
-    variants: { control: "select", description: "스타일" },
-    size: { control: "select", description: "크기" },
+    variants: {
+      control: "inline-radio",
+      options: ["colored", "neutral", "danger"],
+      description: "버튼 유형 및 스타일",
+    },
+    size: {
+      control: "inline-radio",
+      options: ["xs", "sm", "md", "lg"],
+      description: "크기",
+    },
     disabled: { control: "boolean", description: "비활성화 여부" },
   },
   args: {
