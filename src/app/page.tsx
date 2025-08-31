@@ -1,6 +1,7 @@
 "use client"
 
 import { Dropdown } from "@/shared/ui/dropdown/Dropdown";
+import * as S from "@/shared//ui/dropdown/Dropdown.css";
 
 export default function MainPage() {
   return <div>MainPage
@@ -13,12 +14,12 @@ export default function MainPage() {
             selectedOption ? (selectedOption) : "으어"
           }
         </Dropdown.Value>
-        <Dropdown.Icon/>
+        <Dropdown.Icon side="right"/>
       </Dropdown.Trigger>
-      <Dropdown.Menu >
+      <Dropdown.Menu className="S.">
 
         <Dropdown.Option optionId={1}>
-          OPTION1ㅇㅈㅇㅈㅇㄹㄷㄹㄷ
+          OPTION1
         </Dropdown.Option>
                 <Dropdown.Option optionId={2}>
           OPTION2
@@ -31,3 +32,4 @@ export default function MainPage() {
     </div>
   </div>;
 }
+

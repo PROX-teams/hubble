@@ -3,6 +3,7 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
+//화이트 모드 적용
 export const wrapper = style({
   position: "relative",
 })
@@ -12,22 +13,27 @@ export const trigger = recipe({
     tx.cap1_md, 
     {
       display: "flex",
+      alignItems:"center",
+      width: "100%", 
       justifyContent:"space-between",
       padding: "0.53rem 0.75rem",
       border: `0.063rem solid ${vars.color.stroke_400}`, 
       borderRadius: "0.38rem",
       backgroundColor: vars.color.gray_100,
       cursor: "pointer",
-      width: "100%",
       color: vars.color.gray_500,
     }
   ],
   variants: {
-    iconPlacement: {
-      right: { paddingLeft: "0.75rem", paddingRight: "0.375rem" }, 
-      both:  { paddingLeft: "0.5rem",  paddingRight: "0.375rem" },  
-      left:  { paddingLeft: "0.5rem",  paddingRight: "0.75rem" }, 
-      none:  { paddingLeft: "0rem",    paddingRight: "0rem" },  
+    size: {
+      sm:   { width: "5.5rem",   height: "2.125rem" },   // 88×34
+      md:   { width: "6.563rem", height: "2.125rem" },   // 105×34
+      lg:   { width: "6.875rem", height: "2.125rem" },   // 110×34
+      xl:   { width: "7.25rem",  height: "1.625rem" },   // 116×26
+      "2xl":{ width: "14.5rem",  height: "2.125rem" },   // 232×34
+      "2xl-tall": { width: "14.5rem", height: "3.5rem" },// 232×56
+      "3xl":{ width: "20.75rem", height: "2.125rem" },   // 332×34
+      "4xl":{ width: "28.125rem",height: "2.125rem" },   // 450×34
     },
     variant: {
       solid: {
@@ -35,6 +41,7 @@ export const trigger = recipe({
         border: `0.063rem solid ${vars.color.stroke_200}`, 
       },
       ghost: {
+        padding:"0",
         backgroundColor: "transparent",
         border: "none",             
       },
@@ -42,7 +49,7 @@ export const trigger = recipe({
     },
   },
   defaultVariants: {
-      iconPlacement: "right",
+      size:"md",
       variant: "none",
     },
   });
@@ -50,6 +57,10 @@ export const trigger = recipe({
 export const value = recipe({
   base: {
     color: vars.color.gray_500,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    minWidth: 0,
   },
   variants: {
     selected: {
@@ -64,14 +75,24 @@ export const value = recipe({
   },
 });
 
-export const icon = style({
-  display: "flex",
+
+export const icon = recipe({
+  base: {
+      display: "inline-flex",
+    },
+  variants: {
+    side: {
+      left:  { marginInlineStart: "-0.375rem " }, 
+      right: { marginInlineEnd:  "-0.375rem ",}, 
+    },
+  },
 });
+
 
 export const menu = recipe({
   base:{
   marginTop: "0.4rem", 
-  border: `0.1rem solid ${vars.color.stroke_200}`,
+  border: `0.1rem solid ${vars.color.stroke_300}`,
   borderRadius: "0.38rem",
   padding: "0.2rem 0.2rem", 
   backgroundColor: vars.color.gray_200,
@@ -79,9 +100,17 @@ export const menu = recipe({
   overflowY: "auto",
   zIndex: 1000,
   position: "absolute",
-  minWidth: "10rem",
+ 
   },
   variants: {
+    size: {
+      sm: { width: "5.5rem" },       // 88px
+      md: { width: "7.5rem" },       // 120px
+      lg: { width: "9.625rem" },     // 154px
+      xl: { width: "14.5rem" },      // 232px
+      "2xl": { width: "20.75rem" },  // 332px
+      "3xl": { width: "28.125rem" }, // 450px
+    },
     placement: {
       left: {
         left: 0,
@@ -94,10 +123,15 @@ export const menu = recipe({
         right: 0,
       },
     },
+    defaultVariants: {
+      size: "md",
+  },
   }
 });
 
 export const option = style({
+  display: "flex",
+  justifyContent: "center",
   alignItems: "center",
   padding: "0.34rem 1rem",
   cursor: "pointer",
@@ -106,8 +140,6 @@ export const option = style({
 });
 
 export const optionSelected = style({
-  display: "flex",
-  alignItems: "center",
   padding: "0.34rem 1rem",
   borderRadius: "0.19rem", 
   backgroundColor: vars.color.gray_300,

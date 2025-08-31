@@ -1,13 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Dropdown } from "./Dropdown";
 
-type iconPlacement = "right" | "both" | "left" | "none";
-type variant = "solid" | "ghost" | "none";
+type Side = "right" | "left" ;
+type Variant = "solid" | "ghost" | "none";
 type Placement = "left" | "center" | "right";
+type TriggerSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "2xl-tall" | "4xl";
+type MenuSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
 
 type DropdownStoryProps = {
-  iconPlacement: iconPlacement;
-  variant: variant;
+  side: Side;
+  triggerSize: TriggerSize;
+  menuSize: MenuSize;
+  variant: Variant;
   placeholder: string;
   placement: Placement;
   independent:boolean;
@@ -24,18 +28,18 @@ function DropdownTemplate(props: DropdownStoryProps) {
   return (
     <Dropdown>
       <Dropdown.Trigger
-        iconPlacement={props.iconPlacement}
+        size={props.triggerSize}
         variant={props.variant}
       >
-        {(props.icon === "left" || props.icon === "both") && <Dropdown.Icon />}
+        {(props.icon === "left" || props.icon === "both") && <Dropdown.Icon side={props.side} />}
         <Dropdown.Value>
           {({ selectedOption }) =>
             selectedOption ? selectedOption : props.placeholder
           }
         </Dropdown.Value>
-        {(props.icon === "right" || props.icon === "both") && <Dropdown.Icon />}
+        {(props.icon === "right" || props.icon === "both") && <Dropdown.Icon side={props.side} />}
       </Dropdown.Trigger>
-      <Dropdown.Menu placement={props.placement} independent={props.independent}>
+      <Dropdown.Menu size={props.menuSize} placement={props.placement} independent={props.independent}>
         {OPTIONS.map((item) => (
           <Dropdown.Option key={item.id} optionId={item.id}>
             {item.label}
@@ -67,9 +71,9 @@ const meta = {
   },
   tags: ["autodocs"], 
   argTypes: {
-    iconPlacement: {
+    triggerSize:{
       control: "radio",
-      options: ["right", "both", "left", "none"],
+      options: ["sm" , "md" , "lg" , "xl" , "2xl" , "3xl" , "2xl-tall" , "4xl"],
       table: { category: "Trigger" }
     },
     variant: {
@@ -78,6 +82,16 @@ const meta = {
       table: { category: "Trigger" }
     },
     placeholder: { control: "text", table: { category: "Trigger" } },
+    menuSize:{
+      control: "radio",
+      options: ["sm", "md", "lg", "xl", "2xl", "3xl"],
+      table: { category: "Menu" }
+    },
+    side: {
+      control: "radio",
+      options: ["right", "left",],
+      table: { category: "Icon" }
+    },
     placement: {
       control: "radio",
       options: ["left", "center", "right"],
@@ -107,9 +121,9 @@ export const Icon: Story = {
   },
   render: (args) => (
     <div style={{ display: "flex", gap: "1rem" }}>
-      <DropdownTemplate {...args} iconPlacement="left" icon="left" />
-      <DropdownTemplate {...args} iconPlacement="right" icon="right" />
-      <DropdownTemplate {...args} iconPlacement="both" icon="both" />
+      <DropdownTemplate {...args} side="left" icon="left" />
+      <DropdownTemplate {...args} side="right" icon="right" />
+      <DropdownTemplate {...args} icon="both" />
     </div>
   ),
 };
@@ -118,6 +132,7 @@ export const Placement: Story = {
   args: {
     icon: "right",
     placeholder: "전체 공개",
+    menuSize:"lg"
   },
   render: (args) => (
     <div style={{ display: "flex", gap: "10rem" }}>
@@ -130,21 +145,24 @@ export const Placement: Story = {
 
 export const Variant: Story = {
   args: {
+    icon: "right",
     variant: "ghost",
-    iconPlacement: "none",
     placeholder: "For Week",
   },
 };
 
 export const OnlyMenu: Story = {
-  render: () => (
+  args: {
+    menuSize:"lg"
+  },
+  render: (args) => (
     <Dropdown>
-      <Dropdown.Menu independent>
+      <Dropdown.Menu size={args.menuSize} placement={args.placement} independent>
         <Dropdown.Option optionId={1}>
-          북마크 수정
+          Option1
         </Dropdown.Option>
         <Dropdown.Option optionId={2}>
-          북마크 삭제
+          Option2
         </Dropdown.Option>
       </Dropdown.Menu>
     </Dropdown>
