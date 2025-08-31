@@ -1,6 +1,6 @@
 import { recipe } from "@vanilla-extract/recipes";
 import { style } from "@vanilla-extract/css";
-import { vars } from "@/shared/styles/theme.css";
+import { lightTheme, vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
 export const wrapper = style({
@@ -29,13 +29,14 @@ const baseField = style([
   {
     width: "100%",
     borderRadius: "0.38rem",
-    border: `2px solid ${vars.color.stroke_200}`,
-    backgroundColor: vars.color.gray_100,
+    border: `0.063rem solid ${vars.color.stroke_300}`,
+    backgroundColor: vars.color.black,
     color: vars.color.white,
     transition: "border-color 0.2s ease",
     selectors: {
       "&::placeholder": { color: vars.color.gray_400 },
-      "&:focus": { outline: "none", borderColor: vars.color.stroke_typing },
+      "&:focus": { outline: "none", border: `0.126rem solid ${vars.color.stroke_typing}`},
+      [`${lightTheme} &`]: { color: vars.color.black, backgroundColor: vars.color.white},
     },
   },
 ]);
@@ -61,6 +62,12 @@ export const inputRecipe = recipe({
         width: "28.25rem",
         minHeight: "2.75rem",
         padding: "0.69rem 0.75rem",
+      },
+    },
+    variant: {
+      solid: {
+        backgroundColor: vars.color.gray_100,
+        border: `0.063rem solid ${vars.color.stroke_200}`,
       },
     },
   },
@@ -96,6 +103,17 @@ export const textareaRecipe = recipe({
         padding: "0.63rem 0.75rem",
       },
     },
+    variant: {
+      solid: {
+        backgroundColor: vars.color.gray_100,
+        border: `0.063rem solid ${vars.color.stroke_200}`,
+      },
+      muted: {
+        backgroundColor: vars.color.gray_200,
+        border: `0.063rem solid ${vars.color.stroke_300}`,
+      },
+    },
+    
   },
   defaultVariants: { size: "md" },
 });

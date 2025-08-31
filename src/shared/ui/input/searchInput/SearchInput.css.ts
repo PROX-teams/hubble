@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { vars } from "@/shared/styles/theme.css";
+import { lightTheme, vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
 export const searchWrapper = style({
@@ -26,6 +26,7 @@ export const baseField = style([
       "&:focus": { outline: "none" },
       "&::-webkit-search-decoration": { display: "none" },
       "&::-webkit-search-cancel-button": { display: "none" },
+      [`${lightTheme} &`]: { color: vars.color.black},
     },
   },
 ]);

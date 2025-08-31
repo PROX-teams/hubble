@@ -1,11 +1,16 @@
 "use client";
 
 import { forwardRef, ComponentPropsWithoutRef, ReactNode } from "react";
+import { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
-import * as s from "../input/Input.css";
+import * as S from "../input/Input.css";
+
+type TextareaVariants = NonNullable<RecipeVariants<typeof S.textareaRecipe>>;
+type Variant = NonNullable<TextareaVariants ["variant"]>;
 
 interface TextareaFieldProps
   extends Omit<ComponentPropsWithoutRef<"textarea">, "size"> {
+  variant?: Variant;
   label?: ReactNode;
   size?: "sm" | "md" | "lg";
   isError?: boolean;
@@ -17,6 +22,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
     {
       label,
       placeholder = "내용을 입력해 주세요",
+      variant,
       size = "md",
       isError = false,
       errorMessage,
@@ -26,17 +32,17 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
     ref
   ) => {
     return (
-      <div className={s.wrapper}>
-        {label && <label className={s.label}>{label}</label>}
+      <div className={S.wrapper}>
+        {label && <label className={S.label}>{label}</label>}
         <textarea
           ref={ref}
           placeholder={placeholder}
-          className={clsx(s.textareaRecipe({ size }), className)}
+          className={clsx(S.textareaRecipe({ size, variant }), className)}
           rows={1}
           {...props}
         />
 
-        {isError && <p className={s.errorMessage}>{errorMessage}</p>}
+        {isError && <p className={S.errorMessage}>{errorMessage}</p>}
       </div>
     );
   }

@@ -10,8 +10,14 @@ const meta = {
   tags: ["autodocs"],
   argTypes: {
     placeholder: {control: "text"},
-    onSearch: { action: "onSearch" },
-    onChange: { action: "onChange" },
+    onSearch: {
+      action: "onSearch",
+      description: "검색 실행 시 호출되는 이벤트 핸들러입니다. 보통 Enter 입력 또는 검색 버튼 클릭 시 발생합니다.",
+    },
+    onChange: {
+    action: "onChange",
+    description: "입력 값이 변경될 때 호출되는 이벤트 핸들러입니다.",
+    },
   },
 } satisfies Meta<typeof SearchInput>;
 

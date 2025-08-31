@@ -15,6 +15,12 @@ const meta = {
     size: {
       control: "radio",
       options: ["sm", "md", "lg"],
+      description: "텍스트 필드의 크기 스케일입니다.",
+    },
+    variant: {
+      control: "radio",
+      options: ["solid", "muted", "none"],
+      description: "텍스트 필드의 시각 스타일을 지정합니다.",
     },
     isError: {
       control: "boolean",

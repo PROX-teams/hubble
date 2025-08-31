@@ -18,6 +18,12 @@ const meta = {
     size: {
       control: "radio",
       options: ["sm", "md", "lg"],
+      description: "입력 필드의 크기 스케일입니다.",
+    },
+    variant: {
+      control: "radio",
+      options: ["solid"],
+      description: "입력 필드의 시각 스타일을 지정합니다.",
     },
     placeholder: { control: "text" },
     isError: {

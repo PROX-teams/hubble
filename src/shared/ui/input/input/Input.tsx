@@ -1,10 +1,15 @@
 "use client";
 
 import { forwardRef, ComponentPropsWithoutRef, ReactNode } from "react";
+import { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
 import * as S from "./Input.css";
 
+type InputVariants = NonNullable<RecipeVariants<typeof S.inputRecipe>>;
+type Variant = NonNullable<InputVariants["variant"]>;
+
 interface InputFieldProps extends Omit<ComponentPropsWithoutRef<"input">, "size"> {
+  variant?: Variant;
   label?: ReactNode;
   size?: "sm" | "md" | "lg";
   isError?: boolean;
@@ -14,6 +19,7 @@ interface InputFieldProps extends Omit<ComponentPropsWithoutRef<"input">, "size"
 export const Input = forwardRef<HTMLInputElement, InputFieldProps>(
   (
     {
+      variant,
       label,
       type = "text",
       placeholder = "내용을 입력해 주세요.",
@@ -34,7 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputFieldProps>(
           ref={ref}
           type={type}
           placeholder={placeholder}
-          className={clsx(S.inputRecipe({size}), className)}
+          className={clsx(S.inputRecipe({size,variant}), className)}
           {...props}
         />
         {isError && <p className={S.errorMessage}>{errorMessage}</p>}
