@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Theme } from "../types/global.types";
 import { darkTheme, lightTheme } from "../styles/theme.css";
+import * as S from "@/shared/styles/rootLayout.css";
 
 export default function ThemeProvider({
   children,
@@ -14,7 +15,7 @@ export default function ThemeProvider({
 
   return (
     <body className={theme === "dark" ? darkTheme : lightTheme}>
-      {children}
+      <div className={S.rootLayout}>{children}</div>
     </body>
   );
 }

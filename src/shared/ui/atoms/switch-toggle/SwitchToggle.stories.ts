@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { fn } from "storybook/test";
-import { SwitchToggle } from "./Switchtoggle";
+import SwitchToggle from "./SwitchToggle";
 
 const meta = {
   title: "Button/Toggle/Switch",

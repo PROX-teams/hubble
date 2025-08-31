@@ -110,6 +110,30 @@ export const tx = styleVariants({
     lineHeight: font.lineHeight.base130,
     letterSpacing: font.letterSpacing.base,
   },
+  cap2_sb: {
+    fontSize: font.size.cap2,
+    fontWeight: font.weight.sb,
+    lineHeight: font.lineHeight.base130,
+    letterSpacing: font.letterSpacing.base,
+  },
+  cap2_md: {
+    fontSize: font.size.cap2,
+    fontWeight: font.weight.md,
+    lineHeight: font.lineHeight.base130,
+    letterSpacing: font.letterSpacing.base,
+  },
+  cap2_rg: {
+    fontSize: font.size.cap2,
+    fontWeight: font.weight.rg,
+    lineHeight: font.lineHeight.base130,
+    letterSpacing: font.letterSpacing.base,
+  },
+  cap3_rg: {
+    fontSize: font.size.cap3,
+    fontWeight: font.weight.rg,
+    lineHeight: font.lineHeight.base130,
+    letterSpacing: font.letterSpacing.base,
+  },
   m1_bd: {
     fontSize: font.size.m1,
     fontWeight: font.weight.bd,
