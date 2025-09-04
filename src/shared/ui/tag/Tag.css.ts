@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { vars } from "@/shared/styles/theme.css"; 
+import { lightTheme, vars } from "@/shared/styles/theme.css"; 
 import { tx } from "@/shared/styles/textStyle.css";
 
 export const tagBox = style([
@@ -19,9 +19,15 @@ export const tagBox = style([
 
 export const tagLabel = style({
   color: vars.color.white,
+  selectors: {
+      [`${lightTheme} &`]: {
+        color: vars.color.black,
+      },
+    },
 });
 
 export const removeIcon = style({
+  color: vars.color.gray_500,
   marginInlineEnd: "-0.125rem",
   width: "1rem",
   height: "1rem",
@@ -29,6 +35,7 @@ export const removeIcon = style({
 });
 
 export const tagIcon = style({
+  color: vars.color.gray_400,
   marginInlineStart: "-0.125rem",
   width: "1rem",
   height: "1rem",
