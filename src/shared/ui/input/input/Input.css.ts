@@ -35,7 +35,7 @@ const baseField = style([
     transition: "border-color 0.2s ease",
     selectors: {
       "&::placeholder": { color: vars.color.gray_400 },
-      "&:focus": { outline: "none", border: `0.126rem solid ${vars.color.stroke_typing}`},
+      "&:focus": { outline: `0.126rem solid ${vars.color.stroke_typing}`},
       [`${lightTheme} &`]: { color: vars.color.black, backgroundColor: vars.color.white},
     },
   },
