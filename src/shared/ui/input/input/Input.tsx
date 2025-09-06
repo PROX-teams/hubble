@@ -24,7 +24,7 @@ import * as S from "./Input.css";
  */
 
 type InputVariants = NonNullable<RecipeVariants<typeof S.inputRecipe>>;
-type Variant = NonNullable<InputVariants["variant"]>;
+type Variant = InputVariants["variant"];
 
 interface InputFieldProps extends Omit<ComponentPropsWithoutRef<"input">, "size"> {
   variant?: Variant;
