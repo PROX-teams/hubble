@@ -18,7 +18,8 @@ export const breadcrumbListStyle = style([
 export const breadcrumbItemStyle = style({
   display: 'flex',
   alignItems: 'center',
-  color: vars.color.gray_400
+  color: vars.color.gray_400,
+  cursor: "pointer"
 });
 
 export const breadcrumbItemInactiveStyle = style({

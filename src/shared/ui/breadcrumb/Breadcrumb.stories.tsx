@@ -23,7 +23,7 @@ const BreadcrumbTemplate = ({ items, separator }: BreadcrumbStoryArgs) => {
 };
 
 const meta = {
-  title: "Breadcrumb",
+  title: "Navigation/Breadcrumb",
   component: BreadcrumbTemplate,
   parameters: {
     layout: "centered",

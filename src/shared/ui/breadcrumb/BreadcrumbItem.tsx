@@ -1,23 +1,20 @@
 "use client";
 
-import { forwardRef, ComponentPropsWithoutRef} from 'react';
+import { ComponentPropsWithRef} from 'react';
 import { breadcrumbItemStyle, breadcrumbItemInactiveStyle } from './Breadcrumb.css';
 import clsx from "clsx";
 
-interface BreadcrumbItemProps extends ComponentPropsWithoutRef<"li"> {
+interface BreadcrumbItemProps extends ComponentPropsWithRef<"li"> {
   active?: boolean;
 }
 
-const BreadcrumbItem = forwardRef<
-  HTMLLIElement,
-  BreadcrumbItemProps
->(({ active = false, className, ...props }, ref) => (
+const BreadcrumbItem = ({ active = false, className,ref, ...props }: BreadcrumbItemProps) => (
   <li
     ref={ref}
     className={clsx(breadcrumbItemStyle, active && breadcrumbItemInactiveStyle, className)}
     {...props}
   />
-))
+)
 BreadcrumbItem.displayName = "BreadcrumbItem"
 
 export default BreadcrumbItem

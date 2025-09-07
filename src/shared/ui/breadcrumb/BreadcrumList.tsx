@@ -1,14 +1,13 @@
-import { forwardRef, ComponentPropsWithoutRef, Children, isValidElement, Fragment, ReactNode } from "react";
+import { ComponentPropsWithRef, Children, isValidElement, Fragment, ReactNode } from "react";
 import clsx from "clsx";
 import { breadcrumbListStyle } from "./Breadcrumb.css";
 import BreadcrumbSeparator from "./BreadcrumbSeparator";
 
-interface BreadcrumbListProps extends ComponentPropsWithoutRef<"ol"> {
+interface BreadcrumbListProps extends ComponentPropsWithRef<"ol"> {
   separator?: ReactNode;
 }
 
-const BreadcrumbList = forwardRef<HTMLOListElement, BreadcrumbListProps>(
-  ({ children, className, separator, ...props }, ref) => {
+const BreadcrumbList = ({ children, className, separator, ref, ...props }: BreadcrumbListProps) => {
     const items = Children.toArray(children).filter(isValidElement);
     const lastIndex = items.length - 1;
 
@@ -26,8 +25,8 @@ const BreadcrumbList = forwardRef<HTMLOListElement, BreadcrumbListProps>(
         ))}
       </ol>
     );
-  }
-);
+  };
+
 
 BreadcrumbList.displayName = "BreadcrumbList";
 export default BreadcrumbList;
