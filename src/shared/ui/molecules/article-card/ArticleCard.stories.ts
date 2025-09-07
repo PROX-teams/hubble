@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import ArticleCard from "./ArticleCard";
-import data from "./mock.json";
+import data from "@/shared/mock/article.json";
 
 const meta = {
   title: "Card/Article",
