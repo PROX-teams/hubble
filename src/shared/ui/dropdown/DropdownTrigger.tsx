@@ -28,7 +28,7 @@ interface DropdownTriggerProps extends ComponentPropsWithoutRef<"button">{
 }
 
 function DropdownTrigger({
-  variant  = "none",
+  variant,
   size,
   className,
   children,
