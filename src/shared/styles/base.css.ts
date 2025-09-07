@@ -24,6 +24,11 @@ globalStyle("body", {
   color: "#000",
 });
 
+// body 태그에 .no-scroll 클래스가 있을 때 스크롤 비활성화
+globalStyle("body.no-scroll", {
+  overflow: "hidden",
+});
+
 globalStyle("a", {
   color: "inherit",
   textDecoration: "none",
