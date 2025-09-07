@@ -32,6 +32,19 @@ function ModalTrigger({ type }: { type: MessageType }) {
   );
 }
 
+/**
+ * VisibleByDefault 스토리를 렌더링하기 위한 래퍼 컴포넌트입니다.
+ */
+function VisibleByDefaultStory(args: Story["args"]) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  return isMounted ? <ConfirmModal {...args} /> : null;
+}
+
 const meta = {
   title: "Modal/ConfirmModal",
   component: ConfirmModal,
@@ -92,14 +105,7 @@ export const VisibleByDefault: Story = {
     onDelete: () => {},
     onCancel: () => {},
   },
-  render: (args) => {
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-      setIsMounted(true);
-    }, []);
-    return isMounted ? <ConfirmModal {...args} /> : <></>;
-  },
+  render: (args) => <VisibleByDefaultStory {...args} />,
 };
 
 export const DeleteGeneral: Story = {
