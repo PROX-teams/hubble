@@ -8,15 +8,17 @@ import {
 import WarnIcon from "@/shared/assets/icons/common/warn.svg";
 import ActionButton from "../../atoms/button/action-button/ActionButton";
 
-interface ConfirmModalProps {
-  hide: () => void; // 모달 숨기기 함수
+export interface ConfirmModalProps {
   type: MessageType; // 메시지 타입
+  hide: () => void; // 모달 숨기기 함수
+  hideOnClickOutside?: boolean; // 배경 클릭 시 모달 숨기기 여부
   onCancel?: () => void; // 취소 콜백 함수
   onDelete: () => void; // 삭제 콜백 함수
 }
 
 export default function ConfirmModal({
   hide,
+  hideOnClickOutside = false,
   type,
   onCancel,
   onDelete,
@@ -34,7 +36,11 @@ export default function ConfirmModal({
   };
 
   return (
-    <Modal hide={hide} className={S.container}>
+    <Modal
+      hide={hide}
+      className={S.container}
+      hideOnClickOutside={hideOnClickOutside}
+    >
       <Modal.Content className={S.contentWrapper}>
         <motion.div
           className={S.iconWrapper}

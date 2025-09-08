@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import ConfirmModal from "./ConfirmModal";
-import {
-  CONFIRM_MESSAGES,
-  MessageType,
-} from "@/shared/constants/confirmMessage";
+import ConfirmModal, { ConfirmModalProps } from "./ConfirmModal";
+import { CONFIRM_MESSAGES } from "@/shared/constants/confirmMessage";
 import useModal from "@/shared/model/hooks/useModal";
 import { AnimatePresence } from "framer-motion";
 import ActionButton from "../../atoms/button/action-button/ActionButton";
 import { useEffect, useState } from "react";
 
-function ModalTrigger({ type }: { type: MessageType }) {
+/**
+ * ModalTrigger 컴포넌트는 트리거 버튼을 포함하여 ConfirmModal을 제어하는 역할을 합니다.
+ */
+
+function ModalTrigger(args: ConfirmModalProps) {
   const { isOpen, openModal, closeModal } = useModal();
 
   return (
@@ -19,14 +20,7 @@ function ModalTrigger({ type }: { type: MessageType }) {
       </ActionButton>
 
       <AnimatePresence>
-        {isOpen && (
-          <ConfirmModal
-            hide={closeModal}
-            onCancel={() => {}}
-            onDelete={() => {}}
-            type={type}
-          />
-        )}
+        {isOpen && <ConfirmModal {...args} hide={closeModal} />}
       </AnimatePresence>
     </>
   );
@@ -35,14 +29,14 @@ function ModalTrigger({ type }: { type: MessageType }) {
 /**
  * VisibleByDefault 스토리를 렌더링하기 위한 래퍼 컴포넌트입니다.
  */
-function VisibleByDefaultStory(args: Story["args"]) {
+function ConfirmModalPreview(args: Story["args"]) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  return isMounted ? <ConfirmModal {...args} /> : null;
+  return isMounted ? <ConfirmModal {...(args as ConfirmModalProps)} /> : null;
 }
 
 const meta = {
@@ -71,18 +65,28 @@ const meta = {
       options: Object.keys(CONFIRM_MESSAGES),
       description: "모달에 표시될 메시지의 종류를 선택합니다.",
     },
+    hide: {
+      action: "hidden",
+      description: "모달을 닫을 때 호출되는 함수입니다.",
+    },
+    hideOnClickOutside: {
+      control: "boolean",
+      description: "배경 (dimmed) 클릭 시 모달을 닫을지 여부를 결정합니다.",
+    },
     onDelete: {
-      action: "deleted",
       description: "삭제 버튼 클릭 시 호출되는 콜백 함수입니다.",
     },
     onCancel: {
       action: "canceled",
       description: "취소 버튼 클릭 시 호출되는 콜백 함수입니다.",
     },
-    hide: {
-      action: "hidden",
-      description: "모달을 닫을 때 호출되는 함수입니다.",
-    },
+  },
+  args: {
+    type: "DELETE_GENERAL",
+    hide: () => {},
+    hideOnClickOutside: false,
+    onDelete: () => {},
+    onCancel: () => {},
   },
 } satisfies Meta<typeof ConfirmModal>;
 
@@ -90,7 +94,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const VisibleByDefault: Story = {
+export const Preview: Story = {
   parameters: {
     docs: {
       description: {
@@ -101,11 +105,8 @@ export const VisibleByDefault: Story = {
   },
   args: {
     type: "DELETE_GENERAL",
-    hide: () => {},
-    onDelete: () => {},
-    onCancel: () => {},
   },
-  render: (args) => <VisibleByDefaultStory {...args} />,
+  render: (args) => <ConfirmModalPreview {...args} />,
 };
 
 export const DeleteGeneral: Story = {
@@ -118,10 +119,8 @@ export const DeleteGeneral: Story = {
   },
   args: {
     type: "DELETE_GENERAL",
-    hide: () => {},
-    onDelete: () => {},
   },
-  render: (args) => <ModalTrigger {...args} />,
+  render: (args) => <ModalTrigger {...(args as ConfirmModalProps)} />,
 };
 
 export const DeleteBookmark: Story = {
@@ -134,10 +133,8 @@ export const DeleteBookmark: Story = {
   },
   args: {
     type: "DELETE_BOOKMARK",
-    hide: () => {},
-    onDelete: () => {},
   },
-  render: (args) => <ModalTrigger {...args} />,
+  render: (args) => <ModalTrigger {...(args as ConfirmModalProps)} />,
 };
 
 export const DeleteStory: Story = {
@@ -150,8 +147,6 @@ export const DeleteStory: Story = {
   },
   args: {
     type: "DELETE_STORY",
-    hide: () => {},
-    onDelete: () => {},
   },
-  render: (args) => <ModalTrigger {...args} />,
+  render: (args) => <ModalTrigger {...(args as ConfirmModalProps)} />,
 };
