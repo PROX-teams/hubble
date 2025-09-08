@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-// NutationObserver 객체 설정
+// MutationObserver 객체 설정
 const mutationObserverOption: MutationObserverInit = {
   childList: true, // 감시 대상의 직계 자식 노드 변화(추가 또는 제거) 감지 여부
   subtree: false, // 감시 대상의 손자 노드 변화 감지 여부
@@ -23,7 +23,7 @@ const ModalRoot = () => {
     }
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
     };
   }, []);
 

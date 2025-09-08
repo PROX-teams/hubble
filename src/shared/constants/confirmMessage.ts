@@ -12,7 +12,8 @@ const CONFIRM_MESSAGES: Record<MessageType, ConfirmMessage> = {
   },
   DELETE_BOOKMARK: {
     title: "정말 삭제하시겠습니까?",
-    description: `북마크를 삭제하면 포함된 노트도 함께 삭제되며,\n  복구할 수 없습니다. 삭제 전 내용을 꼭 확인해주세요.`,
+    description:
+      "북마크를 삭제하면 포함된 노트도 함께 삭제되며,\n  복구할 수 없습니다. 삭제 전 내용을 꼭 확인해주세요.",
   },
   DELETE_GENERAL: {
     title: "정말 삭제하시겠습니까?",
