@@ -53,8 +53,6 @@ export default function ConfirmModal({
             duration: 0.6,
             ease: easeInOut,
             times: [0, 0.3, 0.5, 0.7, 0.8, 1],
-            // repeat: Infinity,
-            // repeatDelay: 1,
           }}
         >
           <WarnIcon className={S.icon} />
