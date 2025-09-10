@@ -1,4 +1,4 @@
-import Button from "@/shared/ui/atoms/button/Button";
+import Button from "@/shared/ui/button/button/Button";
 import * as S from "./SignupButton.css";
 import { ButtonHTMLAttributes } from "react";
 import { ButtonBase } from "@/shared/types/components.types";
