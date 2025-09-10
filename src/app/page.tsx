@@ -1,19 +1,16 @@
-import StoryCard from "@/shared/ui/storycard/StoryCard";
-import data from "@/shared/ui/storycard/mock.json";
-import { gridContainer} from "@/shared/ui/storycard/StoryCardGrid.css";
-import type { StoryEntity } from "@/shared/types/story.types";
+"use client"
 
-const stories: StoryEntity[] = Array(8).fill(data).map((item, idx) => ({
-  ...item,
-  id: idx + 1, 
-}));
+import ArticleCard from "@/shared/ui/molecules/article-card/ArticleCard";
+import mockData from "@/shared/ui/molecules/article-card/mock.json";
+import Tag from "@/shared/ui/tag/Tag";
+import TagIcon from "@/shared/assets/icons/common/tagIcon-test.svg"
 
 export default function MainPage() {
   return (
-        <div className={gridContainer}>
-          {stories.map((item) => (
-            <StoryCard key={item.id} data={item} />
-          ))}
-        </div>
+    <div>
+      <ArticleCard data={mockData} variant="large" />
+      <Tag icon={<TagIcon/>} label={"CSS"} onRemove={()=> {""}}/>
+    </div>
   );
 }
+
