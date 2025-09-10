@@ -8,29 +8,23 @@ export interface StoryCardProps extends ComponentPropsWithoutRef<"div"> {
     data: StoryEntity;
 }
 
-const StoryCard = ({ data, onClick}: StoryCardProps) => {
+const StoryCard = ({data, onClick}: StoryCardProps) => {
   return (
-    <div className={S.storyCard} onClick={onClick}>
-      <div className={S.header}>
-        {/* 타이틀 영역 */}
-        <div className={S.titleContainer}>
-          {data.icon && <span className={S.icon}>{ mockStoryIconMap[data.icon]}</span>}
-          <span className={S.title}>{data.title}</span>
+      <div className={S.storyCard} onClick={onClick}>
+        <div className={S.header}>
+          <div className={S.titleContainer}>
+            {data.icon && <span className={S.titleIcon}>{ mockStoryIconMap[data.icon]}</span>}
+            <span className={S.title}>{data.title}</span>
+          </div>
+          <div className={S.countContainer}>
+            <span className={S.countIcon}><CountIcon/></span>
+            {typeof data.articleIds?.length === "number" && <span className={S.count}>{data.articleIds.length}</span>}
+          </div>
         </div>
-
-        {/* 카운트/메타 영역 */}
-        <div className={S.countContainer}>
-          <span className={S.countIcon}><CountIcon/></span>
-          {typeof data.articles?.length === "number" && <span>{data.articles.length}</span>}
-        </div>
-      </div>
-
-      {/* 본문 */}
       {data.description && <div className={S.description}>{data.description}</div>}
-    </div>
+      </div>
   );
 };
-
 
 StoryCard.displayName = "StoryCard";
 

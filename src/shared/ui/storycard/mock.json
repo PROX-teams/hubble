@@ -1,27 +1,8 @@
 {
   "id": 1,
   "title": "프론트엔드 공부집",
-  "description": "포스트 31개를 학습하는 시리즈 단위의 학습일지입니다. SEO부터 UI 컴포넌트, DevOps 등 프론트엔드 전반의 학습 내용을 기록합니다.",
-  "category": "유 유",
+  "description": "포스트 31개를 학습하는 시리즈 단위의 학습일지입니다. SEO부터 UI 컴포넌트, DevOps 등 프론트엔드 전반의 학습 내용을 기록합니다.포스트 31개를 학습하는 시리즈 단위의 학습일지입니다. SEO부터 UI 컴포넌트, DevOps 등 프론트엔드 전반의 학습 내용을 기록합니다.",
+  "category": "프론트엔드",
   "icon": "chart",
-  "articles": [
-    {
-  "id": 1,
-  "title": "토스 PM 출신의 IA 및 화면설계서 실무 파일 토스 PM 출신의 IA 및 화면설계서 실무 파일",
-  "author": "PROX 팀블로그",
-  "date": "2023.10.01",
-  "likeCount": 3,
-  "description": "네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 방법에 대해 작성하였습니다. 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 방법에 대해 작성하였습니다. 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는",
-  "imageUrl": "https://velog.velcdn.com/images/vlmbuyd/post/84e3407b-0ace-4832-97fb-ffddf72a7e80/image.png"
-    },
-    {
-  "id": 2,
-  "title": "토스 PM 출신의 IA 및 화면설계서 실무 파일 토스 PM 출신의 IA 및 화면설계서 실무 파일",
-  "author": "PROX 팀블로그",
-  "date": "2023.10.01",
-  "likeCount": 3,
-  "description": "네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 방법에 대해 작성하였습니다. 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 방법에 대해 작성하였습니다. 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는",
-  "imageUrl": "https://velog.velcdn.com/images/vlmbuyd/post/84e3407b-0ace-4832-97fb-ffddf72a7e80/image.png"
-    }
-  ]
-} 
+  "articleIds": [1, 2, 3]
+}
