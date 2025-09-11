@@ -6,8 +6,8 @@ export const container = style({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  width: "24.8rem",
-  height: "15.8rem",
+  width: "24.875rem",
+  height: "15.875rem",
   paddingTop: "1.875rem",
 });
 
