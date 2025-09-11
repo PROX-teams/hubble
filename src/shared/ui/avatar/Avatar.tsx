@@ -16,7 +16,7 @@ interface AvatarProps {
  */
 
 export default function Avatar({ size = 40, src, name, userId }: AvatarProps) {
-  const dynamicStyles = getAvatarStyles(size ?? 40, userId, !!src);
+  const dynamicStyles = getAvatarStyles(size, userId, !!src);
 
   return (
     <div className={S.container} style={dynamicStyles}>

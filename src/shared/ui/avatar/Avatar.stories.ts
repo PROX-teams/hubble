@@ -6,11 +6,6 @@ const meta = {
   component: Avatar,
   parameters: {
     layout: "centered",
-    docs: {
-      descrption: {
-        component: "사용자의 프로필 이미지를 표시하는 아바타 컴포넌트입니다.",
-      },
-    },
   },
   tags: ["autodocs"],
   argTypes: {

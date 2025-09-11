@@ -29,8 +29,9 @@ const getAvatarStyles = (size: number, userId: number, img: boolean) => {
   const colorIdx = remainder === 0 ? AVATAR_COLORS.length - 1 : remainder - 1;
 
   return {
-    width: size ? `${size}px` : "2.5rem",
-    height: size ? `${size}px` : "2.5rem",
+    // 느슨한 불일치 -> 0도 유효한 값으로 인정 && null, undefined 걸러내기
+    width: size != null ? `${size}px` : "2.5rem",
+    height: size != null ? `${size}px` : "2.5rem",
     backgroundColor: img ? undefined : AVATAR_COLORS[colorIdx],
   };
 };
