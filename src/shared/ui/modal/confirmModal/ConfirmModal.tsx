@@ -6,7 +6,7 @@ import {
   MessageType,
 } from "@/shared/constants/confirmMessage";
 import WarnIcon from "@/shared/assets/icons/common/warn.svg";
-import ActionButton from "../../atoms/button/action-button/ActionButton";
+import ActionButton from "../../button/action-button/ActionButton";
 
 export interface ConfirmModalProps {
   type: MessageType; // 메시지 타입
