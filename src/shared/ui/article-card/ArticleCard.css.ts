@@ -83,7 +83,7 @@ const imgBase = style({
   position: "relative",
   width: "100%",
   overflow: "hidden",
-  borderRadius: "6",
+  borderRadius: "0.375rem",
 });
 const imgCompactVariant = style({});
 export const dimmedOverlay = style({
@@ -95,6 +95,7 @@ export const dimmedOverlay = style({
   height: "100%",
   backgroundColor: "rgba(0, 0, 0, 0.1)",
   transition: "background-color 0.4s ease",
+  borderRadius: "inherit",
 });
 globalStyle(`${hoverContainer}:hover ${dimmedOverlay}`, {
   backgroundColor: "transparent",

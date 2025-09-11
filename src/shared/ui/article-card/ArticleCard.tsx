@@ -5,7 +5,6 @@ import {
   container,
   contentContainer,
   hoverContainer,
-  imgWrapper,
   titleStyle,
   content,
 } from "./ArticleCard.css";
