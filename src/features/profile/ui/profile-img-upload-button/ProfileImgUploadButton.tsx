@@ -1,21 +1,21 @@
-import Button from "@/shared/ui/atoms/button/Button";
+import Button from "@/shared/ui/button/button/Button";
 import { ButtonHTMLAttributes } from "react";
 import { ButtonBase } from "@/shared/types/components.types";
-import * as S from "./SaveDraftButton.css";
+import * as S from "./ProfileImgUploadButton.css";
 
-interface SaveDraftButtonProps
+interface ProfileImgUploadButtonProps
   extends ButtonBase,
     ButtonHTMLAttributes<HTMLButtonElement> {}
 
 /**
- * 임시 저장 버튼입니다.
+ * 프로필 이미지 변경 버튼입니다.
  */
 
-export default function SaveDraftButton({
+export default function ProfileImgUploadButton({
   size = "md",
   variants = "neutral",
   ...props
-}: SaveDraftButtonProps) {
+}: ProfileImgUploadButtonProps) {
   return (
     <Button
       size={size}
@@ -23,7 +23,7 @@ export default function SaveDraftButton({
       className={S.buttonStyle}
       {...props}
     >
-      임시 저장
+      프로필 이미지 변경
     </Button>
   );
 }
