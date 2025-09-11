@@ -4,6 +4,7 @@ export const gridContainer = style({
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))", 
   width: "min(824px, calc(100% - 144px))",
+  minHeight: "170px",
   gap: "20px", 
   margin: "0 72px",
   
