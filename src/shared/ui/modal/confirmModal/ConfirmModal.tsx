@@ -41,7 +41,7 @@ export default function ConfirmModal({
       className={S.container}
       hideOnClickOutside={hideOnClickOutside}
     >
-      <Modal.Content className={S.contentWrapper}>
+      <div className={S.contentWrapper}>
         <motion.div
           className={S.iconWrapper}
           // Warn shake animation
@@ -59,9 +59,9 @@ export default function ConfirmModal({
         </motion.div>
         <strong className={S.title}>{label.title}</strong>
         <p className={S.description}>{label.description}</p>
-      </Modal.Content>
+      </div>
 
-      <Modal.Footer className={S.footer}>
+      <div className={S.footer}>
         <ActionButton
           size="md"
           variants="neutral"
@@ -78,7 +78,7 @@ export default function ConfirmModal({
         >
           삭제
         </ActionButton>
-      </Modal.Footer>
+      </div>
     </Modal>
   );
 }

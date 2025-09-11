@@ -66,19 +66,3 @@ export default function Modal({
     container
   );
 }
-
-function ModalHeader({ children, className }: ModalBase) {
-  return <header className={clsx(S.header, className)}>{children}</header>;
-}
-
-function ModalContent({ children, className }: ModalBase) {
-  return <div className={clsx(S.content, className)}>{children}</div>;
-}
-
-function ModalFooter({ children, className }: ModalBase) {
-  return <footer className={clsx(S.footer, className)}>{children}</footer>;
-}
-
-Modal.Header = ModalHeader;
-Modal.Content = ModalContent;
-Modal.Footer = ModalFooter;

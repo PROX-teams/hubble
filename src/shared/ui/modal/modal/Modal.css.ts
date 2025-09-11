@@ -32,9 +32,3 @@ export const modalContainer = style({
     },
   },
 });
-
-export const header = style({});
-
-export const content = style({});
-
-export const footer = style({});
