@@ -1,7 +1,7 @@
 "use client";
 
 import { ButtonBase } from "@/shared/types/components.types";
-import Button from "@/shared/ui/atoms/button/Button";
+import Button from "@/shared/ui/button/button/Button";
 import { ButtonHTMLAttributes } from "react";
 import EmailIcon from "@/shared/assets/icons/dashboard/email.svg";
 import * as S from "./EmailCopyButton.css";

@@ -1,5 +1,5 @@
 import { darkTheme, lightTheme, vars } from "@/shared/styles/theme.css";
-import { buttonBaseStyle } from "@/shared/ui/atoms/button/Button.css";
+import { buttonBaseStyle } from "@/shared/ui/button/button/Button.css";
 import { style, styleVariants } from "@vanilla-extract/css";
 
 const base = style([

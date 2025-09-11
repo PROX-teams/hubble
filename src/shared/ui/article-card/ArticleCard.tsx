@@ -37,31 +37,30 @@ export default function ArticleCard({
   const withImg = !!imageUrl;
 
   return (
-    <Link href={`/notebook/${data.id}`}>
-      <div className={clsx(container({ variant }), hoverContainer)}>
-        {/* 커버 이미지 */}
-        {imageUrl && <CoverImage imageUrl={imageUrl} variant={variant} />}
+    <Link
+      href={`/notebook/${data.id}`}
+      className={clsx(container({ variant }), hoverContainer)}
+    >
+      {/* 커버 이미지 */}
+      {imageUrl && <CoverImage imageUrl={imageUrl} variant={variant} />}
 
-        <div className={contentContainer({ variant, withImg })}>
-          {/* 제목 */}
-          <strong className={titleStyle({ variant, withImg })}>
-            {data.title}
-          </strong>
+      <div className={contentContainer({ variant, withImg })}>
+        {/* 제목 */}
+        <strong className={titleStyle({ variant, withImg })}>
+          {data.title}
+        </strong>
 
-          {/* 메타 데이터 */}
-          {variant === "large" && (
-            <Meta
-              author={data.author}
-              date={data.date}
-              likeCount={data.likeCount}
-            />
-          )}
+        {/* 메타 데이터 */}
+        {variant === "large" && (
+          <Meta
+            author={data.author}
+            date={data.date}
+            likeCount={data.likeCount}
+          />
+        )}
 
-          {/* 본문 */}
-          <div className={content({ variant, withImg })}>
-            {data.description}
-          </div>
-        </div>
+        {/* 본문 */}
+        <div className={content({ variant, withImg })}>{data.description}</div>
       </div>
     </Link>
   );

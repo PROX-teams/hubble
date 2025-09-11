@@ -30,10 +30,10 @@ const base = style({
 const compactBase = style({
   display: "flex",
   flexDirection: "row-reverse",
-  gap: 8,
-  width: 232,
-  height: 55,
-  padding: "10px 8px",
+  gap: "0.5rem",
+  width: "14.5rem",
+  height: "3.4375rem",
+  padding: "0.625rem 0.5rem",
   borderRadius: 0,
   backgroundColor: vars.color.black,
   border: "none",
@@ -52,26 +52,26 @@ export const container = recipe({
         base,
         {
           flexDirection: "column",
-          width: 305,
-          height: 304,
+          width: "19.0625rem",
+          height: "19rem",
         },
       ],
       small: [
         base,
         {
           flexDirection: "column",
-          width: 202,
-          height: 198,
+          width: "12.625rem",
+          height: "12.375rem",
         },
       ],
       wide: [
         base,
         {
           flexDirection: "row-reverse",
-          gap: 11,
-          width: 382,
-          height: 96,
-          padding: "18px",
+          gap: "0.6875rem",
+          width: "23.875rem",
+          height: "6rem",
+          padding: "1.125rem",
         },
       ],
       compact: compactBase,
@@ -83,7 +83,7 @@ const imgBase = style({
   position: "relative",
   width: "100%",
   overflow: "hidden",
-  borderRadius: 6,
+  borderRadius: "0.375rem",
 });
 const imgCompactVariant = style({});
 export const dimmedOverlay = style({
@@ -94,8 +94,8 @@ export const dimmedOverlay = style({
   width: "100%",
   height: "100%",
   backgroundColor: "rgba(0, 0, 0, 0.1)",
-  borderRadius: 6,
   transition: "background-color 0.4s ease",
+  borderRadius: "inherit",
 });
 globalStyle(`${hoverContainer}:hover ${dimmedOverlay}`, {
   backgroundColor: "transparent",
@@ -113,11 +113,15 @@ export const imgWrapper = recipe({
 
   variants: {
     variant: {
-      large: { height: 143 },
-      small: { minHeight: 73 },
-      wide: { minWidth: 111, height: 60 },
+      large: { height: "8.9375rem", borderRadius: "0.312rem 0.312rem 0 0" },
+      small: { minHeight: "4.5625rem", borderRadius: "0.312rem 0.312rem 0 0" },
+      wide: {
+        minWidth: "6.9375rem",
+        height: "3.75rem",
+        borderRadius: "0.25rem",
+      },
       compact: [
-        { minWidth: 54, height: 32, borderRadius: 3 },
+        { minWidth: "3.375rem", height: "2rem", borderRadius: "0.187rem" },
         imgCompactVariant,
       ],
     },
@@ -129,20 +133,20 @@ export const metaContainer = style([
     display: "flex",
     alignItems: "center",
     color: vars.color.gray_500,
-    marginBottom: 13,
+    marginBottom: "0.8125rem",
   },
   tx.cap2_rg,
 ]);
 globalStyle(`${metaContainer} > *:not(:first-child)::before`, {
   content: "'|'",
-  height: 12,
+  height: "0.75rem",
   color: vars.color.stroke_400,
-  margin: "0 8px",
+  margin: "0 0.5rem",
 });
 export const metaIconWrapper = style({
   display: "flex",
   alignItems: "center",
-  gap: 2,
+  gap: "0.125rem",
 });
 
 export const contentContainer = recipe({
@@ -157,16 +161,16 @@ export const contentContainer = recipe({
       small: {
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: 10,
+        gap: "0.625rem",
       },
       wide: {
         flexDirection: "column",
-        gap: 4,
+        gap: "0.25rem",
       },
       compact: {
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: 2,
+        gap: "0.125rem",
       },
     },
     withImg: {
@@ -182,14 +186,14 @@ export const contentContainer = recipe({
         variant: "large",
         withImg: true,
       },
-      style: { padding: 18 },
+      style: { padding: "1.125rem" },
     },
     {
       variants: {
         variant: "large",
         withImg: false,
       },
-      style: { padding: "20px 18px 0 18px" },
+      style: { padding: "1.25rem 1.125rem 0 1.125rem" },
     },
     // --- small ---
     {
@@ -197,14 +201,14 @@ export const contentContainer = recipe({
         variant: "small",
         withImg: true,
       },
-      style: { padding: "14px 13px 18px 13px" },
+      style: { padding: "0.875rem 0.8125rem 1.125rem 0.8125rem" },
     },
     {
       variants: {
         variant: "small",
         withImg: false,
       },
-      style: { padding: "16px 13px 0 13px" },
+      style: { padding: "1rem 0.8125rem 0 0.8125rem" },
     },
     // --- compact ---
     {
@@ -212,14 +216,14 @@ export const contentContainer = recipe({
         variant: "compact",
         withImg: true,
       },
-      style: { width: 154 },
+      style: { width: "9.625rem" },
     },
     {
       variants: {
         variant: "compact",
         withImg: false,
       },
-      style: { width: 216 },
+      style: { width: "13.5rem" },
     },
   ],
 });
@@ -245,12 +249,16 @@ export const titleStyle = recipe({
 
   variants: {
     variant: {
-      large: [titleStyleBase, tx.t1_md, { width: 249, marginBottom: 7 }],
+      large: [
+        titleStyleBase,
+        tx.t1_md,
+        { width: "15.5625rem", marginBottom: "0.4375rem" },
+      ],
       small: [
         titleStyleBase,
         {
           display: "-webkit-box",
-          width: 174,
+          width: "10.875rem",
           WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
           whiteSpace: "normal",
@@ -289,14 +297,14 @@ export const titleStyle = recipe({
         variant: "wide",
         withImg: true,
       },
-      style: { width: 224 },
+      style: { width: "14rem" },
     },
     {
       variants: {
         variant: "wide",
         withImg: false,
       },
-      style: { width: 346 },
+      style: { width: "21.625rem" },
     },
   ],
 });
@@ -315,14 +323,14 @@ export const content = recipe({
     variant: {
       large: [
         {
-          paddingLeft: 12,
+          paddingLeft: "0.75rem",
           borderLeft: `1px solid ${vars.color.stroke_400}`,
         },
         tx.b2_180_rg,
       ],
       small: [
         {
-          paddingLeft: 10,
+          paddingLeft: "0.625rem",
           borderLeft: `1px solid ${vars.color.stroke_400}`,
         },
         tx.b3_rg,
@@ -348,14 +356,14 @@ export const content = recipe({
         variant: "large",
         withImg: true,
       },
-      style: { height: 69, WebkitLineClamp: 3 },
+      style: { height: "4.3125rem", WebkitLineClamp: 3 },
     },
     {
       variants: {
         variant: "large",
         withImg: false,
       },
-      style: { height: 92, WebkitLineClamp: 4 },
+      style: { height: "5.75rem", WebkitLineClamp: 4 },
     },
     // --- small ---
     {
@@ -363,14 +371,14 @@ export const content = recipe({
         variant: "small",
         withImg: true,
       },
-      style: { height: 44, WebkitLineClamp: 2 },
+      style: { height: "2.75rem", WebkitLineClamp: 2 },
     },
     {
       variants: {
         variant: "small",
         withImg: false,
       },
-      style: { height: 66, WebkitLineClamp: 3 },
+      style: { height: "4.125rem", WebkitLineClamp: 3 },
     },
     // --- wide ---
     {
@@ -378,14 +386,14 @@ export const content = recipe({
         variant: "wide",
         withImg: true,
       },
-      style: { width: 224 },
+      style: { width: "14rem" },
     },
     {
       variants: {
         variant: "wide",
         withImg: false,
       },
-      style: { width: 346 },
+      style: { width: "21.625rem" },
     },
   ],
 });
