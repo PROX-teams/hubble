@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { ModalBase } from "@/shared/types/components.types";
 import * as S from "./Modal.css";
 import { shadowSprinkles } from "@/shared/styles/shadow.css";
-import { modalVariants } from "@/shared/constants/animations";
+import { modalVariants } from "@/shared/lib/animations/modal";
 
 interface ModalProps extends ModalBase {
   hideOnClickOutside?: boolean;
