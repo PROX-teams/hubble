@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 import ConfirmModal, { ConfirmModalProps } from "./ConfirmModal";
 import { CONFIRM_MESSAGES } from "@/shared/constants/confirmMessage";
 import useModal from "@/shared/model/hooks/useModal";
-import { AnimatePresence } from "framer-motion";
-import ActionButton from "../../atoms/button/action-button/ActionButton";
-import { useEffect, useState } from "react";
+import ActionButton from "@/shared/ui/button/action-button/ActionButton";
 
 /**
  * ModalTrigger 컴포넌트는 트리거 버튼을 포함하여 ConfirmModal을 제어하는 역할을 합니다.
