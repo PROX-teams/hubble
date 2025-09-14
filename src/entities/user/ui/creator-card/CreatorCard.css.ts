@@ -39,7 +39,8 @@ export const contentWrapper = style({
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
-  justifyContent: "space-between",
+  justifyContent: "center",
+  gap: "0.1875rem",
   flex: 1,
   width: "100%",
   height: "2.437rem",
@@ -48,6 +49,12 @@ export const contentWrapper = style({
 export const name = style([
   tx.t1_md,
   {
+    display: "-webkit-box",
+    textOverflow: "ellipsis",
+    WebkitLineClamp: 1,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+
     selectors: {
       [`${darkTheme} &`]: {
         color: vars.color.white,
