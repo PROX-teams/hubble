@@ -2,10 +2,10 @@
 
 import { forwardRef, ComponentPropsWithoutRef, KeyboardEvent, ReactNode,ChangeEvent} from "react";
 import clsx from "clsx";
-import * as S from "./SearchInput.css";
+import * as S from "./KeywordInput.css";
 import AddIcon from "@/shared/assets/icons/common/add.svg"
 
-interface SearchInputProps
+interface KeywordInputProps
   extends Omit<ComponentPropsWithoutRef<"input">, "size"> {
     icon?: ReactNode
     value?: string;
@@ -13,7 +13,7 @@ interface SearchInputProps
     onSearch?: (value?: string) => void;
 }
 
-const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
+const KeywordInput = forwardRef<HTMLInputElement, KeywordInputProps>(
   (
     {
       value,
@@ -33,7 +33,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
       }
     };
     return (
-      <div role="search" className={clsx(S.searchWrapper, className)}>
+      <div role="search" className={clsx(S.keywordInputWrapper, className)}>
         {icon && <span className={S.iconBox}>{icon}</span>}
         <input
           ref={ref}
@@ -49,5 +49,5 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   }
 );
 
-SearchInput.displayName = "SearchInput";
-export default SearchInput;
+KeywordInput.displayName = "KeywordInput";
+export default KeywordInput;

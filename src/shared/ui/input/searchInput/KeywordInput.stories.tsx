@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import SearchInput from "./SearchInput";
+import KeywordInput from "./KeywordInput";
 
 const meta = {
-  title: "Input/SearchInput",
-  component: SearchInput,
+  title: "Input/KeywordInput",
+  component: KeywordInput,
   parameters: {
     layout: "centered",
   },
@@ -19,7 +19,7 @@ const meta = {
     description: "입력 값이 변경될 때 호출되는 이벤트 핸들러입니다.",
     },
   },
-} satisfies Meta<typeof SearchInput>;
+} satisfies Meta<typeof KeywordInput>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

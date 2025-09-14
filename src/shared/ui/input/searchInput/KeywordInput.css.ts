@@ -2,7 +2,7 @@ import { style } from "@vanilla-extract/css";
 import { lightTheme, vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
-export const searchWrapper = style({
+export const keywordInputWrapper = style({
   display: "inline-flex",
   alignItems: "center",
   width: "13.38rem",
