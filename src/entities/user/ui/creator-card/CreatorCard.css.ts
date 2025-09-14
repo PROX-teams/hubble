@@ -44,6 +44,7 @@ export const contentWrapper = style({
   flex: 1,
   width: "100%",
   height: "2.437rem",
+  overflow: "hidden",
 });
 
 export const name = style([
@@ -53,6 +54,7 @@ export const name = style([
     textOverflow: "ellipsis",
     WebkitLineClamp: 1,
     WebkitBoxOrient: "vertical",
+    width: "100%",
     overflow: "hidden",
 
     selectors: {
@@ -73,6 +75,7 @@ export const introduction = style([
     textOverflow: "ellipsis",
     WebkitLineClamp: 1,
     WebkitBoxOrient: "vertical",
+    width: "100%",
     overflow: "hidden",
     color: vars.color.gray_500,
   },

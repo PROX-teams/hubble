@@ -4,7 +4,7 @@ import * as S from "./CreatorCard.css";
 
 interface CreatorCardProps {
   userId: number; // 사용자 고유 ID
-  imageUrl: string; // 프로필 이미지 URL
+  imageUrl?: string; // 프로필 이미지 URL
   name: string; // 크리에이터명
   introduction?: string; // 소개글
 }
@@ -26,7 +26,9 @@ export default function CreatorCard({
 
       <div className={S.contentWrapper}>
         <strong className={S.name}>{name}</strong>
-        <p className={S.introduction}>{introduction}</p>
+        {introduction && introduction.length > 0 && (
+          <p className={S.introduction}>{introduction}</p>
+        )}
       </div>
     </Link>
   );

@@ -46,6 +46,16 @@ export const WithImage: Story = {
   },
 };
 
+export const WithoutIntroduction: Story = {
+  args: {
+    userId: 1,
+    imageUrl:
+      "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png",
+    name: "PROX 팀블로그",
+    introduction: "",
+  },
+};
+
 export const WithoutImage: Story = {
   args: {
     userId: 1,
