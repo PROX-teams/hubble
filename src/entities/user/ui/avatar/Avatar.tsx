@@ -1,7 +1,7 @@
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import * as S from "./Avatar.css";
-import getAvatarStyles from "@/shared/lib/styles/getAvatarStyles";
-import { useEffect, useState } from "react";
+import getAvatarStyles from "@/entities/user/lib/styles/getAvatarStyles";
 
 interface AvatarProps {
   size?: number; // width, height 크기 (기본값: 40)
