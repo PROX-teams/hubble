@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Avatar from "@/shared/ui/avatar/Avatar";
+import Avatar from "@/entities/user/ui/avatar/Avatar";
 import * as S from "./CreatorCard.css";
 
 interface CreatorCardProps {

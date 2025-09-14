@@ -14,12 +14,10 @@ const meta = {
       description: "사용자 고유 ID",
     },
     imageUrl: {
-      control: "boolean",
-      description: "프로필 이미지 URL 포함 여부",
-      mapping: {
-        true: "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png",
-        false: "",
-      },
+      control: "text",
+      description: "프로필 이미지 URL",
+      defaultValue:
+        "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png",
     },
     name: {
       control: "text",
