@@ -26,13 +26,13 @@ export const header = recipe({
     },
   ],
   variants: {
-    justify: {
-      inline: { justifyContent: "flex-start" },  
+    variant: {
+      compact: { justifyContent: "flex-start" },  
       spread: { justifyContent: "space-between" } 
     },
   },
   defaultVariants: {
-    justify: "inline",
+    variant: "compact",
   },
 });
 
@@ -53,7 +53,7 @@ export const triggerIcon = recipe({
     color:vars.color.stroke_500,
   },
   variants: {
-    enabled: {
+    rotatable: {
       true: {},
       false: { transition: "none" }, 
     },
@@ -64,7 +64,7 @@ export const triggerIcon = recipe({
   },
   
   defaultVariants: {
-    enabled: false,
+    rotatable: false,
     open: false,
   },
 });
