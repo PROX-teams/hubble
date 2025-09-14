@@ -5,6 +5,7 @@ export const container = style({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  flexShrink: 0,
   borderRadius: "50%",
   overflow: "hidden",
 });

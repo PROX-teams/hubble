@@ -23,7 +23,7 @@ const AVATAR_COLORS = [
 ];
 
 // Avatar의 크기와 userId를 받아 동적으로 스타일을 생성하는 함수
-const getAvatarStyles = (size: number, userId: number, img: boolean) => {
+const getAvatarStyles = (size: number, userId: number, hasImg: boolean) => {
   // userId가 1부터 시작한다고 가정
   const remainder = userId % AVATAR_COLORS.length;
   const colorIdx = remainder === 0 ? AVATAR_COLORS.length - 1 : remainder - 1;
@@ -32,7 +32,7 @@ const getAvatarStyles = (size: number, userId: number, img: boolean) => {
     // 느슨한 불일치 -> 0도 유효한 값으로 인정 && null, undefined 걸러내기
     width: size != null ? `${size}px` : "2.5rem",
     height: size != null ? `${size}px` : "2.5rem",
-    backgroundColor: img ? undefined : AVATAR_COLORS[colorIdx],
+    backgroundColor: hasImg ? "transparent" : AVATAR_COLORS[colorIdx],
   };
 };
 

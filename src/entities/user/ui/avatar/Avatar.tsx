@@ -1,11 +1,14 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import * as S from "./Avatar.css";
-import getAvatarStyles from "@/shared/lib/styles/getAvatarStyles";
+import getAvatarStyles from "@/entities/user/lib/styles/getAvatarStyles";
 
 interface AvatarProps {
   size?: number; // width, height 크기 (기본값: 40)
   src?: string; // 이미지 URL
-  name: string; // 사용자 이름 (이미지가 없을 때 첫 글자 표시)
+  name?: string; // 사용자 이름 (이미지가 없을 때 첫 글자 표시)
   userId: number; // 유저 고유 ID (배경색 결정용)
 }
 
@@ -16,17 +19,26 @@ interface AvatarProps {
  */
 
 export default function Avatar({ size = 40, src, name, userId }: AvatarProps) {
-  const dynamicStyles = getAvatarStyles(size, userId, !!src);
+  const [isError, setIsError] = useState<boolean>(false);
+  const showImg = !!src && !isError;
+  const dynamicStyles = getAvatarStyles(size, userId, showImg);
+
+  useEffect(() => {
+    if (src) setIsError(false);
+  }, [src]);
+
+  const handleError = () => setIsError(true);
 
   return (
     <div className={S.container} style={dynamicStyles}>
-      {src ? (
+      {showImg ? (
         <Image
           src={src}
           width={size}
           height={size}
           alt="profile-image"
           className={S.img}
+          onError={handleError}
         />
       ) : (
         <span className={S.text}>{name?.[0]}</span>
