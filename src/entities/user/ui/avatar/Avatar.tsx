@@ -1,6 +1,7 @@
 import Image from "next/image";
 import * as S from "./Avatar.css";
 import getAvatarStyles from "@/shared/lib/styles/getAvatarStyles";
+import { useEffect, useState } from "react";
 
 interface AvatarProps {
   size?: number; // width, height 크기 (기본값: 40)
@@ -16,17 +17,26 @@ interface AvatarProps {
  */
 
 export default function Avatar({ size = 40, src, name, userId }: AvatarProps) {
-  const dynamicStyles = getAvatarStyles(size, userId, !!src);
+  const [isError, setIsError] = useState<boolean>(false);
+  const showImg = !!src && !isError;
+  const dynamicStyles = getAvatarStyles(size, userId, showImg);
+
+  useEffect(() => {
+    if (src) setIsError(false);
+  }, [src]);
+
+  const handleError = () => setIsError(true);
 
   return (
     <div className={S.container} style={dynamicStyles}>
-      {src ? (
+      {showImg ? (
         <Image
           src={src}
           width={size}
           height={size}
           alt="profile-image"
           className={S.img}
+          onError={handleError}
         />
       ) : (
         <span className={S.text}>{name?.[0]}</span>
