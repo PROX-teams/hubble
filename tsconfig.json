@@ -28,6 +28,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/shared/ui/input/searchInput/KeywordInput.tsx"  ],
   "exclude": ["node_modules"]
 }
