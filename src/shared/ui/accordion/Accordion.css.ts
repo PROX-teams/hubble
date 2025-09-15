@@ -8,7 +8,6 @@ export const wrapper = style({
   height: "100%",                 
   display: "flex",                
   flexDirection: "column",
-  gap:"8px"
 })
 
 export const content = style({
@@ -22,7 +21,7 @@ export const header = recipe({
       display: "flex",
       alignItems: "center",
       width: "100%",
-      gap: 8,
+      gap: "0.375rem",
     },
   ],
   variants: {

@@ -5,6 +5,7 @@ import { useContext, ComponentPropsWithoutRef } from "react";
 import { AccordionContext } from "@/shared/model/accordion/contexts/AccordionContextProvider";
 import clsx from "clsx";
 import * as S from "@/shared/ui/accordion/Accordion.css";
+import { accordionVariants } from "@/shared/lib/animations/accordion";
 
 export const AccordionContent = ({ children, className }: ComponentPropsWithoutRef<'div'>) => {
   const { isOpen } = useContext(AccordionContext);
@@ -15,9 +16,10 @@ export const AccordionContent = ({ children, className }: ComponentPropsWithoutR
         <motion.div
           key="accordion-content"
           className={clsx(S.content, className)}
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
+          variants={accordionVariants}
+          initial="collapsed"
+          animate="open"
+          exit="collapsed"
           transition={{ type: "spring", duration: 0.4, bounce: 0 }}
         >
           {children}
