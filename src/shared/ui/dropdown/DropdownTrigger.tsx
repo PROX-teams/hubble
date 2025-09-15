@@ -1,7 +1,7 @@
 import { ComponentPropsWithoutRef,useContext } from "react";
 import type { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
-import { DropdownContext } from "@/shared/model/dropdown/contexts/DropdownContextProvider";
+import { DropdownContext } from "@/shared/model/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";
 
 /**

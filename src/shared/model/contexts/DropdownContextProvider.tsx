@@ -1,9 +1,10 @@
 import { createContext, PropsWithChildren, ReactNode } from "react";
-import { useDropdown } from "@/shared/model/dropdown/hooks/uesDropdown";
+import { useDropdown } from "@/shared/model/hooks/uesDropdown";
 
 export type DropdownContextType = {
   isBoxOpen: boolean;
   toggleBoxOpen: () => void;
+  closeBox: () => void;
   selectedId: number | null;
   selectedOption: ReactNode | null;
   selectOption: (id: number, option: ReactNode) => void; 
@@ -12,6 +13,7 @@ export type DropdownContextType = {
 export const DropdownContext = createContext<DropdownContextType>({
   isBoxOpen: false,
   toggleBoxOpen: () => {},
+  closeBox: () => {},
   selectedId: null,
   selectedOption: null,
   selectOption: () => {},
@@ -24,6 +26,7 @@ function DropdownContextProvider({ children }: PropsWithChildren) {
     selectOption,
     isBoxOpen,
     toggleBoxOpen,
+    closeBox,
   } = useDropdown<number>();
 
   return (
@@ -31,6 +34,7 @@ function DropdownContextProvider({ children }: PropsWithChildren) {
       value={{
         isBoxOpen,
         toggleBoxOpen,
+        closeBox,
         selectedOption,
         selectedId,
         selectOption,
@@ -43,4 +47,3 @@ function DropdownContextProvider({ children }: PropsWithChildren) {
 
 
 export { DropdownContextProvider }
-

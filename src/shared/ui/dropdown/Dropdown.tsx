@@ -1,7 +1,7 @@
 'use client';
 
 import { ComponentProps } from 'react';
-import { DropdownContextProvider } from '@/shared/model/dropdown/contexts/DropdownContextProvider';
+import { DropdownContextProvider } from '@/shared/model/contexts/DropdownContextProvider';
 import DropdownWrapper from './DropdownWrapper';
 import { DropdownTrigger } from './DropdownTrigger';
 import { DropdownMenu } from './DropdownMenu';

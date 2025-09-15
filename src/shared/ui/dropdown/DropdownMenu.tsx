@@ -1,7 +1,7 @@
 import { HTMLAttributes, useContext } from "react";
 import { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
-import { DropdownContext } from "@/shared/model/dropdown/contexts/DropdownContextProvider";
+import { DropdownContext } from "@/shared/model/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";
 
 /**
@@ -37,6 +37,7 @@ export default function DropdownMenu({
 }: DropdownMenuProps) {
 
   const { isBoxOpen } = useContext(DropdownContext);
+  // 한 상수가 두가지 역할을 가지게 된다. 
   const isOpen = independent ?? isBoxOpen;
 
   return isOpen ? (

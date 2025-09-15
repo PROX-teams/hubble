@@ -3,7 +3,6 @@ import { style } from "@vanilla-extract/css";
 import { lightTheme,vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
-//화이트 모드 적용
 export const wrapper = style({
   position: "relative",
 })
@@ -112,6 +111,7 @@ export const menu = recipe({
   borderRadius: "0.38rem",
   padding: "0.2rem 0.2rem", 
   backgroundColor: vars.color.gray_200,
+  //대응하기
   maxHeight: "12.5rem",
   overflowY: "auto",
   zIndex: 1000,

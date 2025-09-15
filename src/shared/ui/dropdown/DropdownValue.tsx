@@ -1,5 +1,5 @@
 import { useContext, ReactNode } from "react";
-import { DropdownContext } from "@/shared/model/dropdown/contexts/DropdownContextProvider";
+import { DropdownContext } from "@/shared/model/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";
 
 /**
