@@ -1,6 +1,6 @@
-import { tx } from "@/shared/styles/textStyle.css";
-import { darkTheme, lightTheme, vars } from "@/shared/styles/theme.css";
 import { style } from "@vanilla-extract/css";
+import { darkTheme, lightTheme, vars } from "@/shared/styles/theme.css";
+import { tx } from "@/shared/styles/textStyle.css";
 
 export const container = style({
   display: "flex",
@@ -25,6 +25,7 @@ export const contentWrapper = style({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
+  width: "15.75rem",
   height: "100%",
 });
 
@@ -59,6 +60,11 @@ export const date = style([
 export const message = style([
   tx.b2_160_rg,
   {
+    display: "-webkit-box",
+    textOverflow: "ellipsis",
+    WebkitLineClamp: 1,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
     color: vars.color.gray_700,
   },
 ]);

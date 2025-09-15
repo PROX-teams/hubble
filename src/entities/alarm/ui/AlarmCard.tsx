@@ -1,5 +1,5 @@
 import Avatar from "@/entities/user/ui/avatar/Avatar";
-import * as S from "./Alarm.css";
+import * as S from "./AlarmCard.css";
 import CheckIcon from "@/shared/assets/icons/alarm/alarm-check.svg";
 
 interface AlarmCardProps {
