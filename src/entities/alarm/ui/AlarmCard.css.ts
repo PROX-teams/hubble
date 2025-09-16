@@ -68,29 +68,3 @@ export const message = style([
     color: vars.color.gray_700,
   },
 ]);
-
-export const checkWrapper = style({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "1.75rem",
-  height: "1.625rem",
-  borderRadius: "0.375rem",
-  backgroundColor: vars.color.gray_200,
-  transition: "all 0.4s ease",
-  cursor: "pointer",
-});
-
-export const check = style({
-  transition: "all 0.4s ease",
-  color: vars.color.gray_400,
-
-  selectors: {
-    [`${darkTheme} ${checkWrapper}:hover &`]: {
-      color: vars.color.white,
-    },
-    [`${lightTheme} ${checkWrapper}:hover &`]: {
-      color: vars.color.black,
-    },
-  },
-});

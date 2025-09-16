@@ -1,14 +1,9 @@
 import Avatar from "@/entities/user/ui/avatar/Avatar";
 import * as S from "./AlarmCard.css";
-import CheckIcon from "@/shared/assets/icons/alarm/alarm-check.svg";
+import { Alarm } from "../alarm.types";
 
-interface AlarmCardProps {
-  userId: number; // 사용자 고유 ID (아바타 컴포넌트에 전달)
-  date: string; // 알림 날짜
-  message: string; // 알림 내용
-  isDone: boolean; // 알림 확인 여부
-  userName: string; // 크리에이터명
-  imageUrl?: string; // 프로필 이미지 URL (아바타 컴포넌트에 전달)
+interface AlarmCardProps extends Alarm {
+  actionSlot?: React.ReactNode; // 알림 체크 액션 버튼 슬롯
 }
 
 export default function AlarmCard({
@@ -18,9 +13,10 @@ export default function AlarmCard({
   userId,
   imageUrl,
   userName,
+  actionSlot,
 }: AlarmCardProps) {
   return (
-    <li className={S.container}>
+    <div className={S.container}>
       <Avatar size={20} src={imageUrl} name={userName} userId={userId} />
 
       <div className={S.innerWrapper}>
@@ -32,12 +28,8 @@ export default function AlarmCard({
           <p className={S.message}>{message}</p>
         </div>
 
-        {!isDone && (
-          <div className={S.checkWrapper}>
-            <CheckIcon className={S.check} />
-          </div>
-        )}
+        {!isDone && actionSlot}
       </div>
-    </li>
+    </div>
   );
 }

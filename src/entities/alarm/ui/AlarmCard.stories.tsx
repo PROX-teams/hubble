@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import AlarmCard from "./AlarmCard";
+import MarkAsDoneButton from "@/features/alarm/mark-as-done/ui/MarkAsDoneButton";
 
 const meta = {
   title: "Card/Alarm",
@@ -25,6 +26,10 @@ const meta = {
     },
     userName: { control: "text", description: "크리에이터명" },
     imageUrl: { control: "text", description: "프로필 이미지 URL" },
+    actionSlot: {
+      description: "알림 체크 액션 버튼 슬롯",
+      control: { type: undefined },
+    },
   },
   args: {
     userId: 1,
@@ -34,6 +39,7 @@ const meta = {
     userName: "PROX",
     imageUrl:
       "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png",
+    actionSlot: undefined,
   },
 } satisfies Meta<typeof AlarmCard>;
 
@@ -48,6 +54,7 @@ export const Default: Story = {
       },
     },
   },
+  render: (args) => <AlarmCard {...args} actionSlot={<MarkAsDoneButton />} />,
 };
 
 export const Done: Story = {
@@ -75,4 +82,5 @@ export const WithLongText: Story = {
       },
     },
   },
+  render: (args) => <AlarmCard {...args} actionSlot={<MarkAsDoneButton />} />,
 };
