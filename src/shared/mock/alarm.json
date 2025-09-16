@@ -1,0 +1,82 @@
+[
+  {
+    "userId": 1,
+    "date": "2025.06.29",
+    "message": "좋은 정보 감사합니다!",
+    "isDone": false,
+    "userName": "PROX",
+    "imageUrl": ""
+  },
+  {
+    "userId": 2,
+    "date": "2025.06.29",
+    "message": "좋은 정보 감사합니다!",
+    "isDone": false,
+    "userName": "PROX",
+    "imageUrl": "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png"
+  },
+  {
+    "userId": 2,
+    "date": "2025.06.29",
+    "message": "좋은 정보 감사합니다!",
+    "isDone": false,
+    "userName": "이수호",
+    "imageUrl": ""
+  },
+  {
+    "userId": 2,
+    "date": "2025.06.29",
+    "message": "좋은 정보 감사합니다!",
+    "isDone": false,
+    "userName": "PROX",
+    "imageUrl": "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png"
+  },
+  {
+    "userId": 17,
+    "date": "2025.06.29",
+    "message": "좋은 정보 감사합니다!",
+    "isDone": false,
+    "userName": "김예안",
+    "imageUrl": ""
+  },
+  {
+    "userId": 2,
+    "date": "2025.06.29",
+    "message": "좋은 정보 감사합니다!",
+    "isDone": false,
+    "userName": "PROX",
+    "imageUrl": "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png"
+  },
+  {
+    "userId": 3,
+    "date": "2025.06.28",
+    "message": "멋진 글이네요!",
+    "isDone": false,
+    "userName": "JaneDoe",
+    "imageUrl": ""
+  },
+  {
+    "userId": 4,
+    "date": "2025.06.27",
+    "message": "도움이 많이 되었습니다.",
+    "isDone": true,
+    "userName": "JohnSmith",
+    "imageUrl": ""
+  },
+  {
+    "userId": 12,
+    "date": "2025.06.27",
+    "message": "도움이 많이 되었습니다.",
+    "isDone": true,
+    "userName": "정혜인",
+    "imageUrl": ""
+  },
+  {
+    "userId": 17,
+    "date": "2025.06.27",
+    "message": "도움이 많이 되었습니다.",
+    "isDone": true,
+    "userName": "ㅁ",
+    "imageUrl": ""
+  }
+]
