@@ -11,7 +11,7 @@ interface DropdownOptionProps extends ComponentPropsWithoutRef<'div'> {
   optionId: number;
 }
 
-export default function DropdownOption({
+function DropdownOption({
   optionId,
   onClick,
   className,

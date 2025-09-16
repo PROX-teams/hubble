@@ -11,15 +11,17 @@ export interface DropdownIconProps extends ComponentProps<"span"> {
   side?: Side;
 }
 
-export const DropdownIcon = ({
+function DropdownIcon({
   children,
   className,
   side,
   ...props
-}: DropdownIconProps) => {
+}: DropdownIconProps) {
   return (
     <span className={clsx(S.icon({ side }), className)} {...props}>
       {children ?? <SelectIcon />}
     </span>
   );
-};
+}
+
+export { DropdownIcon };

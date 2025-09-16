@@ -1,3 +1,5 @@
+"use client"
+
 import { createContext, PropsWithChildren, ReactNode } from "react";
 import { useDropdown } from "@/shared/model/hooks/uesDropdown";
 

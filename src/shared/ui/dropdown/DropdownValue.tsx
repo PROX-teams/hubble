@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, ReactNode } from "react";
 import { DropdownContext } from "@/shared/model/contexts/DropdownContextProvider";
 import * as S from "./Dropdown.css";
@@ -16,7 +18,7 @@ interface DropdownValueProps {
   children: (props: { selectedOption: ReactNode | null }) => ReactNode;
 }
 
-export const DropdownValue = ({ children }: DropdownValueProps) => {
+function DropdownValue({ children }: DropdownValueProps) {
   const { selectedOption } = useContext(DropdownContext);
 
   return (
@@ -26,4 +28,6 @@ export const DropdownValue = ({ children }: DropdownValueProps) => {
       {children({ selectedOption })}
     </div>
   );
-};
+}
+
+export { DropdownValue };

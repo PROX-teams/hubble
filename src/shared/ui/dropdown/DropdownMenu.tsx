@@ -1,3 +1,5 @@
+"use client";
+
 import { HTMLAttributes, useContext } from "react";
 import { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
@@ -27,7 +29,7 @@ interface DropdownMenuProps extends HTMLAttributes<HTMLDivElement> {
   size?: Size
 }
 
-export default function DropdownMenu({
+function DropdownMenu({
   children,
   className,
   independent,

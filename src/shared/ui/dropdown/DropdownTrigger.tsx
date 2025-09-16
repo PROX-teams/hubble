@@ -1,3 +1,5 @@
+"use client";
+
 import { ComponentPropsWithoutRef,useContext } from "react";
 import type { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
