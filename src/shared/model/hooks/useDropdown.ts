@@ -1,6 +1,6 @@
 import { useState, ReactNode } from "react";
 
-export const useDropdownState= <T>() => {
+export const useDropdown= <T>() => {
   const [selectedId, setSelectedId] = useState<T | null>(null);
   const [selectedOption, setSelectedOption] = useState<ReactNode | null>(null);
   const [isBoxOpen, setIsBoxOpen] = useState(false);

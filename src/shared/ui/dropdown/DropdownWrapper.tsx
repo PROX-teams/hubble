@@ -4,17 +4,17 @@ import { ComponentPropsWithoutRef, useContext} from "react";
 import { DropdownContext } from "@/shared/model/contexts/DropdownContextProvider";
 import clsx from "clsx";
 import * as s from "./Dropdown.css"
-import { useClickOutside } from "@/shared/model/hooks/useClickOutside";
+import { useHideOnClickOutside } from "@/shared/model/hooks/useHideOnClickOutside";
 
 function DropdownWrapper({ children, className, ...props }: ComponentPropsWithoutRef<"div">) {
 
   const { isBoxOpen, closeBox } = useContext(DropdownContext);
 
-  const dropdownRef = useClickOutside<HTMLDivElement>({
+  const dropdownRef = useHideOnClickOutside<HTMLDivElement>({
     onClickOutside: () => {
       closeBox();
     },
-    enabled: !isBoxOpen,
+    disabled: !isBoxOpen,
   })
 
   return (

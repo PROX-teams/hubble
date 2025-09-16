@@ -8,7 +8,7 @@ type ClickOutsideEvents = Pick<
 interface ClickOutsideOptions {
   onClickOutside: () => void;
   event?: keyof ClickOutsideEvents;
-  enabled?: boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -17,19 +17,19 @@ interface ClickOutsideOptions {
  *  외부 클릭 이벤트 종류
  * @param {keyof ClickOutsideEvents} [event]
  * 외부 클릭 감지를 비활성화 여부
- * @param {boolean} [enabled]
+ * @param {boolean} [disabled]
  */
 
 
-export const useClickOutside = <T extends HTMLElement>({
+export const useHideOnClickOutside = <T extends HTMLElement>({
   onClickOutside,
   event = 'pointerdown',
-  enabled = false,
+  disabled = false,
 }: ClickOutsideOptions) => {
   const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (enabled) return;
+    if (disabled) return;
     const handleClickOutside = (e: ClickOutsideEvents[typeof event]) => {
 
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -41,7 +41,7 @@ export const useClickOutside = <T extends HTMLElement>({
     return () => {
       window.removeEventListener(event, handleClickOutside, { capture: true });
     };
-  }, [onClickOutside, event, enabled]);
+  }, [onClickOutside, event, disabled]);
 
   return ref;
 };

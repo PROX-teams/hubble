@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, PropsWithChildren, ReactNode } from "react";
-import { useDropdownState } from "@/shared/model/hooks/useDropdownState";
+import { useDropdown } from "@/shared/model/hooks/useDropdown";
 
 export type DropdownContextType = {
   isBoxOpen: boolean;
@@ -29,7 +29,7 @@ function DropdownContextProvider({ children }: PropsWithChildren) {
     isBoxOpen,
     toggleBoxOpen,
     closeBox,
-  } = useDropdownState<number>();
+  } = useDropdown<number>();
 
   return (
     <DropdownContext.Provider
