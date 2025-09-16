@@ -10,8 +10,8 @@ import { TabContent, TabContents } from "./Content";
  * 탭 메뉴에 따라 컨텐츠 렌더링 예시
  * <Tab>
  *   <Tab.Menus>
- *    <Tab.Menu tabIndex={0}>Tab 1</Tab.Menu>
- *    <Tab.Menu tabIndex={1}>Tab 2</Tab.Menu>
+ *    <Tab.Menu tabIndex={0} activeStyle={S.active}>Tab 1</Tab.Menu>
+ *    <Tab.Menu tabIndex={1} activeStyle={S.active}>Tab 2</Tab.Menu>
  *  </Tab.Menus>
  *  <Tab.Contents>
  *    <Tab.Content tabIndex={0}>Content 1</Tab.Content>

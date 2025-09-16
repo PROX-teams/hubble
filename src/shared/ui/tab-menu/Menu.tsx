@@ -1,6 +1,9 @@
 import { HTMLAttributes, useContext } from "react";
 import clsx from "clsx";
-import { TabMenuDispatchContext } from "@/shared/model/contexts/TabMenuContextProvider";
+import {
+  TabMenuContext,
+  TabMenuDispatchContext,
+} from "@/shared/model/contexts/TabMenuContextProvider";
 import * as S from "./TabMenu.css";
 
 /**
@@ -21,17 +24,23 @@ export function TabMenus({
  * @param {() => void} [onClick] - 탭 클릭 시 실행될 추가적인 콜백 함수
  * @param {React.ReactNode} children - 탭 메뉴에 표시될 텍스트 또는 요소
  * @param {string} [className] - 추가적인 CSS 클래스
+ * @param {string} [activeStyle] - 활성화된 탭에 적용될 추가적인 CSS 클래스
  */
 export function TabMenu({
   tabIndex,
   onClick,
   children,
   className,
+  activeStyle,
 }: HTMLAttributes<HTMLButtonElement> & {
   tabIndex: number;
   onClick?: () => void;
+  activeStyle?: string;
 }) {
+  const activeTab = useContext(TabMenuContext);
   const setActiveTab = useContext(TabMenuDispatchContext);
+
+  const isActive = activeTab === tabIndex;
 
   const handleOnClick = () => {
     setActiveTab(tabIndex);
@@ -39,7 +48,10 @@ export function TabMenu({
   };
 
   return (
-    <button className={clsx(S.tab, className)} onClick={handleOnClick}>
+    <button
+      className={clsx(S.tab, className, isActive && activeStyle)}
+      onClick={handleOnClick}
+    >
       {children}
     </button>
   );
