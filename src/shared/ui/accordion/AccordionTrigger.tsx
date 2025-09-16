@@ -2,7 +2,7 @@
 
 import { ComponentPropsWithoutRef, useContext } from "react";
 import clsx from "clsx";
-import { AccordionContext } from "@/shared/model/accordion/contexts/AccordionContextProvider";
+import { AccordionContext } from "@/shared/model/contexts/AccordionContextProvider";
 import * as S from "@/shared/ui/accordion/Accordion.css";
 
 /**

@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useContext, ComponentPropsWithoutRef } from "react";
-import { AccordionContext } from "@/shared/model/accordion/contexts/AccordionContextProvider";
+import { AccordionContext } from "@/shared/model/contexts/AccordionContextProvider";
 import clsx from "clsx";
 import * as S from "@/shared/ui/accordion/Accordion.css";
 import { accordionVariants } from "@/shared/lib/animations/accordion";
@@ -29,4 +29,4 @@ export const AccordionContent = ({ children, className }: ComponentPropsWithoutR
   );
 };
 
-
+AccordionContent.displayNme = "AccordionContent"

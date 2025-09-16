@@ -1,9 +1,9 @@
 import { ComponentProps } from 'react';
 import { AccordionContent } from './AccordionContent';
 import { AccordionHeader } from './AccordionHeader';
-import { AccordionContextProvider } from '@/shared/model/accordion/contexts/AccordionContextProvider';
+import { AccordionContextProvider } from '@/shared/model/contexts/AccordionContextProvider';
 import { AccordionTrigger } from './AccordionTrigger';
-import AccordionWrapper from './AccordionWrapper';
+import {AccordionWrapper} from './AccordionWrapper';
 /**
  * Accordion 컴포넌트
  *

@@ -1,6 +1,6 @@
-import { useState} from "react";
+import { useState } from "react";
 
-export const useAccordion = () => {
+export const useToggle = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen((prev) => !prev);
 

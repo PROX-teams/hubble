@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, PropsWithChildren } from 'react';
-import { useAccordion } from '../hooks/useAccordion';
+import { useToggle } from '../hooks/useToggle';
 
 export interface AccordionContextProps {
   isOpen: boolean;
@@ -15,13 +15,11 @@ export const AccordionContext = createContext<AccordionContextProps>({
 
 function AccordionContextProvider({ children }: PropsWithChildren) {
 
-    const{ isOpen, toggle} = useAccordion();
+    const{ isOpen, toggle} = useToggle();
 
 
     return (
-      <AccordionContext.Provider
-          value={{ isOpen, toggle }}
-      >
+      <AccordionContext.Provider value={{ isOpen, toggle }}>
         {children}
       </AccordionContext.Provider>
     );
