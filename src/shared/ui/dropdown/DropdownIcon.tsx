@@ -1,0 +1,27 @@
+import SelectIcon from "@/shared/assets/icons/common/select.svg";
+import type { RecipeVariants } from "@vanilla-extract/recipes";
+import { ComponentProps } from "react";
+import clsx from "clsx";
+import * as S from "./Dropdown.css";
+
+type TriggerVariants = NonNullable<RecipeVariants<typeof S.dropdownicon>>;
+type Side = NonNullable<TriggerVariants["side"]>;
+
+export interface DropdownIconProps extends ComponentProps<"span"> {
+  side?: Side;
+}
+
+function DropdownIcon({
+  children,
+  className,
+  side,
+  ...props
+}: DropdownIconProps) {
+  return (
+    <span className={clsx(S.dropdownicon({ side }), className)} {...props}>
+      {children ?? <SelectIcon />}
+    </span>
+  );
+}
+
+export { DropdownIcon };
