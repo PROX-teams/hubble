@@ -30,7 +30,7 @@ function DropdownOption({
 
   return (
     <div
-      className={clsx(S.option, isSelected && S.optionSelected, className)}
+      className={clsx(S.dropdownoption, isSelected && S.optionSelected, className)}
       onClick={handleClick}
       {...props}
     >

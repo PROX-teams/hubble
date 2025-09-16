@@ -23,7 +23,7 @@ function DropdownValue({ children }: DropdownValueProps) {
 
   return (
     <div
-      className={S.value({ selected: !!selectedOption })}
+      className={S.dropdownvalue({ selected: !!selectedOption })}
     >
       {children({ selectedOption })}
     </div>

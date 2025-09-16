@@ -19,7 +19,7 @@ import * as S from "./Dropdown.css";
  * Dropdown.css에 정의된 size variant를 지정합니다.
  */
 
-type MenuVariant = RecipeVariants<typeof S.menu>;
+type MenuVariant = RecipeVariants<typeof S.dropdownmenu>;
 type Placement = NonNullable<MenuVariant>['placement'];
 type Size = NonNullable<MenuVariant>['size'];
 
@@ -39,11 +39,10 @@ function DropdownMenu({
 }: DropdownMenuProps) {
 
   const { isBoxOpen } = useContext(DropdownContext);
-  // 한 상수가 두가지 역할을 가지게 된다. 
   const isOpen = independent ?? isBoxOpen;
 
   return isOpen ? (
-    <div className={clsx(S.menu({ placement,size }), className)} {...props}>
+    <div className={clsx(S.dropdownmenu({ placement,size }), className)} {...props}>
       {children}
     </div>
   ) : null;

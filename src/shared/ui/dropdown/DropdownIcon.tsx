@@ -4,7 +4,7 @@ import { ComponentProps } from "react";
 import clsx from "clsx";
 import * as S from "./Dropdown.css";
 
-type TriggerVariants = NonNullable<RecipeVariants<typeof S.icon>>;
+type TriggerVariants = NonNullable<RecipeVariants<typeof S.dropdownicon>>;
 type Side = NonNullable<TriggerVariants["side"]>;
 
 export interface DropdownIconProps extends ComponentProps<"span"> {
@@ -18,7 +18,7 @@ function DropdownIcon({
   ...props
 }: DropdownIconProps) {
   return (
-    <span className={clsx(S.icon({ side }), className)} {...props}>
+    <span className={clsx(S.dropdownicon({ side }), className)} {...props}>
       {children ?? <SelectIcon />}
     </span>
   );

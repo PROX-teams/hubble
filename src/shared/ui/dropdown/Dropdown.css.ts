@@ -3,11 +3,12 @@ import { style } from "@vanilla-extract/css";
 import { lightTheme,vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
-export const wrapper = style({
+export const dropdownwrapper = style({
+  display: "inline-block",
   position: "relative",
 })
 
-export const trigger = recipe({
+export const dropdowntrigger = recipe({
   base: [
     tx.cap1_md, 
     {
@@ -64,7 +65,7 @@ export const trigger = recipe({
     },
   });
 
-export const value = recipe({
+export const dropdownvalue = recipe({
   base: {
     color: vars.color.gray_500,
     overflow: "hidden",
@@ -91,7 +92,7 @@ export const value = recipe({
 });
 
 
-export const icon = recipe({
+export const dropdownicon = recipe({
   base: {
       display: "inline-flex",
     },
@@ -104,7 +105,7 @@ export const icon = recipe({
 });
 
 
-export const menu = recipe({
+export const dropdownmenu = recipe({
   base:{
   marginTop: "0.4rem", 
   border: `0.1rem solid ${vars.color.stroke_300}`,
@@ -145,7 +146,7 @@ export const menu = recipe({
   }
 });
 
-export const option = style({
+export const dropdownoption = style({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",

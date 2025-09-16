@@ -1,25 +1,47 @@
-"use client";
+import { useEffect, useRef } from 'react';
 
-import { useContext, useEffect, useRef } from "react";
-import { DropdownContext } from "../contexts/DropdownContextProvider";
+type ClickOutsideEvents = Pick<
+  WindowEventMap,
+  'pointerdown' | 'pointerup' | 'mousedown' | 'mouseup' | 'touchstart' | 'touchend'
+>;
 
-export const useClickOutside = () => {
-  const { isBoxOpen, closeBox } = useContext(DropdownContext);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+interface ClickOutsideOptions {
+  onClickOutside: () => void;
+  event?: keyof ClickOutsideEvents;
+  enabled?: boolean;
+}
+
+/**
+ * 외부 클릭 이벤트 발생 시 실행할 함수
+ * @param {() => void} [onClickOutside] 
+ *  외부 클릭 이벤트 종류
+ * @param {keyof ClickOutsideEvents} [event]
+ * 외부 클릭 감지를 비활성화 여부
+ * @param {boolean} [enabled]
+ */
+
+
+export const useClickOutside = <T extends HTMLElement>({
+  onClickOutside,
+  event = 'pointerdown',
+  enabled = false,
+}: ClickOutsideOptions) => {
+  const ref = useRef<T>(null);
 
   useEffect(() => {
-    if (!isBoxOpen) return;
-    const handleClickOutside = (e: PointerEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        closeBox();
+    if (enabled) return;
+    const handleClickOutside = (e: ClickOutsideEvents[typeof event]) => {
+
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClickOutside();
       }
     };
-    document.addEventListener("pointerdown", handleClickOutside, { capture: true });
+    window.addEventListener(event, handleClickOutside, { capture: true });
 
     return () => {
-      document.removeEventListener("pointerdown", handleClickOutside, { capture: true });
+      window.removeEventListener(event, handleClickOutside, { capture: true });
     };
-  }, [isBoxOpen, closeBox]);
+  }, [onClickOutside, event, enabled]);
 
-  return dropdownRef;
+  return ref;
 };

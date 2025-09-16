@@ -20,7 +20,7 @@ import * as S from "./Dropdown.css";
  * (Dropdown.css에 정의된 size variant를 따릅니다.)
  */
 
-type TriggerVariants = NonNullable<RecipeVariants<typeof S.trigger>>;
+type TriggerVariants = NonNullable<RecipeVariants<typeof S.dropdowntrigger>>;
 type Variant = NonNullable<TriggerVariants["variant"]>;
 type Size = NonNullable<TriggerVariants["size"]>;
 
@@ -45,7 +45,7 @@ function DropdownTrigger({
   return (
     <button
       className={clsx(
-        S.trigger({ variant,size}),
+        S.dropdowntrigger({ variant,size}),
         className
       )}
       onClick={handleClick}
