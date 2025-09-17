@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "react";
 import clsx from "clsx";
-import { TabMenuContextProvider } from "@/shared/model/contexts/TabMenuContextProvider";
+import { TabMenuContextProvider } from "@/shared/model/contexts/TabMenuContext";
 import * as S from "./TabMenu.css";
 import { TabMenu, TabMenus } from "./Menu";
 import { TabContent, TabContents } from "./Content";

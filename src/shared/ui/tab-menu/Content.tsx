@@ -1,6 +1,6 @@
-import { HTMLAttributes, useContext } from "react";
+import { HTMLAttributes } from "react";
 import clsx from "clsx";
-import { TabMenuContext } from "@/shared/model/contexts/TabMenuContextProvider";
+import { useTabMenuContext } from "@/shared/model/contexts/TabMenuContext";
 import * as S from "./TabMenu.css";
 
 /**
@@ -26,7 +26,7 @@ export function TabContent({
   children,
   className,
 }: HTMLAttributes<HTMLDivElement> & { tabIndex: number }) {
-  const activeTab = useContext(TabMenuContext);
+  const activeTab = useTabMenuContext();
 
   return tabIndex === activeTab ? (
     <div className={clsx(S.content, className)}>{children}</div>

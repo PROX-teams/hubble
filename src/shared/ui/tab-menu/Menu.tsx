@@ -1,9 +1,9 @@
-import { HTMLAttributes, useContext } from "react";
+import { HTMLAttributes } from "react";
 import clsx from "clsx";
 import {
-  TabMenuContext,
-  TabMenuDispatchContext,
-} from "@/shared/model/contexts/TabMenuContextProvider";
+  useTabMenuContext,
+  useTabMenuDispatchContext,
+} from "@/shared/model/contexts/TabMenuContext";
 import * as S from "./TabMenu.css";
 
 /**
@@ -37,8 +37,8 @@ export function TabMenu({
   onClick?: () => void;
   activeStyle?: string;
 }) {
-  const activeTab = useContext(TabMenuContext);
-  const setActiveTab = useContext(TabMenuDispatchContext);
+  const activeTab = useTabMenuContext();
+  const setActiveTab = useTabMenuDispatchContext();
 
   const isActive = activeTab === tabIndex;
 
