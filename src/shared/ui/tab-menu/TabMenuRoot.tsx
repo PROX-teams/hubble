@@ -1,7 +1,5 @@
 import { HTMLAttributes } from "react";
-import clsx from "clsx";
 import { TabMenuContextProvider } from "@/shared/model/contexts/TabMenuContext";
-import * as S from "./TabMenu.css";
 import { TabMenu, TabMenus } from "./Menu";
 import { TabContent, TabContents } from "./Content";
 
@@ -24,7 +22,7 @@ import { TabContent, TabContents } from "./Content";
 function TabMenuRoot({ children, className }: HTMLAttributes<HTMLDivElement>) {
   return (
     <TabMenuContextProvider>
-      <div className={clsx(S.container, className)}>{children}</div>
+      <div className={className}>{children}</div>
     </TabMenuContextProvider>
   );
 }

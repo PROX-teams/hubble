@@ -4,7 +4,6 @@ import {
   useTabMenuContext,
   useTabMenuDispatchContext,
 } from "@/shared/model/contexts/TabMenuContext";
-import * as S from "./TabMenu.css";
 
 /**
  * 탭 메뉴 아이템들을 감싸는 래퍼 컴포넌트입니다.
@@ -15,7 +14,7 @@ export function TabMenus({
   children,
   className,
 }: HTMLAttributes<HTMLUListElement>) {
-  return <div className={clsx(S.tabMenus, className)}>{children}</div>;
+  return <div className={className}>{children}</div>;
 }
 
 /**
@@ -49,7 +48,7 @@ export function TabMenu({
 
   return (
     <button
-      className={clsx(S.tab, className, isActive && activeStyle)}
+      className={clsx(className, isActive && activeStyle)}
       onClick={handleOnClick}
     >
       {children}

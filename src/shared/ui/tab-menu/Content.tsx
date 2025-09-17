@@ -1,7 +1,5 @@
 import { HTMLAttributes } from "react";
-import clsx from "clsx";
 import { useTabMenuContext } from "@/shared/model/contexts/TabMenuContext";
-import * as S from "./TabMenu.css";
 
 /**
  * 탭 콘텐츠 아이템들을 감싸는 래퍼 컴포넌트입니다.
@@ -12,7 +10,7 @@ export function TabContents({
   children,
   className,
 }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={clsx(S.content, className)}>{children}</div>;
+  return <div className={className}>{children}</div>;
 }
 
 /**
@@ -29,6 +27,6 @@ export function TabContent({
   const activeTab = useTabMenuContext();
 
   return tabIndex === activeTab ? (
-    <div className={clsx(S.content, className)}>{children}</div>
+    <div className={className}>{children}</div>
   ) : null;
 }
