@@ -9,10 +9,10 @@ export const button = style([
   {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    gap: "0.1875rem",
+    justifyContent: "space-between",
     width: "3.875rem",
     height: "1.75rem",
+    padding: "0 0.6875rem 0 0.5625rem ",
     border: `1px solid ${vars.color.stroke_200}`,
     borderRadius: "6.25rem",
     transition: "all 0.4s ease",

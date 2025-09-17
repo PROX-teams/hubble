@@ -335,7 +335,7 @@ export const content = recipe({
         },
         tx.b3_rg,
       ],
-      wide: [{ WebkitLineClamp: 2 }, tx.cap1_rg],
+      wide: [{ height: "2.125rem", WebkitLineClamp: 2 }, tx.cap1_rg],
       compact: [
         {
           width: "100%",

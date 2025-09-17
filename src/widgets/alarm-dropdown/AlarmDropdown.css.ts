@@ -6,6 +6,7 @@ export const dropdownMenu = style({
   display: "flex",
   flexDirection: "column",
   height: "27.0625rem",
+  padding: 0,
   backgroundColor: vars.color.gray_100,
 });
 
@@ -56,6 +57,7 @@ export const activeTabMenu = style([
 ]);
 
 export const content = style({
-  overflowY: "auto",
   padding: "0.5rem 0 1rem 0",
+  overflowY: "auto",
+  overflowX: "hidden",
 });
