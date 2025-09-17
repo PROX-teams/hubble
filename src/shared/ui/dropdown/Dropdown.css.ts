@@ -105,6 +105,7 @@ export const dropdownicon = recipe({
 
 export const dropdownmenu = recipe({
   base: {
+    maxHeight: "26.875rem", // 430px
     marginTop: "0.4rem",
     border: `0.1rem solid ${vars.color.stroke_300}`,
     borderRadius: "0.38rem",

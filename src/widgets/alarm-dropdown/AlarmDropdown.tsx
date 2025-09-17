@@ -12,7 +12,7 @@ import MarkAsDoneButton from "@/features/alarm/mark-as-done/ui/MarkAsDoneButton"
 
 interface AlarmDropdownProps {
   data: Alarm[]; // 알림 데이터를 배열로 받습니다.
-  independent?: boolean | null; // 메뉴를 Context와 무관하게 독립적으로 열지 여부를 설정합니다.
+  independent?: boolean; // 메뉴를 Context와 무관하게 독립적으로 열지 여부를 설정합니다.
 }
 
 export default function AlarmDropdown({
