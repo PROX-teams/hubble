@@ -9,13 +9,17 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    size: { control: "number", description: "아바타 크기" },
+    size: {
+      control: "inline-radio",
+      options: [20, 26, 32, 38, 48, 65],
+      description: "아바타 크기",
+    },
     src: { control: "text", description: "이미지 URL" },
     name: { control: "text", description: "사용자 이름" },
     userId: { control: "number", description: "유저 고유 ID" },
   },
   args: {
-    size: 40,
+    size: 38,
     src: "https://velog.velcdn.com/images/vlmbuyd/post/d85be7e6-5919-4fc3-aba7-f3a38cecb677/image.png",
     name: "User",
     userId: 1,
@@ -25,11 +29,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const WithImage: Story = {
-  args: {
-    size: 48,
-  },
-};
+export const WithImage: Story = {};
 
 export const WithoutImage: Story = {
   args: {

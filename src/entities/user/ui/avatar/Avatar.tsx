@@ -5,8 +5,10 @@ import Image from "next/image";
 import * as S from "./Avatar.css";
 import getAvatarStyles from "@/entities/user/lib/styles/getAvatarStyles";
 
+type Size = 20 | 26 | 32 | 38 | 48 | 65;
+
 interface AvatarProps {
-  size?: number; // width, height 크기 (기본값: 40)
+  size?: Size; // width, height 크기 (기본값: 38)
   src?: string; // 이미지 URL
   name?: string; // 사용자 이름 (이미지가 없을 때 첫 글자 표시)
   userId: number; // 유저 고유 ID (배경색 결정용)
@@ -18,7 +20,7 @@ interface AvatarProps {
  * - 배경색은 userId를 기반으로 결정됩니다.
  */
 
-export default function Avatar({ size = 40, src, name, userId }: AvatarProps) {
+export default function Avatar({ size = 38, src, name, userId }: AvatarProps) {
   const [isError, setIsError] = useState<boolean>(false);
   const showImg = !!src && !isError;
   const dynamicStyles = getAvatarStyles(size, userId, showImg);
@@ -41,7 +43,7 @@ export default function Avatar({ size = 40, src, name, userId }: AvatarProps) {
           onError={handleError}
         />
       ) : (
-        <span className={S.text}>{name?.[0]}</span>
+        <span className={S.text[size]}>{name?.[0]}</span>
       )}
     </div>
   );

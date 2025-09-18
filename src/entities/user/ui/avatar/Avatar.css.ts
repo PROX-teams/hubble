@@ -1,5 +1,6 @@
+import { tx } from "@/shared/styles/textStyle.css";
 import { vars } from "@/shared/styles/theme.css";
-import { style } from "@vanilla-extract/css";
+import { style, styleVariants } from "@vanilla-extract/css";
 
 export const container = style({
   display: "flex",
@@ -16,8 +17,43 @@ export const img = style({
   objectFit: "cover",
 });
 
-export const text = style({
-  fontSize: "1.25rem",
+export const baseText = style({
   fontWeight: 400,
+  lineHeight: "160%",
+  letterSpacing: "-0.02em",
   color: vars.color.white,
+});
+
+export const text = styleVariants({
+  20: [
+    baseText,
+    {
+      fontSize: "0.6875rem",
+    },
+  ],
+  26: [baseText, tx.b2_160_rg],
+  32: [
+    baseText,
+    {
+      fontSize: "1rem",
+    },
+  ],
+  38: [
+    baseText,
+    {
+      fontSize: "1.125rem",
+    },
+  ],
+  48: [
+    baseText,
+    {
+      fontSize: "1.5rem",
+    },
+  ],
+  65: [
+    baseText,
+    {
+      fontSize: "2rem",
+    },
+  ],
 });
