@@ -1,20 +1,19 @@
 import { HTMLAttributes } from "react";
 import { TabMenuContextProvider } from "@/shared/model/contexts/TabMenuContext";
-import { TabMenu, TabMenus } from "./Menu";
-import { TabContent, TabContents } from "./Content";
+import { TabItem, TabList } from "./Menu";
+import { TabPanel, TabPanels } from "./Panel";
 
 /**
  * @example
- * 탭 메뉴에 따라 컨텐츠 렌더링 예시
  * <Tab>
- *   <Tab.Menus>
- *    <Tab.Menu tabIndex={0} activeStyle={S.active}>Tab 1</Tab.Menu>
- *    <Tab.Menu tabIndex={1} activeStyle={S.active}>Tab 2</Tab.Menu>
- *  </Tab.Menus>
- *  <Tab.Contents>
+ *   <Tab.List>
+ *    <Tab.Item tabIndex={0} activeStyle={S.active}>Tab 1</Tab.Item>
+ *    <Tab.Item tabIndex={1} activeStyle={S.active}>Tab 2</Tab.Item>
+ *  </Tab.List>
+ *  <Tab.Panels>
  *    <Tab.Content tabIndex={0}>Content 1</Tab.Content>
  *    <Tab.Content tabIndex={1}>Content 2</Tab.Content>
- *  </Tab.Contents>
+ *  </Tab.Panels>
  * </Tab>
  */
 
@@ -28,8 +27,8 @@ function TabMenuRoot({ children, className }: HTMLAttributes<HTMLDivElement>) {
 }
 
 export const Tab = Object.assign(TabMenuRoot, {
-  Menus: TabMenus,
-  Menu: TabMenu,
-  Contents: TabContents,
-  Content: TabContent,
+  List: TabList,
+  Item: TabItem,
+  Panels: TabPanels,
+  Panel: TabPanel,
 });

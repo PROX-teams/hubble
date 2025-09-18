@@ -57,6 +57,9 @@ export const activeTabMenu = style([
 ]);
 
 export const content = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.5rem",
   padding: "0.5rem 0 1rem 0",
   overflowY: "auto",
   overflowX: "hidden",

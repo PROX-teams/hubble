@@ -10,7 +10,7 @@ import {
  * @param {React.ReactNode} children - 탭 메뉴 아이템들
  * @param {string} [className] - 추가적인 CSS 클래스
  */
-export function TabMenus({
+export function TabList({
   children,
   className,
 }: HTMLAttributes<HTMLUListElement>) {
@@ -25,7 +25,7 @@ export function TabMenus({
  * @param {string} [className] - 추가적인 CSS 클래스
  * @param {string} [activeStyle] - 활성화된 탭에 적용될 추가적인 CSS 클래스
  */
-export function TabMenu({
+export function TabItem({
   tabIndex,
   onClick,
   children,

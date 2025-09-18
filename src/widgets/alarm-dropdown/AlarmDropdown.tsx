@@ -31,33 +31,33 @@ export default function AlarmDropdown({
         independent={independent ?? undefined}
       >
         <Tab className={S.container}>
-          <Tab.Menus className={S.header}>
-            <Tab.Menu
+          <Tab.List className={S.header}>
+            <Tab.Item
               tabIndex={ALARM_TABS.INBOX}
               className={clsx(S.tabMenu)}
               activeStyle={S.activeTabMenu}
             >
               Inbox
-            </Tab.Menu>
-            <Tab.Menu
+            </Tab.Item>
+            <Tab.Item
               tabIndex={ALARM_TABS.DONE}
               className={clsx(S.tabMenu)}
               activeStyle={S.activeTabMenu}
             >
               Done
-            </Tab.Menu>
-          </Tab.Menus>
+            </Tab.Item>
+          </Tab.List>
 
-          <Tab.Contents className={S.content}>
+          <Tab.Panels className={S.content}>
             {data.map((alarm, idx) => (
-              <Tab.Content
+              <Tab.Panel
                 key={idx} // 실제 데이터 연동 시 고유 ID로 변경 필요
                 tabIndex={alarm.isDone ? ALARM_TABS.DONE : ALARM_TABS.INBOX}
               >
                 <AlarmCard {...alarm} actionSlot={<MarkAsDoneButton />} />
-              </Tab.Content>
+              </Tab.Panel>
             ))}
-          </Tab.Contents>
+          </Tab.Panels>
         </Tab>
       </Dropdown.Menu>
     </Dropdown>

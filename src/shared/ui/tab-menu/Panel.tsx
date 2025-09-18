@@ -6,7 +6,7 @@ import { useTabMenuContext } from "@/shared/model/contexts/TabMenuContext";
  * @param {React.ReactNode} children - 탭 콘텐츠 아이템들
  * @param {string} [className] - 추가적인 CSS 클래스
  */
-export function TabContents({
+export function TabPanels({
   children,
   className,
 }: HTMLAttributes<HTMLDivElement>) {
@@ -19,7 +19,7 @@ export function TabContents({
  * @param {React.ReactNode} children - 탭 콘텐츠 내용
  * @param {string} [className] - 추가적인 CSS 클래스
  */
-export function TabContent({
+export function TabPanel({
   tabIndex,
   children,
   className,
