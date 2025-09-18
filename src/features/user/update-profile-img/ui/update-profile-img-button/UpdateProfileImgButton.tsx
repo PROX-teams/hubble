@@ -1,9 +1,9 @@
 import Button from "@/shared/ui/button/button/Button";
 import { ButtonHTMLAttributes } from "react";
 import { ButtonBase } from "@/shared/types/components.types";
-import * as S from "./ProfileImgUploadButton.css";
+import * as S from "./UpdateProfileImgButton.css";
 
-interface ProfileImgUploadButtonProps
+interface UpdateProfileImgButtonProps
   extends ButtonBase,
     ButtonHTMLAttributes<HTMLButtonElement> {}
 
@@ -11,18 +11,13 @@ interface ProfileImgUploadButtonProps
  * 프로필 이미지 변경 버튼입니다.
  */
 
-export default function ProfileImgUploadButton({
+export default function UpdateProfileImgButton({
   size = "md",
   variants = "neutral",
   ...props
-}: ProfileImgUploadButtonProps) {
+}: UpdateProfileImgButtonProps) {
   return (
-    <Button
-      size={size}
-      variants={variants}
-      className={S.buttonStyle}
-      {...props}
-    >
+    <Button size={size} variants={variants} className={S.button} {...props}>
       프로필 이미지 변경
     </Button>
   );

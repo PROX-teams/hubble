@@ -1,7 +1,7 @@
 import { tx } from "@/shared/styles/textStyle.css";
 import { style } from "@vanilla-extract/css";
 
-export const buttonStyle = style(
+export const button = style(
   {
     display: "flex",
     alignItems: "center",
