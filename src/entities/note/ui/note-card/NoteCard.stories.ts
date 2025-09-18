@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import ArticleCard from "./ArticleCard";
+import NoteCard from "./NoteCard";
 import data from "@/shared/mock/article.json";
 
 const meta = {
-  title: "Card/Article",
-  component: ArticleCard,
+  title: "Card/Note",
+  component: NoteCard,
   parameters: {
     layout: "centered",
   },
@@ -14,8 +14,7 @@ const meta = {
       control: "object",
       description: "더미 데이터",
       table: {
-        type: { summary: "Article" },
-        defaultValue: { summary: "{}" },
+        type: { summary: "Note" },
       },
     },
     variant: {
@@ -32,7 +31,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof ArticleCard>;
+} satisfies Meta<typeof NoteCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

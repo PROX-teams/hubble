@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { dimmedOverlay, imgWrapper } from "./ArticleCard.css";
-import { Variant } from "./ArticleCard";
+import { dimmedOverlay, imgWrapper } from "./NoteCard.css";
+import { Variant } from "./NoteCard";
 
 interface CoverImageProps {
   imageUrl: string;
