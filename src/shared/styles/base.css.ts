@@ -38,7 +38,7 @@ globalStyle("a, button", {
   cursor: "pointer",
 });
 
-globalStyle("ul, ol", {
+globalStyle("ul, ol, li", {
   listStyle: "none",
   padding: 0,
 });
