@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import ProfileImgUploadButton from "./ProfileImgUploadButton";
+import UpdateProfileImgButton from "./UpdateProfileImgButton";
 
 const meta = {
   title: "Button/Action/Upload",
-  component: ProfileImgUploadButton,
+  component: UpdateProfileImgButton,
   parameters: {
     layout: "centered",
   },
@@ -26,7 +26,7 @@ const meta = {
     variants: "neutral",
     size: "md",
   },
-} satisfies Meta<typeof ProfileImgUploadButton>;
+} satisfies Meta<typeof UpdateProfileImgButton>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

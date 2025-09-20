@@ -1,14 +1,14 @@
-interface ArticleMeta {
+interface NoteMeta {
   author: string;
   date: string;
   likeCount: number;
 }
 
-interface Article extends ArticleMeta {
+interface Note extends NoteMeta {
   id: number;
   title: string;
   description: string;
   imageUrl: string;
 }
 
-export type { ArticleMeta, Article };
+export type { NoteMeta, Note };

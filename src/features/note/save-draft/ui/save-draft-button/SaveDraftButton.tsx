@@ -8,7 +8,7 @@ interface SaveDraftButtonProps
     ButtonHTMLAttributes<HTMLButtonElement> {}
 
 /**
- * 임시 저장 버튼입니다.
+ * Notebook 임시 저장 버튼입니다.
  */
 
 export default function SaveDraftButton({

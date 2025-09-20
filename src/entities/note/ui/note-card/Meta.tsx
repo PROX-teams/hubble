@@ -1,8 +1,8 @@
-import { ArticleMeta } from "@/shared/types/post.types";
-import * as S from "./ArticleCard.css";
+import { NoteMeta } from "@/entities/note/note.types";
+import * as S from "./NoteCard.css";
 import HeartIcon from "@/shared/assets/icons/common/heart.svg";
 
-export default function Meta({ author, date, likeCount }: ArticleMeta) {
+export default function Meta({ author, date, likeCount }: NoteMeta) {
   return (
     <div className={S.metaContainer}>
       <span>{author}</span>

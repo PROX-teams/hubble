@@ -1,19 +1,19 @@
 import clsx from "clsx";
 import Link from "next/link";
-import { Article } from "@/shared/types/post.types";
+import { Note } from "@/entities/note/note.types";
 import {
   container,
   contentContainer,
   hoverContainer,
   titleStyle,
   content,
-} from "./ArticleCard.css";
+} from "./NoteCard.css";
 import CoverImage from "./CoverImage";
 import Meta from "./Meta";
 
 export type Variant = "large" | "small" | "wide" | "compact";
-interface ArticleCardProps {
-  data: Omit<Article, "imageUrl">;
+interface NoteCardProps {
+  data: Omit<Note, "imageUrl">;
   imageUrl?: string;
   /**
    * large -   305 X 304 / Thread Page
@@ -25,15 +25,15 @@ interface ArticleCardProps {
 }
 
 /**
- * 게시글의 커버 이미지, 제목, 내용 등 핵심 정보를 요약하여 보여주는 카드 컴포넌트입니다.
+ * 게시글의 커버 이미지, 제목, 내용 등 핵심 정보를 요약하여 보여주는 Note 카드 컴포넌트입니다. <br>
  * variant prop을 통해 메인 페이지, 사이드바, 쓰레드 등 다양한 컨텍스트에 맞는 네 가지(large, small, wide, compact) 형태로 사용할 수 있습니다.
  */
 
-export default function ArticleCard({
+export default function NoteCard({
   data,
   imageUrl,
   variant = "small",
-}: ArticleCardProps) {
+}: NoteCardProps) {
   const withImg = !!imageUrl;
 
   return (
