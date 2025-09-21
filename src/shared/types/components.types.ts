@@ -4,4 +4,9 @@ interface ButtonBase {
   disabled?: boolean; // 버튼 비활성화 여부
 }
 
-export type { ButtonBase };
+interface ModalBase {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export type { ButtonBase, ModalBase };
