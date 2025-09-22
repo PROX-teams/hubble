@@ -19,6 +19,7 @@ export const header = style({
   display: "flex",
   alignItems: "center",
   width: "100%",
+  overflow: "hidden",
   justifyContent: "space-between",
   color: vars.color.white,
 });
