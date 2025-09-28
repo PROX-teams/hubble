@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import SwitchToggle from "./SwitchToggle";
 
 const meta = {
-  title: "Button/Toggle/Switch",
+  title: "Toggle/Switch",
   component: SwitchToggle,
   parameters: {
     layout: "centered",

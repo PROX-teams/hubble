@@ -15,6 +15,9 @@ import * as S from "./AppToggleGroup.css";
  */
 export type ToggleGroupType = "page" | "sidebar";
 
+/**
+ * Headless ToggleGroup 컴포넌트에 디자인 시스템을 적용한 컴포넌트입니다.
+ */
 // 토글 그룹 루트 컴포넌트
 function AppToggleGroupRoot({
   type = "page",

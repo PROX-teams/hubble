@@ -102,7 +102,8 @@ export const SidebarType: Story = {
 };
 
 /**
- * 아이템이 단 하나만 존재할 경우의 UI입니다.
+ * `type="sidebar"`에서 아이템이 단 하나만 존재할 경우의 UI입니다.
+ * `Storybook` 사이드바에서 하나만 표시됩니다.
  */
 export const SingleItem: Story = {
   render: Template,
