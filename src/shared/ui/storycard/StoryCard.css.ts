@@ -12,6 +12,13 @@ export const storyCard = recipe({
   borderRadius: "0.5rem",
   backgroundColor: vars.color.gray_100,
   cursor: "pointer",
+  transition: "all 0.4s ease-in-out",
+  selectors: {
+      "&:hover": {
+        backgroundColor: vars.color.gray_200,   
+        borderColor: vars.color.stroke_300,     
+      },
+    },
   },
   variants: {
     size: {
