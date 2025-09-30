@@ -4,7 +4,7 @@ import { createContext, Dispatch, SetStateAction, useContext } from "react";
 export type ToggleGroupState = string;
 export type ToggleGroupDispatchState = Dispatch<
   SetStateAction<ToggleGroupState>
-> | null;
+>;
 
 /* 컨텍스트 생성 */
 export const ToggleGroupContext = createContext<ToggleGroupState | undefined>(

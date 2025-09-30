@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { ToggleGroupItemProps } from "../toggle-group/Item";
 import {
   ToggleGroup,
@@ -38,7 +37,7 @@ function AppToggleGroupRoot({
   });
 
   return (
-    <ToggleGroup className={clsx(S.typeVariants.root[type])} {...props}>
+    <ToggleGroup className={S.typeVariants.root[type]} {...props}>
       {itemsWithInjectedProps}
     </ToggleGroup>
   );
@@ -51,7 +50,7 @@ function AppToggleGroupItem({
 }: ToggleGroupItemProps & { type?: ToggleGroupType }) {
   return (
     <ToggleGroup.Item
-      className={clsx(S.typeVariants.item[type])}
+      className={S.typeVariants.item[type]}
       activeStyle={S.typeVariants.active[type]}
       {...props}
     />
