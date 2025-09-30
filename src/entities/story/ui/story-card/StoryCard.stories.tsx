@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import StoryCard from "./StoryCard";
-import data from "./mock.json";
+import data from "@/shared/mock/story.json";
 
 const meta: Meta<typeof StoryCard> = {
   title: "Card/Story",

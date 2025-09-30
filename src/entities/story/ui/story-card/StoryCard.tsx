@@ -1,8 +1,8 @@
 import React, { ComponentPropsWithoutRef } from "react";
 import * as S from "./StoryCard.css";
-import type { StoryEntity } from "@/shared/types/story.types";
+import type { StoryEntity } from "@/entities/story/story.types";
 import CountIcon from "@/shared/assets/icons/story/count.svg"
-import { mockStoryIconMap } from "./storyIcon.mock";
+import { storyIconMap } from "./storyIconMap";
 
 export interface StoryCardProps extends ComponentPropsWithoutRef<"div"> {
   data: StoryEntity;
@@ -15,7 +15,7 @@ const StoryCard = ({ data, size = "large",...props }: StoryCardProps) => {
       <div className={S.header}>
         <div className={S.titleContainer({ size })}>
           {data.icon && (
-            <span className={S.titleIcon}>{mockStoryIconMap[data.icon]}</span>
+            <span className={S.titleIcon}>{storyIconMap[data.icon]}</span>
           )}
           <span className={S.title}>{data.title}</span>
         </div>
