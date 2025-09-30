@@ -3,8 +3,9 @@ import {
   ToggleGroup,
   ToggleGroupRootProps,
 } from "../toggle-group/ToggleGroupRoot";
-import { Children, cloneElement, isValidElement } from "react";
+import { Children, cloneElement, isValidElement, useContext } from "react";
 import * as S from "./AppToggleGroup.css";
+import { ToggleGroupContext } from "@/shared/model/contexts/ToggleGroupContext";
 
 /*
  * `type` prop에 따라 `AppToggleGroup`의 스타일 variant을 결정합니다.
@@ -37,7 +38,7 @@ function AppToggleGroupRoot({
   });
 
   return (
-    <ToggleGroup className={S.typeVariants.root[type]} {...props}>
+    <ToggleGroup className={S.root[type]} {...props}>
       {itemsWithInjectedProps}
     </ToggleGroup>
   );
@@ -46,12 +47,17 @@ function AppToggleGroupRoot({
 // 토글 그룹 아이템 컴포넌트
 function AppToggleGroupItem({
   type = "page",
+  value,
   ...props
 }: ToggleGroupItemProps & { type?: ToggleGroupType }) {
+  const selectedValue = useContext(ToggleGroupContext);
+  const active = selectedValue === value;
+
   return (
     <ToggleGroup.Item
-      className={S.typeVariants.item[type]}
-      activeStyle={S.typeVariants.active[type]}
+      className={S.itemRecipe({ type, active })}
+      value={value}
+      data-text={value}
       {...props}
     />
   );

@@ -1,6 +1,7 @@
 import { style, styleVariants } from "@vanilla-extract/css";
 import { darkTheme, lightTheme, vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
+import { recipe } from "@vanilla-extract/recipes";
 
 export const rootBase = style({
   display: "flex",
@@ -8,46 +9,48 @@ export const rootBase = style({
   width: "fit-content",
 });
 
-export const itemBase = style({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: "0.375rem",
-  transition: "all 0.4s ease",
-});
+export const root = styleVariants({
+  page: [
+    rootBase,
+    {
+      height: "2.25rem",
+      padding: "0.3125rem",
+      borderRadius: "0.5rem",
 
-export const typeVariants = {
-  root: styleVariants({
-    page: [
-      rootBase,
-      {
-        height: "2.25rem",
-        padding: "0.3125rem",
-        borderRadius: "0.5rem",
-
-        selectors: {
-          [`${darkTheme} &`]: {
-            backgroundColor: vars.color.gray_100,
-          },
-          [`${lightTheme} &`]: {
-            backgroundColor: vars.color.gray_200,
-          },
+      selectors: {
+        [`${darkTheme} &`]: {
+          backgroundColor: vars.color.gray_100,
+        },
+        [`${lightTheme} &`]: {
+          backgroundColor: vars.color.gray_200,
         },
       },
-    ],
-    sidebar: [
-      rootBase,
-      {
-        height: "1.625rem",
-        borderRadius: "0.375rem",
-      },
-    ],
-  }),
+    },
+  ],
+  sidebar: [
+    rootBase,
+    {
+      height: "1.625rem",
+      borderRadius: "0.375rem",
+    },
+  ],
+});
 
-  item: styleVariants({
-    page: [
-      itemBase,
-      {
+export const itemRecipe = recipe({
+  base: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "0.375rem",
+    transitionProperty: "color, background-color, border-color, shadow",
+    transitionDuration: "0.4s",
+    transitionTimingFunction: "ease",
+    whiteSpace: "nowrap",
+  },
+
+  variants: {
+    type: {
+      page: {
         padding: "0.28125rem 0.625rem",
         border: `1px solid transparent`,
 
@@ -66,11 +69,7 @@ export const typeVariants = {
           },
         },
       },
-      tx.cap1_md,
-    ],
-    sidebar: [
-      itemBase,
-      {
+      sidebar: {
         height: "100%",
         padding: "0.3125rem 0.5rem",
 
@@ -95,50 +94,69 @@ export const typeVariants = {
           },
         },
       },
-      tx.cap2_md,
-    ],
-  }),
+    },
 
-  active: styleVariants({
-    page: [
-      itemBase,
-      {
-        selectors: {
-          [`${darkTheme} &`]: {
-            border: `1px solid ${vars.color.stroke_300}`,
-            color: vars.color.white,
-            backgroundColor: vars.color.gray_300,
-          },
-          [`${lightTheme} &`]: {
-            border: `1px solid ${vars.color.gray_700}`,
-            color: vars.color.white,
-            backgroundColor: vars.color.gray_700,
-          },
-          [`${lightTheme} &:hover`]: {
-            color: vars.color.white,
+    active: {
+      true: {},
+      false: {},
+    },
+  },
+
+  compoundVariants: [
+    // --- page 타입 ---
+    {
+      variants: { type: "page", active: false },
+      style: [{}, tx.cap1_md],
+    },
+    {
+      variants: { type: "page", active: true },
+      style: [
+        {
+          selectors: {
+            [`${darkTheme} &`]: {
+              border: `1px solid ${vars.color.stroke_300}`,
+              color: vars.color.white,
+              backgroundColor: vars.color.gray_300,
+            },
+            [`${lightTheme} &`]: {
+              border: `1px solid ${vars.color.gray_700}`,
+              color: vars.color.white,
+              backgroundColor: vars.color.gray_700,
+            },
+            [`${lightTheme} &:hover`]: {
+              color: vars.color.white,
+            },
           },
         },
-      },
-      tx.cap1_sb,
-    ],
-    sidebar: [
-      itemBase,
+        tx.cap1_sb,
+      ],
+    },
 
-      {
-        padding: "0.3125rem 0.5rem",
+    // --- sidebar 타입 ---
+    {
+      variants: { type: "sidebar", active: false },
+      style: [{}, tx.cap2_md],
+    },
+    {
+      variants: { type: "sidebar", active: true },
+      style: [
+        {
+          // TODO:  레이아웃 시프트 문제로 인해 임시 해결책 적용
+          textShadow: "0.2px 0 0, -0.2px 0 0, 0 0.2px 0, 0 -0.2px 0",
 
-        selectors: {
-          [`${darkTheme} &`]: {
-            color: vars.color.white,
-            backgroundColor: vars.color.gray_200,
-          },
-          [`${lightTheme} &`]: {
-            color: vars.color.black,
-            backgroundColor: vars.color.gray_200,
+          selectors: {
+            [`${darkTheme} &`]: {
+              color: vars.color.white,
+              backgroundColor: vars.color.gray_200,
+            },
+            [`${lightTheme} &`]: {
+              color: vars.color.black,
+              backgroundColor: vars.color.gray_200,
+            },
           },
         },
-      },
-      tx.cap2_sb,
-    ],
-  }),
-};
+        tx.cap2_md,
+      ],
+    },
+  ],
+});
