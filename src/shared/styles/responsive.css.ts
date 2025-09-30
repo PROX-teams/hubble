@@ -3,7 +3,6 @@ import { StyleRule } from "@vanilla-extract/css";
 export const breakpoints = {
   1280: "1280px",
   1440: "1440px",
-  1490: "1490px",
   1728: "1728px",
   1920: "1920px",
 };
