@@ -7,7 +7,7 @@ const StoryCardContent = ({ stories }: { stories: StoryEntity[] }) => {
         <div className={S.gridContainer}>
           {stories.length === 0 && <span>스토리가 없습니다</span>}
           {stories.map((item) => (
-            <StoryCard key={item.id} data={item} />
+            <StoryCard key={item.id} data={item}/>
           ))}
         </div>
   );
