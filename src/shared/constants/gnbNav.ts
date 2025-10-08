@@ -1,4 +1,5 @@
 import { ComponentType,SVGProps } from "react";
+import type { Route } from "next";
 import HomeIcon from "@/shared/assets/icons/gnb-nav/home.svg";
 import ThreadIcon from "@/shared/assets/icons/gnb-nav/threads.svg";
 import GraphIcon from "@/shared/assets/icons/gnb-nav/node-graph.svg";
@@ -9,7 +10,7 @@ import NoteIcon from "@/shared/assets/icons/gnb-nav/notebook.svg";
 import { PATHS } from "@/shared/constants/paths";
 
 interface RouteConfig {
-  href: typeof PATHS[keyof typeof PATHS];
+  href: Route;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   label: string;
 };

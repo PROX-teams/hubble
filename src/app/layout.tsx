@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "@/shared/styles/global.css";
 import ThemeProvider from "@/shared/config/ThemeProvider";
-import { GNBNav } from "@/shared/ui/gnb-nav/GNBNav";
+import { GNBNav } from "@/shared/ui/gnb/gnb-nav/GNBNav";
 
 export const metadata: Metadata = {
   title: "PROX",
