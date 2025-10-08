@@ -6,6 +6,14 @@ import { storyIconMap } from "../../lib/icons/storyIconMap";
 
 export interface StoryCardProps extends ComponentPropsWithoutRef<"div"> {
   data: Story;
+  /**
+   * 컴포넌트의 밀도(density) 설정 옵션입니다.
+   *
+   * - `"compact"` : 간격과 타이포그래피가 축소되어, 가로로 길고 밀집된 형태입니다.
+   * - `"comfortable"` : 기본 간격과 타이포그래피로, 세로로 여유로운 형태입니다.
+   *
+   * 기본값은 `"comfortable"`입니다.
+   */
   density?: "compact" | "comfortable";
 }
 
