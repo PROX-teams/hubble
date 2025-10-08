@@ -11,7 +11,7 @@ const meta: Meta<typeof StoryCard> = {
       description: {
         component:
           "스토리의 아이콘, 제목, 설명, 연결된 아티클 수 등 핵심 정보를 요약하여 보여주는 카드 컴포넌트입니다." +`\n`+
-          "props로 전달된 data(StoryEntity)를 기반으로 렌더링되며, density를 통해 카드의 밀도를 'compact' 또는 'comfortable'로 조절할 수 있습니다.",
+          "props로 전달된 data(Story)를 기반으로 렌더링되며, density를 통해 카드의 밀도를 'compact' 또는 'comfortable'로 조절할 수 있습니다.",
       },
     },
   },
