@@ -21,8 +21,8 @@ export const storyCard = recipe({
     },
   },
   variants: {
-    size: {
-      small: [
+    density: {
+      compact: [
         tx.t1_md,
         {
           padding: "1.125rem",   
@@ -30,7 +30,7 @@ export const storyCard = recipe({
           gap: "0.5rem",         
         },
       ],
-      large: [
+      comfortable: [
         tx.h5_md,
         {
           padding: "1.875rem",   
@@ -41,7 +41,7 @@ export const storyCard = recipe({
     },
   },
   defaultVariants: {
-    size: "large",
+    density: "comfortable",
   },
 });
 
@@ -65,12 +65,12 @@ export const titleContainer = recipe({
     },
   },
   variants: {
-    size: {
-      small: [tx.t1_md],
-      large: [tx.h5_md],
+    density: {
+      compact: [tx.t1_md],
+      comfortable: [tx.h5_md],
     },
   },
-  defaultVariants: { size: "large" },
+  defaultVariants: { density: "comfortable" },
 });
 
 export const titleIcon = style({
@@ -96,12 +96,12 @@ export const countContainer = recipe({
     color: vars.color.gray_400,
   },
   variants: {
-    size: {
-      small: [tx.cap1_rg],
-      large: [tx.t2_rg],
+    density: {
+      compact: [tx.cap1_rg],
+      comfortable: [tx.t2_rg],
     },
   },
-  defaultVariants: { size: "large" },
+  defaultVariants: { density: "comfortable" },
 });
 
 export const countIcon = style({
@@ -125,18 +125,17 @@ export const description = recipe({
     whiteSpace: "pre-line",
   },
   variants: {
-    size: {
-      small: [
+    density: {
+      compact: [
         tx.b2_160_rg,
         {
           marginRight: "0.5rem",  
           marginLeft: "2.25rem",  
         },
       ],
-      large: [tx.b1_rg],
+      comfortable: [tx.b1_rg],
     },
   },
-  defaultVariants: { size: "large" },
+  defaultVariants: { density: "comfortable" },
 });
-
 

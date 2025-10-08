@@ -1,4 +1,4 @@
-interface StoryEntity {
+interface Story {
   id: number;          
   title: string;          
   description?: string;   
@@ -7,4 +7,4 @@ interface StoryEntity {
   articleIds: number[]
 }
 
-export type { StoryEntity };
+export type { Story };

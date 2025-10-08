@@ -1,13 +1,14 @@
 "use client";
 
-import type { StoryEntity } from "@/entities/story/story.types";
+import type { Story } from "@/entities/story/story.types";
 import StoryCard from "@/entities/story/ui/story-card/StoryCard";
 import * as S from "./StoryCardContainer.css"
 import useStoryModal from "../model/useStoryModal";
+import { AnimatePresence } from "framer-motion";
 import StoryCardModal from "@/widgets/storycard-modal/StoryCardModal";
 
 interface StoryGridWithModalProps {
-  stories: StoryEntity[];
+  stories: Story[];
 }
 
 const StoryCardContainer = ({ stories }: StoryGridWithModalProps) => {
@@ -21,9 +22,11 @@ const StoryCardContainer = ({ stories }: StoryGridWithModalProps) => {
           <StoryCard key={item.id} data={item} onClick={() => open(item.id)} />
         ))}
       </div>
-      {isOpen && selectedId != null && (
-        <StoryCardModal id={selectedId} onClose={close} />
-      )}
+      <AnimatePresence>
+        {isOpen && selectedId != null && (
+          <StoryCardModal id={selectedId} onClose={close} />
+        )}
+      </AnimatePresence>
     </>
   );
 };

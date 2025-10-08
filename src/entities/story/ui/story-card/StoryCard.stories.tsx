@@ -11,7 +11,7 @@ const meta: Meta<typeof StoryCard> = {
       description: {
         component:
           "스토리의 아이콘, 제목, 설명, 연결된 아티클 수 등 핵심 정보를 요약하여 보여주는 카드 컴포넌트입니다." +`\n`+
-          "props로 전달된 data(StoryEntity)를 기반으로 렌더링되며, size를 통해 카드의 크기를 'small' 또는 'large'로 조절할 수 있습니다.",
+          "props로 전달된 data(StoryEntity)를 기반으로 렌더링되며, density를 통해 카드의 밀도를 'compact' 또는 'comfortable'로 조절할 수 있습니다.",
       },
     },
   },
@@ -25,13 +25,13 @@ const meta: Meta<typeof StoryCard> = {
         defaultValue: { summary: "{}" },
       },
     },
-    size: {
+    density: {
       control: { type: "radio" },
-      options: ["small", "large"],
-      description: "카드 크기",
+      options: ["compact", "comfortable"],
+      description: "카드 밀도",
       table: {
-        type: { summary: "'small' | 'large'" },
-        defaultValue: { summary: "'large'" },
+        type: { summary: "'compact' | 'comfortable'" },
+        defaultValue: { summary: "'comfortable'" },
       },
     },
     onClick: {  action: "clicked" },
@@ -42,12 +42,12 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Large: Story = {
-  args: {data, size: "large"},
+export const Comfortable: Story = {
+  args: {data, density: "comfortable"},
   render: (args) => <div style={{ width: "394px" }}><StoryCard {...args} /></div>,
 };
 
-export const Small: Story = {
-  args: {data, size: "small"},
+export const Compact: Story = {
+  args: {data, density: "compact"},
   render: (args) => <div style={{ width: "414px" }}><StoryCard {...args} /></div>,
 };
