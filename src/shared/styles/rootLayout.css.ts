@@ -1,18 +1,24 @@
 import { style, globalStyle } from "@vanilla-extract/css";
 import { darkTheme, lightTheme, vars } from "@/shared/styles/theme.css";
 
-// 모든 페이지의 공통 배경색과 텍스트 색상을 설정합니다.
-globalStyle("body", {
+// globalStyle에서 테마별 배경색을 적용하는 올바른 방식입니다.
+globalStyle(`body`, {
+  margin: 0,
+  padding: 0,
   minHeight: "100vh",
   color: vars.color.gray_700,
-  selectors: {
-    [`${darkTheme} &`]: {
-      backgroundColor: vars.color.black,
-    },
-    [`${lightTheme} &`]: {
-      backgroundColor: vars.color.white,
-    },
-  },
+  transition: "background-color 0.3s ease",
+});
+
+// 테마 클래스가 적용된 요소(ThemeProvider의 div 등)에 배경색을 설정합니다.
+globalStyle(`${darkTheme}`, {
+  backgroundColor: vars.color.black,
+  color: vars.color.white,
+});
+
+globalStyle(`${lightTheme}`, {
+  backgroundColor: vars.color.white,
+  color: vars.color.black,
 });
 
 // 실제 컨텐츠가 배치될 영역의 레이아웃을 정의합니다.
