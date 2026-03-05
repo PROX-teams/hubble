@@ -4,7 +4,7 @@ import { vars } from '@/shared/styles/theme.css';
 
 export const bannerContainer = style({
   position: 'relative',
-  width: '900px',
+  width: '850px',
   height: '240px',
   display: 'flex',
   alignItems: 'center',

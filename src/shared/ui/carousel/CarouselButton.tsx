@@ -11,6 +11,7 @@ interface CarouselButtonProps {
   className?: string;
 }
 
+// 문제점 케러셀 여러개 있으면 상관없는 다른 캐러셀이 움직인다. 
 export const CarouselButton = ({ 
   direction, 
   onClick, 

@@ -23,7 +23,7 @@ globalStyle(`${lightTheme}`, {
 
 // 실제 컨텐츠가 배치될 영역의 레이아웃을 정의합니다.
 export const rootLayout = style({
-  paddingLeft: '320px', // 사이드바 공간 확보
+  paddingLeft: '250px', // 사이드바 공간 확보
   width: '100%',
   minHeight: '100vh',
   boxSizing: 'border-box',

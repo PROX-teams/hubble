@@ -4,7 +4,21 @@ import { vars } from '@/shared/styles/theme.css';
 
 export const pageContainer = style({
   display: 'flex',
+  gap: '64px',
+  flexDirection: 'row',
+});
+
+
+export const firstcontainer = style({
+  display: 'flex',
   flexDirection: 'column',
+  gap: '62px',
+});
+
+
+export const container = style({
+  display: 'flex',
+  flexDirection: 'row',
 });
 
 export const contentSection = style([
@@ -19,7 +33,6 @@ export const contentSection = style([
 
 export const sectionHeader = style({
   display: 'flex',
-  marginBottom: '8px',
 });
 
 export const sectionTitle = style([
@@ -32,3 +45,36 @@ export const sectionTitle = style([
 export const carouselWrapper = style({
   width: '856px',
 });
+
+export const buttonGroup = style({
+
+})
+
+
+{/* 크리에이터 카드 */}
+
+export const creatorsSection = style({
+    width: '100%',
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+
+  
+
+})
+
+export const creatorsWrapper = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px'
+
+})
+
+export const divider = style({
+    width: '100%',             // 가로로 길게 뻗도록
+    height: '1px',            // 두께는 1px
+    backgroundColor: vars.color.gray_200, // 색상 적용
+    border: 'none', 
+    margin: '48px 0'  
+})
