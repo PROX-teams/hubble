@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@/shared/styles/global.css";
 import ThemeProvider from "@/shared/config/ThemeProvider";
 import { GNBNav } from "@/shared/ui/gnb/gnb-nav/GNBNav";
+import * as s from "@/shared/styles/rootLayout.css";
 
 export const metadata: Metadata = {
   title: "PROX",
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <GNBNav/>
-          {children}
+          <main className={s.rootLayout}>
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
