@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Theme } from "../types/global.types";
 import { darkTheme, lightTheme } from "../styles/theme.css";
-import * as S from "@/shared/styles/rootLayout.css";
 import ModalRoot from "../ui/modal/modal/ModalRoot";
 
 export default function ThemeProvider({
@@ -18,7 +17,7 @@ export default function ThemeProvider({
 
   return (
     <div className={themeClass}>
-      <div className={S.rootLayout}>{children}</div>
+      {children}
       <ModalRoot />
     </div>
   );
