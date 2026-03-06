@@ -5,7 +5,6 @@ export default function NotebookLayout({
 }>) {
   return (
     <div>
-      사이드바 / 서브 GNB용
       {children}
     </div>
   );
