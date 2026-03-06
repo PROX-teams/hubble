@@ -17,6 +17,7 @@ export const aside = recipe({
     padding: "0.5rem", 
     transition: "width 0.3s ease",
     overflow: "hidden",
+    zIndex: 100, // 👈 추가
     selectors: {
       [`.${lightTheme} &`]: {
         backgroundColor: vars.color.white,
