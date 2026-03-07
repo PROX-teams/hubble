@@ -1,4 +1,9 @@
+'use client';
+
 export default function NotebookDetailPage() {
-  // 개인 글쓰기??가 위치하나?? 
-  return <div>NotebookDetailPage</div>;
+  return (
+    <div>
+      ㄷ페이지 디테일 입니다. 
+    </div>
+  );
 }
