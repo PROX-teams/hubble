@@ -6,6 +6,12 @@ import { NAV_ITEMS_PRIMARY, NAV_ITEMS_SECONDARY } from "@/shared/constants/gnbNa
 import Link from "next/link";
 import * as S from "./GNBNav.css";
 
+import { PATHS } from "@/shared/constants/paths";
+
+interface GNBNavProps {
+  onSearchClick?: () => void;
+}
+
 /**
  * GNB 네비게이션 컴포넌트
  *
@@ -15,7 +21,7 @@ import * as S from "./GNBNav.css";
  * [current] 상태는 현재 경로와 항목의 `href`가 정확히 일치하는 경우로 적용되는 스타일입니다.
  */
 
-export function GNBNav() {
+export function GNBNav({ onSearchClick }: GNBNavProps) {
   const pathname = usePathname();
   const [isGnbOpen, setIsGnbOpen] = useState(false);
 
@@ -27,12 +33,20 @@ export function GNBNav() {
     >
       {NAV_ITEMS_PRIMARY.map(({ href, icon: Icon, label }) => {
         const isActive = pathname === href || pathname?.startsWith(href + "/");
+        const isSearch = href === PATHS.SEARCH;
+
         return (
           <Link
             key={href}
             href={href}
             title={!isGnbOpen ? label : undefined}
             className={S.navLink({ active: isGnbOpen, current: isActive })}
+            onClick={(e) => {
+              if (isSearch && onSearchClick) {
+                e.preventDefault(); // 페이지 이동 방지
+                onSearchClick();    // 모달 열기 함수 실행
+              }
+            }}
           >
             <Icon className={S.icon} />
             <span className={S.label}>
