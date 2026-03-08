@@ -6,6 +6,7 @@ import { vars } from "@/shared/styles/theme.css";
 import ThemeProvider from "@/shared/config/ThemeProvider";
 import { GNBNav } from "@/shared/ui/gnb/gnb-nav/GNBNav";
 import useModal from "@/shared/model/hooks/useModal";
+import { SearchContents } from "@/features/search/search-contents/ui/SearchContents";
 import * as s from "@/shared/styles/rootLayout.css";
 
 // Modal 컴포넌트를 SSR 없이 동적으로 로드합니다.
@@ -37,14 +38,7 @@ export default function RootLayout({
               hide={closeModal}
               hideOnClickOutside={true}
             >
-              <div style={{ padding: "20px" }}>
-                <h2>검색</h2>
-                <input 
-                  type="text" 
-                  placeholder="검색어를 입력하세요..." 
-                  style={{ width: "100%", padding: "10px", marginTop: "10px" }}
-                />
-              </div>
+              <SearchContents />
             </Modal>
           )}
         </ThemeProvider>
@@ -52,4 +46,3 @@ export default function RootLayout({
     </html>
   );
 }
-
