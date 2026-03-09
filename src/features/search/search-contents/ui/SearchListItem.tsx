@@ -4,7 +4,7 @@ import * as S from "./SearchListItem.css";
 
 interface SearchListItemProps {
   title: string;
-  author: string;
+  author?: string;
   meta?: string | number[];
   isMetaHighlighted?: boolean;
   onClick?: () => void;
@@ -12,7 +12,7 @@ interface SearchListItemProps {
 
 export function SearchListItem({
   title,
-  author,
+  author = "익명",
   meta,
   isMetaHighlighted = false,
   onClick,
