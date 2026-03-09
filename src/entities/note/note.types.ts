@@ -1,5 +1,5 @@
 interface NoteMeta {
-  author: string;
+  author?: string;
   date?: string;
   likeCount?: number;
 }
