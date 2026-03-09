@@ -1,4 +1,4 @@
-package com.hubble.api;
+package com.hubble;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
