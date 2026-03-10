@@ -2,11 +2,11 @@ name: Java CI with Gradle and Deploy to EC2
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop" ] # develop 브랜치에 푸시될 때 작동합니다.
 
 defaults:
   run:
-    working-directory: server
+    working-directory: server # 모든 실행 명령어의 기본 시작점을 server 폴더로 설정합니다.
 
 jobs:
   deploy:
@@ -26,16 +26,18 @@ jobs:
     - name: Build api module with Gradle
       run: ./gradlew :api:build -x test
 
-    - name: Copy JAR and Docker files to EC2
+    # JAR 파일 및 Docker 설정 파일들을 한 번에 전송
+    # strip_components: 1 을 사용하여 'server/' 폴더만 제외하고 구조를 유지합니다.
+    - name: Copy Build Artifacts to EC2
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_KEY }}
-        source: "server/api/build/libs/*.jar,!server/api/build/libs/*-plain.jar,server/docker-compose.yml"
+        source: "server/api/build/libs/*.jar,server/docker-compose.yml,server/Dockerfile"
         target: "~/app"
-        strip_components: 4
-        rm: true
+        strip_components: 1
+        rm: true # 배포 시작 시 기존 ~/app 폴더를 깨끗이 비웁니다.
 
     - name: Execution on EC2
       uses: appleboy/ssh-action@master
@@ -44,21 +46,15 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          # 1. 전송된 파일 위치 정리
-          find ~/app -name "docker-compose.yml" -exec mv {} ~/app/ \;
-          mv ~/app/server/api/build/libs/*.jar ~/app/ || true
-          rm -rf ~/app/server
-          
-          # 2. 도커 컴포즈 실행 (환경 변수 주입을 통해 보안 강화)
-          # -E 옵션과 함께 환경 변수를 전달하여 docker-compose.yml이 이를 읽도록 합니다.
           cd ~/app
+          
+          # 환경 변수 주입과 함께 도커 컴포즈 실행
+          # --build 옵션으로 전송된 새 JAR 파일을 포함하여 이미지를 다시 빌드합니다.
           DB_USERNAME=${{ secrets.DB_USERNAME }} \
           DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
           DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }} \
-          sudo -E docker compose up -d
+          JWT_SECRET=${{ secrets.JWT_SECRET }} \
+          sudo -E docker compose up -d --build
           
-          # 3. 기존 스프링 부트 프로세스 종료
-          sudo fuser -k 8080/tcp || true
-          
-          # 4. 새 프로세스 실행 (MySQL 접속 정보 주입)
-          nohup java -jar ~/app/*.jar --spring.datasource.url=jdbc:mysql://localhost:3306/hubble?serverTimezone=UTC\&characterEncoding=UTF-8 --spring.datasource.username=${{ secrets.DB_USERNAME }} --spring.datasource.password=${{ secrets.DB_PASSWORD }} --spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver --jwt.secret=${{ secrets.JWT_SECRET }} --spring.jpa.hibernate.ddl-auto=update --spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect > ~/app/nohup.out 2>&1 &
+          # 사용하지 않는 오래된 이미지 정리 (선택 사항)
+          sudo docker image prune -f
