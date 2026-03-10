@@ -7,7 +7,6 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: hubble
-      # 환경 변수가 없으면 'hubble', 'hubble1234'를 기본값으로 사용 (로컬 개발 편의성)
       MYSQL_USER: ${DB_USERNAME:-hubble}
       MYSQL_PASSWORD: ${DB_PASSWORD:-hubble1234}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
@@ -18,6 +17,25 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hubble-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/hubble?serverTimezone=UTC&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - db
 
 volumes:
   mysql-data:
