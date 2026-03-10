@@ -1,0 +1,54 @@
+name: Java CI with Gradle and Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+# 모노레포 구조이므로 모든 실행 명령어를 server 디렉토리 기준으로 설정합니다.
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build api module with Gradle
+      run: ./gradlew :api:build -x test
+
+    - name: Copy JAR to EC2
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_KEY }}
+        # scp-action은 프로젝트 루트(hubble-client) 기준으로 경로를 찾으므로 server/를 붙여줍니다.
+        source: "server/api/build/libs/*.jar,!server/api/build/libs/*-plain.jar"
+        target: "~/app"
+        # server/api/build/libs 경로를 제거하고 파일만 전송합니다.
+        strip_components: 4
+        rm: true
+
+    - name: Execution on EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          sudo fuser -k 8080/tcp || true
+          
+          nohup java -jar ~/app/*.jar \
+            --jwt.secret=${{ secrets.JWT_SECRET }} \
+            > ~/app/nohup.out 2>&1 &
