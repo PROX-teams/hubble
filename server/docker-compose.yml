@@ -25,6 +25,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/hubble?serverTimezone=UTC&characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
@@ -32,6 +33,10 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
       - JWT_SECRET=${JWT_SECRET}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     depends_on:
       - db
 
