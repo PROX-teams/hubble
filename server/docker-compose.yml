@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: hubble-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: hubble
+      # 환경 변수가 없으면 'hubble', 'hubble1234'를 기본값으로 사용 (로컬 개발 편의성)
+      MYSQL_USER: ${DB_USERNAME:-hubble}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-hubble1234}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  mysql-data:
