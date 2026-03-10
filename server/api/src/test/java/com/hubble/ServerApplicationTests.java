@@ -1,4 +1,4 @@
-package com.hubble.api;
+package com.hubble;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
