@@ -60,6 +60,7 @@ public class SecurityConfig {
                     "/swagger-resources/**",
                     "/webjars/**"
                 ).permitAll() // Swagger 관련 모든 정적 리소스 및 API 문서 경로 허용
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/note/**", "/api/story/**").permitAll()
                 .anyRequest().authenticated() 
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
