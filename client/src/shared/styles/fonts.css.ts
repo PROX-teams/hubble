@@ -1,7 +1,7 @@
 import { createThemeContract, globalFontFace } from "@vanilla-extract/css";
 
 globalFontFace("Pretendard", {
-  src: 'url(/fonts/Pretendard-Regular.woff2) format("woff2")',
+  src: 'url(/fonts/PretendardVariable.woff2) format("woff2")',
 });
 
 export const fontVars = createThemeContract({
