@@ -70,6 +70,14 @@ public class StoryController {
         return ResponseEntity.ok(storyService.getStories(category, keyword, pageable, userId));
     }
 
+    @Operation(summary = "북마크한 스토리 목록 조회", description = "로그인한 사용자가 북마크한 스토리 목록을 조회합니다.")
+    @GetMapping("/bookmarks")
+    public ResponseEntity<Page<StoryResponse>> getBookmarkedStories(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(storyService.getBookmarkedStories(userId, pageable));
+    }
+
     @Operation(summary = "좋아요 많은 스토리 Top 10", description = "좋아요를 가장 많이 받은 스토리 10개를 조회합니다.")
     @GetMapping("/top10")
     public ResponseEntity<List<StoryResponse>> getTop10LikedStories(

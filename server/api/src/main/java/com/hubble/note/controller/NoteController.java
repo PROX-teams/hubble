@@ -60,14 +60,23 @@ public class NoteController {
         return ResponseEntity.ok(noteService.getNote(noteId, userId));
     }
 
-    @Operation(summary = "노트 목록 조회", description = "필터링 및 검색 기능을 포함한 노트 목록을 조회합니다. (무한 스크롤)")
+    @Operation(summary = "노트 목록 조회", description = "필터링(카테고리, 태그) 및 검색 기능을 포함한 노트 목록을 조회합니다. (무한 스크롤)")
     @GetMapping
     public ResponseEntity<Page<NoteResponse>> getNotes(
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) Category category,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String tagName,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(noteService.getNotes(category, keyword, pageable, userId));
+        return ResponseEntity.ok(noteService.getNotes(category, keyword, tagName, pageable, userId));
+    }
+
+    @Operation(summary = "북마크한 노트 목록 조회", description = "로그인한 사용자가 북마크한 노트 목록을 조회합니다.")
+    @GetMapping("/bookmarks")
+    public ResponseEntity<Page<NoteResponse>> getBookmarkedNotes(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getBookmarkedNotes(userId, pageable));
     }
 
     @Operation(summary = "좋아요 많은 노트 Top 10", description = "좋아요를 가장 많이 받은 노트 10개를 조회합니다.")

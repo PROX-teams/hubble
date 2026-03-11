@@ -16,6 +16,7 @@ import com.hubble.user.entity.User;
 import com.hubble.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +81,6 @@ public class NoteService {
 
         note.update(request.title(), request.content(), request.category(), story, request.imageUrl());
         
-        // 기존 태그 삭제 후 재저장
         noteTagRepository.deleteAllByNote(note);
         saveTags(note, request.tag());
 
@@ -97,37 +97,46 @@ public class NoteService {
 
     @Transactional
     public NoteResponse getNote(Long noteId, Long userId) {
-        Note note = getNoteEntity(noteId);
-        note.incrementViewCount();
+        noteRepository.incrementViewCount(noteId);
         
+        Note note = getNoteEntity(noteId);
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         return NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note));
     }
 
-    public Page<NoteResponse> getNotes(Category category, String keyword, Pageable pageable, Long userId) {
+    public Page<NoteResponse> getNotes(Category category, String keyword, String tagName, Pageable pageable, Long userId) {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         Page<Note> notes;
-        if (category != null) {
-            notes = noteRepository.findAllByCategory(category, pageable);
+        
+        if (tagName != null && !tagName.isBlank()) {
+            notes = noteRepository.findAllByTagNameWithFetch(tagName, pageable);
+        } else if (category != null) {
+            notes = noteRepository.findAllByCategoryWithFetch(category, pageable);
         } else if (keyword != null && !keyword.isBlank()) {
-            notes = noteRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+            notes = noteRepository.findByKeywordWithFetch(keyword, pageable);
         } else {
-            notes = noteRepository.findAll(pageable);
+            notes = noteRepository.findAllWithFetch(pageable);
         }
 
         return notes.map(note -> NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note)));
     }
 
+    public Page<NoteResponse> getBookmarkedNotes(Long userId, Pageable pageable) {
+        User user = getUserEntity(userId);
+        return noteBookmarkRepository.findAllByUser(user, pageable)
+                .map(bookmark -> NoteResponse.of(bookmark.getNote(), isLiked(user, bookmark.getNote()), true));
+    }
+
     public List<NoteResponse> getTop10LikedNotes(Long userId) {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
-        return noteRepository.findTop10ByOrderByLikeCountDesc().stream()
+        return noteRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10)).stream()
                 .map(note -> NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note)))
                 .collect(Collectors.toList());
     }
 
     public List<NoteResponse> getTop10ViewedNotes(Long userId) {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
-        return noteRepository.findTop10ByOrderByViewCountDesc().stream()
+        return noteRepository.findTop10ByOrderByViewCountDescWithFetch(PageRequest.of(0, 10)).stream()
                 .map(note -> NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note)))
                 .collect(Collectors.toList());
     }
@@ -140,11 +149,11 @@ public class NoteService {
                 .ifPresentOrElse(
                         like -> {
                             noteLikeRepository.delete(like);
-                            note.updateLikeCount(note.getLikeCount() - 1);
+                            noteRepository.decrementLikeCount(noteId);
                         },
                         () -> {
                             noteLikeRepository.save(NoteLike.builder().user(user).note(note).build());
-                            note.updateLikeCount(note.getLikeCount() + 1);
+                            noteRepository.incrementLikeCount(noteId);
                         }
                 );
     }
@@ -157,11 +166,11 @@ public class NoteService {
                 .ifPresentOrElse(
                         bookmark -> {
                             noteBookmarkRepository.delete(bookmark);
-                            note.updateBookmarkCount(note.getBookmarkCount() - 1);
+                            noteRepository.decrementBookmarkCount(noteId);
                         },
                         () -> {
                             noteBookmarkRepository.save(NoteBookmark.builder().user(user).note(note).build());
-                            note.updateBookmarkCount(note.getBookmarkCount() + 1);
+                            noteRepository.incrementBookmarkCount(noteId);
                         }
                 );
     }

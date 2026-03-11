@@ -13,6 +13,7 @@ import com.hubble.user.entity.User;
 import com.hubble.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,9 +82,9 @@ public class StoryService {
 
     @Transactional
     public StoryResponse getStory(Long storyId, Long userId) {
-        Story story = getStoryEntity(storyId);
-        story.incrementViewCount();
+        storyRepository.incrementViewCount(storyId);
         
+        Story story = getStoryEntity(storyId);
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         return StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story));
     }
@@ -92,19 +93,25 @@ public class StoryService {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         Page<Story> stories;
         if (category != null) {
-            stories = storyRepository.findAllByCategory(category, pageable);
+            stories = storyRepository.findAllByCategoryWithFetch(category, pageable);
         } else if (keyword != null && !keyword.isBlank()) {
-            stories = storyRepository.findByTitleContainingOrDescriptionContaining(keyword, keyword, pageable);
+            stories = storyRepository.findByKeywordWithFetch(keyword, pageable);
         } else {
-            stories = storyRepository.findAll(pageable);
+            stories = storyRepository.findAllWithFetch(pageable);
         }
 
         return stories.map(story -> StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story)));
     }
 
+    public Page<StoryResponse> getBookmarkedStories(Long userId, Pageable pageable) {
+        User user = getUserEntity(userId);
+        return storyBookmarkRepository.findAllByUser(user, pageable)
+                .map(bookmark -> StoryResponse.of(bookmark.getStory(), isLiked(user, bookmark.getStory()), true));
+    }
+
     public List<StoryResponse> getTop10LikedStories(Long userId) {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
-        return storyRepository.findTop10ByOrderByLikeCountDesc().stream()
+        return storyRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10)).stream()
                 .map(story -> StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story)))
                 .collect(Collectors.toList());
     }
@@ -117,11 +124,11 @@ public class StoryService {
                 .ifPresentOrElse(
                         like -> {
                             storyLikeRepository.delete(like);
-                            story.updateLikeCount(story.getLikeCount() - 1);
+                            storyRepository.decrementLikeCount(storyId);
                         },
                         () -> {
                             storyLikeRepository.save(StoryLike.builder().user(user).story(story).build());
-                            story.updateLikeCount(story.getLikeCount() + 1);
+                            storyRepository.incrementLikeCount(storyId);
                         }
                 );
     }
@@ -134,11 +141,11 @@ public class StoryService {
                 .ifPresentOrElse(
                         bookmark -> {
                             storyBookmarkRepository.delete(bookmark);
-                            story.updateBookmarkCount(story.getBookmarkCount() - 1);
+                            storyRepository.decrementBookmarkCount(storyId);
                         },
                         () -> {
                             storyBookmarkRepository.save(StoryBookmark.builder().user(user).story(story).build());
-                            story.updateBookmarkCount(story.getBookmarkCount() + 1);
+                            storyRepository.incrementBookmarkCount(storyId);
                         }
                 );
     }

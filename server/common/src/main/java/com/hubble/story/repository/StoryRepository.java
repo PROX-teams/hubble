@@ -6,6 +6,9 @@ import com.hubble.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,18 +17,40 @@ import java.util.Optional;
 @Repository
 public interface StoryRepository extends JpaRepository<Story, Long> {
 
-    // 좋아요가 많은 순 Top 10
-    List<Story> findTop10ByOrderByLikeCountDesc();
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Story s SET s.viewCount = s.viewCount + 1 WHERE s.id = :id")
+    void incrementViewCount(@Param("id") Long id);
 
-    // 기본 폴더(Default Story) 조회용
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Story s SET s.likeCount = s.likeCount + 1 WHERE s.id = :id")
+    void incrementLikeCount(@Param("id") Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Story s SET s.likeCount = s.likeCount - 1 WHERE s.id = :id")
+    void decrementLikeCount(@Param("id") Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Story s SET s.bookmarkCount = s.bookmarkCount + 1 WHERE s.id = :id")
+    void incrementBookmarkCount(@Param("id") Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Story s SET s.bookmarkCount = s.bookmarkCount - 1 WHERE s.id = :id")
+    void decrementBookmarkCount(@Param("id") Long id);
+
+    @Query(value = "select s from Story s join fetch s.user",
+           countQuery = "select count(s) from Story s")
+    Page<Story> findAllWithFetch(Pageable pageable);
+
+    @Query(value = "select s from Story s join fetch s.user where s.category = :category",
+           countQuery = "select count(s) from Story s where s.category = :category")
+    Page<Story> findAllByCategoryWithFetch(@Param("category") Category category, Pageable pageable);
+
+    @Query(value = "select s from Story s join fetch s.user where s.title like %:keyword% or s.description like %:keyword%",
+           countQuery = "select count(s) from Story s where s.title like %:keyword% or s.description like %:keyword%")
+    Page<Story> findByKeywordWithFetch(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("select s from Story s join fetch s.user order by s.likeCount desc")
+    List<Story> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
+
     Optional<Story> findByTitleAndUser(String title, User user);
-
-    // 카테고리별 필터링 + 무한 스크롤
-    Page<Story> findAllByCategory(Category category, Pageable pageable);
-
-    // 검색 (제목 또는 설명) + 무한 스크롤
-    Page<Story> findByTitleContainingOrDescriptionContaining(String title, String description, Pageable pageable);
-
-    // 전체 조회 (무한 스크롤용)
-    Page<Story> findAll(Pageable pageable);
 }

@@ -6,6 +6,7 @@ import com.hubble.story.entity.Story;
 import com.hubble.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -15,7 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "notes")
+@Table(name = "notes", indexes = {
+        @Index(name = "idx_note_category", columnList = "category"),
+        @Index(name = "idx_note_view_count", columnList = "viewCount"),
+        @Index(name = "idx_note_like_count", columnList = "likeCount"),
+        @Index(name = "idx_note_created_at", columnList = "createdAt")
+})
 @SQLDelete(sql = "UPDATE notes SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
 @Getter
@@ -35,7 +41,7 @@ public class Note extends BaseTimeEntity {
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String content; // 프론트엔드의 description 역할
+    private String content;
 
     private String imageUrl;
 
@@ -51,6 +57,7 @@ public class Note extends BaseTimeEntity {
     @Column(nullable = false)
     private Category category;
 
+    @BatchSize(size = 100) // N+1 문제 방지: 태그 목록을 100개씩 묶어서 In 쿼리로 조회
     @OneToMany(mappedBy = "note", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<NoteTag> noteTags = new ArrayList<>();

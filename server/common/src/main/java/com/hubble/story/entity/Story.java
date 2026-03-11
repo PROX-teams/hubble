@@ -6,6 +6,7 @@ import com.hubble.note.entity.Note;
 import com.hubble.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -15,7 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "stories")
+@Table(name = "stories", indexes = {
+        @Index(name = "idx_story_category", columnList = "category"),
+        @Index(name = "idx_story_like_count", columnList = "likeCount"),
+        @Index(name = "idx_story_created_at", columnList = "createdAt")
+})
 @SQLDelete(sql = "UPDATE stories SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
 @Getter
@@ -47,6 +52,7 @@ public class Story extends BaseTimeEntity {
     @Column(nullable = false)
     private Category category;
 
+    @BatchSize(size = 100) // N+1 문제 방지: 포함된 노트들을 100개씩 일괄 조회
     @OneToMany(mappedBy = "story")
     @Builder.Default
     private List<Note> notes = new ArrayList<>();
