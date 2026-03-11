@@ -52,7 +52,7 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() 
+                .requestMatchers("/api/auth/**", "/api/user/**").permitAll() 
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
