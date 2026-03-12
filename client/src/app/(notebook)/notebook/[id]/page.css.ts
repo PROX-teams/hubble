@@ -10,7 +10,6 @@ export const container = style({
 
 export const header = style({
   marginBottom: '40px',
-  borderBottom: `1px solid ${vars.color.stroke_200}`,
   paddingBottom: '30px',
 });
 
@@ -80,9 +79,6 @@ export const tagList = style({
   display: 'flex',
   flexWrap: 'wrap',
   gap: '8px',
-  marginTop: '40px',
-  paddingTop: '30px',
-  borderTop: `1px solid ${vars.color.stroke_200}`,
 });
 
 export const loadingContainer = style({

@@ -42,14 +42,6 @@ export default function NotebookDetailPage() {
     );
   }
 
-  const formattedDate = note.date 
-    ? new Date(note.date).toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).replace(/\. /g, '.').replace(/\.$/, '')
-    : '';
-
   return (
     <div className={s.container}>
       <header className={s.header}>
@@ -58,16 +50,15 @@ export default function NotebookDetailPage() {
         )}
         <h1 className={s.title}>{note.title}</h1>
         <div className={s.meta}>
-          <span className={s.author}>{note.author || '익명'}</span>
-          <span>•</span>
-          <span>{formattedDate}</span>
-          <span>•</span>
-          <span>조회수 {note.viewCount || 0}</span>
-          <span>•</span>
-          <span>좋아요 {note.likeCount || 0}</span>
-          <span>•</span>
-          <span>북마크 {note.bookmarkCount || 0}</span>
+          <span className={s.author}>By {note.author || '익명'}</span>
         </div>
+        {note.tag && note.tag.length > 0 && (
+        <div className={s.tagList}>
+          {note.tag.map((tagName) => (
+            <Tag key={tagName} label={tagName} />
+          ))}
+        </div>
+      )}
       </header>
 
       {/* Tiptap HTML 콘텐츠 렌더링 */}
@@ -75,14 +66,6 @@ export default function NotebookDetailPage() {
         className={s.content}
         dangerouslySetInnerHTML={{ __html: note.description || '' }}
       />
-
-      {note.tag && note.tag.length > 0 && (
-        <div className={s.tagList}>
-          {note.tag.map((tagName) => (
-            <Tag key={tagName} label={tagName} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
