@@ -8,8 +8,8 @@ export const PATHS = {
   HOME: route("/"),
 
   /* --- 회원가입, 로그인 --- */
-  AUTH_LOGIN: route("/auth/login"),
-  AUTH_SIGNUP: route("/auth/signup"),
+  AUTH_LOGIN: route("/login"),
+  AUTH_SIGNUP: route("/signup"),
 
   /* --- 노트북 --- */
   NOTEBOOK: route("/notebook"),

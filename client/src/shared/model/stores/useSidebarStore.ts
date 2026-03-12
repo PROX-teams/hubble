@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-// 해당 훅의 위치 적합하지 않은 것 같음
+// 사이드바의 열림/닫힘 상태를 관리하는 전역 스토어입니다.
 type SidebarState = {
   isSidebarOpen: boolean;
   openSidebar: () => void;
