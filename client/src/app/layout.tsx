@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 import "@/shared/styles/global.css";
-import { vars } from "@/shared/styles/theme.css";
 import ThemeProvider from "@/shared/config/ThemeProvider";
 import QueryProvider from "@/shared/api/QueryProvider";
 import { GNBNav } from "@/shared/ui/gnb/gnb-nav/GNBNav";
+import { HeaderGnb } from "@/widgets/header-gnb/HeaderGnb"; // 추가
 import useModal from "@/shared/model/hooks/useModal";
 import { SearchContents } from "@/features/search/search-contents/ui/SearchContents";
 import * as s from "@/shared/styles/rootLayout.css";
@@ -28,8 +28,7 @@ export default function RootLayout({
       <body>
         <QueryProvider>
           <ThemeProvider>
-            {/*상단 GNB 임시 */}
-            <div style={{ width: "100%", position: "sticky", background: vars.color.black, zIndex: 100, top: 0, height:"48px", borderBottom: `1px solid ${vars.color.gray_200}`, marginBottom: "48px"}}/>
+            <HeaderGnb /> {/* 임시 div 교체 */}
             <GNBNav onSearchClick={openModal} />
             <main className={s.rootLayout}>
               {children}
