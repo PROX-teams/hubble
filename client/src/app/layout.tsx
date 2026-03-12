@@ -9,6 +9,7 @@ import { HeaderGnb } from "@/widgets/header-gnb/HeaderGnb"; // 추가
 import useModal from "@/shared/model/hooks/useModal";
 import { SearchContents } from "@/features/search/search-contents/ui/SearchContents";
 import * as s from "@/shared/styles/rootLayout.css";
+import { darkTheme } from "@/shared/styles/theme.css";
 
 // Modal 컴포넌트를 SSR 없이 동적으로 로드합니다.
 const Modal = dynamic(() => import("@/shared/ui/modal/modal/Modal"), {
@@ -24,11 +25,11 @@ export default function RootLayout({
   const { openModal, isOpen, closeModal } = useModal();
 
   return (
-    <html lang="ko">
+    <html lang="ko" className={darkTheme}>
       <body>
         <QueryProvider>
           <ThemeProvider>
-            <HeaderGnb /> {/* 임시 div 교체 */}
+            <HeaderGnb />
             <GNBNav onSearchClick={openModal} />
             <main className={s.rootLayout}>
               {children}
