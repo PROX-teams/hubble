@@ -47,6 +47,13 @@ export const getNotes = async (params: GetNotesParams): Promise<PageResponse<Not
 };
 
 /**
+ * 단일 노트 상세 정보 조회
+ */
+export const getNoteDetail = async (id: number): Promise<Note> => {
+  return fetcher<Note>(`${API_ENDPOINTS.NOTE}/${id}`);
+};
+
+/**
  * 새 노트 생성
  */
 export const createNote = async (data: NoteCreateRequest): Promise<Note> => {

@@ -15,6 +15,7 @@ interface Note extends NoteMeta {
   tag?: string[];
   storyId?: number;
   viewCount?: number;
+  likeCount?: number;
   bookmarkCount?: number;
   isLiked?: boolean;
   isBookmarked?: boolean;
