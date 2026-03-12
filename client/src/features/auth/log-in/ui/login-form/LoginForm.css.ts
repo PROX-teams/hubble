@@ -27,22 +27,10 @@ export const inputGroup = style({
 });
 
 export const button = style([
-  tx.t1_md,
+  tx.t2_md,
   {
-    height: '52px',
-    borderRadius: '8px',
-    backgroundColor: vars.color.black,
-    color: vars.color.white,
-    cursor: 'pointer',
-    border: 'none',
-    transition: 'background-color 0.2s ease',
-    ':disabled': {
-      backgroundColor: vars.color.gray_300,
-      cursor: 'not-allowed',
-    },
-    ':hover': {
-      backgroundColor: vars.color.gray_700,
-    }
+    width:"452px",
+    
   }
 ]);
 
@@ -56,8 +44,7 @@ export const linkText = style([
 ]);
 
 export const link = style({
-  color: vars.color.black,
-  fontWeight: 600,
+  color: vars.color.white,
   textDecoration: 'none',
   marginLeft: '8px',
   ':hover': {

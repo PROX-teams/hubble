@@ -5,14 +5,10 @@ globalStyle("html, body", {
   margin: 0,
   padding: 0,
   minHeight: "100vh",
-  backgroundColor: vars.color.black,
   color: vars.color.gray_700,
   transition: "background-color 0.3s ease",
 });
 
-globalStyle(`html.${darkTheme}, body.${darkTheme}, .${darkTheme} body`, {
-  backgroundColor: vars.color.black,
-});
 
 // 2. 테마 클래스 요소 설정
 globalStyle(`${darkTheme}, ${lightTheme}`, {

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Input } from '@/shared/ui/input/input/Input';
+import Button from '@/shared/ui/button/button/Button';
 import { PATHS } from '@/shared/constants/paths';
 import { useLogin } from '../../model/useLogin';
 import * as S from './LoginForm.css';
@@ -47,13 +48,14 @@ export const LoginForm = () => {
         />
       </div>
 
-      <button 
+      <Button
         type="submit" 
-        className={S.button}
         disabled={isPending || !email || !password}
+        className={S.button}
+        size='lg'
       >
         {isPending ? '로그인 중...' : '로그인'}
-      </button>
+      </Button>
 
       <p className={S.linkText}>
         아직 회원이 아니신가요?
