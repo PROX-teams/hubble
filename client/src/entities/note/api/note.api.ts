@@ -1,7 +1,7 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
 import type { PageResponse, CategoryType, SortType } from '@/shared/types/api.types';
-import type { Note } from '../note.types';
+import type { Note, NoteCreateRequest } from '../note.types';
 
 export interface GetNotesParams {
   category?: CategoryType;
@@ -44,4 +44,14 @@ export const getNotes = async (params: GetNotesParams): Promise<PageResponse<Not
   const url = queryString ? `${API_ENDPOINTS.NOTE}?${queryString}` : API_ENDPOINTS.NOTE;
 
   return fetcher<PageResponse<Note>>(url);
+};
+
+/**
+ * 새 노트 생성
+ */
+export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
+  return fetcher<Note>(API_ENDPOINTS.NOTE, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 };
