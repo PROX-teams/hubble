@@ -1,42 +1,75 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getMyNotes } from '@/entities/note/api/note.api';
+import { getMyStories } from '@/entities/story/api/story.api';
 import { Dropdown } from "@/shared/ui/dropdown/Dropdown";
 import { Accordion } from "@/shared/ui/accordion/Accordion";
 import NoteCard from "@/entities/note/ui/note-card/NoteCard";
-import { Note } from "@/entities/note/note.types";
 import AccordionArrow from "@/shared/assets/icons/common/accordionArrow.svg";
 import * as S from "./MyNoteList.css";
-
-// 임시 Mock 데이터
-interface StoryWithNotes {
-  id: number;
-  title: string;
-  notes: Note[];
-}
-
-const MOCK_STORIES_WITH_NOTES: StoryWithNotes[] = [
-  {
-    id: 1,
-    title: "알고리즘 공부",
-    notes: [
-      { id: 101, title: "BFS 탐색 기법", description: "너비 우선 탐색에 대하여...", author: "JJJ-un", date: "2024-03-07", likeCount: 5, imageUrl: "" },
-      { id: 103, title: "DP 기초", description: "다이나믹 프로그래밍의 원리", author: "JJJ-un", date: "2024-03-05", likeCount: 8, imageUrl: "" },
-    ],
-  },
-  {
-    id: 2,
-    title: "React Deep Dive",
-    notes: [
-      { id: 102, title: "useEffect 완벽 가이드", description: "의존성 배열의 모든 것", author: "JJJ-un", date: "2024-03-06", likeCount: 12, imageUrl: "" },
-    ],
-  },
-];
 
 const MyNoteList = () => {
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
 
-  const filteredStories = selectedStoryId 
-    ? MOCK_STORIES_WITH_NOTES.filter(s => s.id === selectedStoryId)
-    : MOCK_STORIES_WITH_NOTES;
+  // 내 스토리 목록 조회
+  const { data: storiesData, isLoading: isStoriesLoading } = useQuery({
+    queryKey: ['myStories'],
+    queryFn: () => getMyStories(0, 100),
+  });
+
+  // 내 노트 목록 조회
+  const { data: notesData, isLoading: isNotesLoading } = useQuery({
+    queryKey: ['myNotes'],
+    queryFn: () => getMyNotes(0, 100),
+  });
+
+  const stories = storiesData?.content || [];
+  const notes = notesData?.content || [];
+
+  // 스토리별로 노트 그룹화
+  const groupedNotes = useMemo(() => {
+    const groups: Record<number, typeof notes> = {};
+    const unclassifiedNotes: typeof notes = [];
+
+    notes.forEach(note => {
+      if (note.storyId) {
+        if (!groups[note.storyId]) {
+          groups[note.storyId] = [];
+        }
+        groups[note.storyId].push(note);
+      } else {
+        unclassifiedNotes.push(note);
+      }
+    });
+
+    // 스토리 데이터와 노트를 결합
+    const results = stories.map(story => ({
+      id: story.id,
+      title: story.title,
+      notes: groups[story.id] || [],
+    })).filter(group => group.notes.length > 0 || !selectedStoryId);
+
+    // 미분류 노트가 있다면 추가
+    if (unclassifiedNotes.length > 0) {
+      results.push({
+        id: -1, // 임시 ID
+        title: "미분류",
+        notes: unclassifiedNotes,
+      });
+    }
+
+    return results;
+  }, [stories, notes, selectedStoryId]);
+
+  const filteredGroups = selectedStoryId 
+    ? groupedNotes.filter(g => g.id === selectedStoryId)
+    : groupedNotes;
+
+  if (isStoriesLoading || isNotesLoading) {
+    return <div className={S.container}>불러오는 중...</div>;
+  }
 
   return (
     <div className={S.container}>
@@ -45,15 +78,20 @@ const MyNoteList = () => {
         <Dropdown>
           <Dropdown.Trigger size="2xl" variant="muted">
             <Dropdown.Value>
-              {({ selectedOption }) => selectedOption || "스토리 선택"}
+              {({ selectedOption }) => {
+                if (selectedOption === null || selectedOption === undefined) return "스토리 선택";
+                if (selectedStoryId === null) return "전체 스토리";
+                const story = stories.find(s => s.id === selectedStoryId);
+                return story ? story.title : (selectedStoryId === -1 ? "미분류" : "스토리 선택");
+              }}
             </Dropdown.Value>
             <Dropdown.Icon />
           </Dropdown.Trigger>
           <Dropdown.Menu size="xl">
-            <Dropdown.Option optionId={0} onClick={() => setSelectedStoryId(null)} >
+            <Dropdown.Option optionId={null} onClick={() => setSelectedStoryId(null)} >
               전체 스토리
             </Dropdown.Option>
-            {MOCK_STORIES_WITH_NOTES.map((story) => (
+            {stories.map((story) => (
               <Dropdown.Option 
                 key={story.id} 
                 optionId={story.id}
@@ -62,33 +100,48 @@ const MyNoteList = () => {
                 {story.title}
               </Dropdown.Option>
             ))}
+            {notes.some(n => !n.storyId) && (
+              <Dropdown.Option 
+                optionId={-1}
+                onClick={() => setSelectedStoryId(-1)}
+              >
+                미분류
+              </Dropdown.Option>
+            )}
           </Dropdown.Menu>
         </Dropdown>
       </div>
 
       {/* 하단 아코디언 리스트 */}
       <div className={S.accordionListWrapper}>
-        {filteredStories.map((story) => (
-          <Accordion key={story.id}>
-            <Accordion.Header>
-              <span className={S.storyTitle}>최신</span>
-              <Accordion.Trigger rotatable={true}>
-                <AccordionArrow width={16} height={16} />
-              </Accordion.Trigger>
-            </Accordion.Header>
-            <Accordion.Content>
-              <div className={S.noteListWrapper}>
-                {story.notes.map((note) => (
-                  <NoteCard 
-                    key={note.id} 
-                    data={note} 
-                    variant="compact"
-                  />
-                ))}
-              </div>
-            </Accordion.Content>
-          </Accordion>
-        ))}
+        {filteredGroups.length > 0 ? (
+          filteredGroups.map((group) => (
+            <Accordion key={group.id} defaultOpen={true}>
+              <Accordion.Header>
+                <Accordion.Trigger rotatable={true}>
+                  <AccordionArrow width={16} height={16} />
+                </Accordion.Trigger>
+                <span className={S.storyTitle}>{group.title}</span>
+                <span className={S.noteCount}>{group.notes.length}</span>
+              </Accordion.Header>
+              <Accordion.Content>
+                <div className={S.noteListWrapper}>
+                  {group.notes.map((note) => (
+                    <NoteCard 
+                      key={note.id} 
+                      data={note} 
+                      variant="compact"
+                    />
+                  ))}
+                </div>
+              </Accordion.Content>
+            </Accordion>
+          ))
+        ) : (
+          <div style={{ padding: '20px', color: '#888', textAlign: 'center' }}>
+            작성한 노트가 없습니다.
+          </div>
+        )}
       </div>
     </div>
   );
