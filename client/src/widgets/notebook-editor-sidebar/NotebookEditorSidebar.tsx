@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import * as s from './NotebookEditorSidebar.css';
 import { SideBar } from '@/shared/ui/sidebar/SideBar';
 import { Input } from '@/shared/ui/input/input/Input';
@@ -10,6 +11,19 @@ import Button from '@/shared/ui/button/button/Button';
 import Tag from '@/shared/ui/tag/Tag';
 import AddIcon from '@/shared/assets/icons/common/add.svg';
 import { useSidebarStore } from '@/shared/model/stores/useSidebarStore';
+import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
+import { createNote } from '@/entities/note/api/note.api';
+import { CategoryType } from '@/shared/types/api.types';
+import { useAuthStore } from '@/entities/user/model/useAuthStore';
+
+const CATEGORIES: { id: CategoryType; label: string }[] = [
+  { id: 'DEVELOPMENT', label: '개발' },
+  { id: 'DESIGN', label: '디자인' },
+  { id: 'PLANNING', label: '기획' },
+  { id: 'MARKETING', label: '마케팅' },
+  { id: 'LIFE', label: '일상' },
+  { id: 'OTHER', label: '기타' },
+];
 
 const MOCK_STORIES = [
   { id: 1, title: '프론트엔드 공부집' },
@@ -18,21 +32,66 @@ const MOCK_STORIES = [
 ];
 
 export const NotebookEditorSidebar = () => {
-  const [tags, setTags] = useState<string[]>(['프론트엔드', 'React']);
+  const router = useRouter();
   const [tagInput, setTagInput] = useState('');
-  const { isSidebarOpen }= useSidebarStore()
+  const { isSidebarOpen } = useSidebarStore();
+  const { isLoggedIn } = useAuthStore();
+  
+  const { 
+    title, 
+    content, 
+    category, 
+    tag, 
+    imageUrl, 
+    storyId,
+    setCategory,
+    setTag,
+    setStoryId,
+    reset
+  } = useNoteEditorStore();
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && tagInput.trim()) {
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
+      if (!tag.includes(tagInput.trim())) {
+        setTag([...tag, tagInput.trim()]);
       }
       setTagInput('');
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setTag(tag.filter((t) => t !== tagToRemove));
+  };
+
+  const handlePublish = async () => {
+    if (!isLoggedIn) {
+      alert('로그인이 필요한 서비스입니다.');
+      router.push('/login');
+      return;
+    }
+
+    if (!title.trim() || !content.trim()) {
+      alert('제목과 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      await createNote({
+        title,
+        content,
+        category,
+        tag,
+        imageUrl,
+        storyId: storyId || undefined,
+      });
+      
+      alert('노트가 게시되었습니다.');
+      reset();
+      router.push('/thread');
+    } catch (error) {
+      console.error('Failed to publish note:', error);
+      alert('노트 게시 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -50,32 +109,43 @@ export const NotebookEditorSidebar = () => {
         <h3 className={s.sectionTitle}>노트 정보</h3>
       </section>
 
-      {/* 스토리에 추가 (드롭다운) */}
+      {/* 카테고리 및 스토리에 추가 */}
       <section className={s.section}>
-        <h3 className={s.sectionTitle}>스토리에 추가</h3>
-        <div>
-          <Dropdown>
+        <h3 className={s.sectionTitle}>카테고리 및 스토리</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Dropdown onSelect={(id) => setCategory(id as CategoryType)}>
             <Dropdown.Trigger>
               <Dropdown.Value>
-                {({ selectedOption }) => (selectedOption ? selectedOption : '카테고리 설정')}
+                {({ selectedOption }) => (
+                  selectedOption 
+                    ? CATEGORIES.find(c => c.id === selectedOption)?.label 
+                    : CATEGORIES.find(c => c.id === category)?.label || '카테고리 설정'
+                )}
               </Dropdown.Value>
               <Dropdown.Icon />
             </Dropdown.Trigger>
             <Dropdown.Menu>
-              {MOCK_STORIES.map((story) => (
+              {CATEGORIES.map((cat) => (
                 <Dropdown.Option 
-                  key={story.id} 
-                  optionId={story.id}
+                  key={cat.id} 
+                  optionId={cat.id}
                 >
-                  {story.title}
+                  {cat.label}
                 </Dropdown.Option>
               ))}
             </Dropdown.Menu>
           </Dropdown>
-          <Dropdown>
+
+          <Dropdown onSelect={(id) => setStoryId(Number(id))}>
             <Dropdown.Trigger size="3xl">
               <Dropdown.Value>
-                {({ selectedOption }) => (selectedOption ? selectedOption : '스토리를 선택해주세요')}
+                {({ selectedOption }) => (
+                  selectedOption 
+                    ? MOCK_STORIES.find(s => s.id === selectedOption)?.title 
+                    : storyId 
+                      ? MOCK_STORIES.find(s => s.id === storyId)?.title 
+                      : '스토리를 선택해주세요'
+                )}
               </Dropdown.Value>
               <Dropdown.Icon />
             </Dropdown.Trigger>
@@ -97,9 +167,10 @@ export const NotebookEditorSidebar = () => {
       <section className={s.section}>
         <h3 className={s.sectionTitle}>노트 소개</h3>
         <Textarea 
-          placeholder="노트에 대한 짧은 소개글을 작성해주세요" 
+          placeholder="노트에 대한 짧은 소개글을 작성해주세요 (현재는 본문 내용이 저장됩니다)" 
           variant="solid"
           size="md"
+          disabled
         />
       </section>
 
@@ -115,11 +186,11 @@ export const NotebookEditorSidebar = () => {
           size="sm"
         />
         <div className={s.tagList}>
-          {tags.map((tag) => (
+          {tag.map((t) => (
             <Tag 
-              key={tag} 
-              label={tag} 
-              onRemove={() => handleRemoveTag(tag)} 
+              key={t} 
+              label={t} 
+              onRemove={() => handleRemoveTag(t)} 
             />
           ))}
         </div>
@@ -145,6 +216,7 @@ export const NotebookEditorSidebar = () => {
         <Button 
           variants="colored" 
           size="lg" 
+          onClick={handlePublish}
         >
           게시하기
         </Button>

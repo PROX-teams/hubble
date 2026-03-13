@@ -44,3 +44,10 @@ export const getStories = async (params: GetStoriesParams): Promise<PageResponse
 
   return fetcher<PageResponse<Story>>(url);
 };
+
+/**
+ * 단일 스토리 상세 조회
+ */
+export const getStoryDetail = async (id: number): Promise<Story> => {
+  return fetcher<Story>(`${API_ENDPOINTS.STORY}/${id}`);
+};

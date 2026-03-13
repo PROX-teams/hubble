@@ -1,7 +1,7 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
 import type { PageResponse, CategoryType, SortType } from '@/shared/types/api.types';
-import type { Note } from '../note.types';
+import type { Note, NoteCreateRequest } from '../note.types';
 
 export interface GetNotesParams {
   category?: CategoryType;
@@ -44,4 +44,28 @@ export const getNotes = async (params: GetNotesParams): Promise<PageResponse<Not
   const url = queryString ? `${API_ENDPOINTS.NOTE}?${queryString}` : API_ENDPOINTS.NOTE;
 
   return fetcher<PageResponse<Note>>(url);
+};
+
+/**
+ * 단일 노트 상세 정보 조회
+ */
+export const getNoteDetail = async (id: number): Promise<Note> => {
+  return fetcher<Note>(`${API_ENDPOINTS.NOTE}/${id}`);
+};
+
+/**
+ * 북마크한 노트 목록 조회
+ */
+export const getBookmarkedNotes = async (page = 0, size = 10): Promise<PageResponse<Note>> => {
+  return fetcher<PageResponse<Note>>(`${API_ENDPOINTS.NOTE}/bookmarks?page=${page}&size=${size}`);
+};
+
+/**
+ * 새 노트 생성
+ */
+export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
+  return fetcher<Note>(API_ENDPOINTS.NOTE, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 };

@@ -8,8 +8,11 @@ import Image from '@tiptap/extension-image';
 import Suggestion from '@tiptap/suggestion';
 import * as s from './Editor.css';
 import { suggestion } from './suggestion';
+import { useNoteEditorStore } from '../model/useNoteEditorStore';
 
 const Editor = () => {
+  const { title, setTitle, setContent } = useNoteEditorStore();
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -38,6 +41,9 @@ const Editor = () => {
         class: s.editorContent,
       },
     },
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML());
+    },
   });
 
   const handleTitleKeyDown = (e: React.KeyboardEvent) => {
@@ -58,6 +64,8 @@ const Editor = () => {
         type="text"
         className={s.titleInput}
         placeholder="제목을 입력하세요"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
         onKeyDown={handleTitleKeyDown}
       />
 

@@ -1,8 +1,11 @@
 'use client';
 
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { NotebookEditorSidebar } from '@/widgets/notebook-editor-sidebar/NotebookEditorSidebar';
 import { useSidebarStore } from '@/shared/model/stores/useSidebarStore';
+import { useAuthStore } from '@/entities/user/model/useAuthStore';
 
 // Tiptap 에디터는 브라우저 API를 사용하므로 dynamic import를 사용하여 SSR을 비활성화합니다.
 const Editor = dynamic(() => import('@/features/note/write-note/ui/Editor'), {
@@ -12,6 +15,19 @@ const Editor = dynamic(() => import('@/features/note/write-note/ui/Editor'), {
 
 export default function NotebookPage() {
   const { isSidebarOpen, toggleSidebar } = useSidebarStore();
+  const { isLoggedIn } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      alert('로그인이 필요한 페이지입니다.');
+      router.replace('/login');
+    }
+  }, [isLoggedIn, router]);
+
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
     <div style={{ position: 'relative' }}>
