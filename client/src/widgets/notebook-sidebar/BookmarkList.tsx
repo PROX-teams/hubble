@@ -22,15 +22,9 @@ const BookmarkList = () => {
 
   return (
     <div className={S.container}>
-      {/* 
-        상단 드롭다운(카테고리 선택)은 현재 백엔드에서 
-        북마크 목록에 대한 별도 카테고리 필터링 기능을 제공하지 않으므로 임시 비활성화하거나, 
-        가져온 데이터 내에서 필터링하도록 구성할 수 있습니다.
-      */}
-      
       {/* 하단 아코디언 리스트 */}
       <div className={S.accordionListWrapper}>
-        <Accordion>
+        <Accordion defaultOpen={true}>
           <Accordion.Header>
             <Accordion.Trigger rotatable={true}>
               <AccordionArrow width={16} height={16} />

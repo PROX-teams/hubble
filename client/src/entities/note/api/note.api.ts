@@ -61,6 +61,13 @@ export const getBookmarkedNotes = async (page = 0, size = 10): Promise<PageRespo
 };
 
 /**
+ * 내 노트 목록 조회
+ */
+export const getMyNotes = async (page = 0, size = 50): Promise<PageResponse<Note>> => {
+  return fetcher<PageResponse<Note>>(`${API_ENDPOINTS.NOTE}/me?page=${page}&size=${size}`);
+};
+
+/**
  * 새 노트 생성
  */
 export const createNote = async (data: NoteCreateRequest): Promise<Note> => {

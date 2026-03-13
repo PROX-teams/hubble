@@ -51,3 +51,10 @@ export const getStories = async (params: GetStoriesParams): Promise<PageResponse
 export const getStoryDetail = async (id: number): Promise<Story> => {
   return fetcher<Story>(`${API_ENDPOINTS.STORY}/${id}`);
 };
+
+/**
+ * 내 스토리 목록 조회 (로그인한 사용자가 작성한 스토리)
+ */
+export const getMyStories = async (page = 0, size = 50): Promise<PageResponse<Story>> => {
+  return fetcher<PageResponse<Story>>(`${API_ENDPOINTS.STORY}/me?page=${page}&size=${size}`);
+};
