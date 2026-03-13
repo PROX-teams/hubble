@@ -6,7 +6,7 @@ import ThemeProvider from "@/shared/config/ThemeProvider";
 import QueryProvider from "@/shared/api/QueryProvider";
 import { GNBNav } from "@/shared/ui/gnb/gnb-nav/GNBNav";
 import { HeaderGnb } from "@/widgets/header-gnb/HeaderGnb"; // 추가
-import useModal from "@/shared/model/hooks/useModal";
+import { useSearchModalStore } from "@/features/search/search-contents/model/useSearchModalStore";
 import { SearchContents } from "@/features/search/search-contents/ui/SearchContents";
 import * as s from "@/shared/styles/rootLayout.css";
 import { darkTheme } from "@/shared/styles/theme.css";
@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const { openModal, isOpen, closeModal } = useModal();
+  const { isOpen, openSearch, closeSearch } = useSearchModalStore();
 
   return (
     <html lang="ko" className={darkTheme}>
@@ -30,13 +30,13 @@ export default function RootLayout({
         <QueryProvider>
           <ThemeProvider>
             <HeaderGnb />
-            <GNBNav onSearchClick={openModal} />
+            <GNBNav onSearchClick={openSearch} />
             <main className={s.rootLayout}>
               {children}
             </main>
             {isOpen && (
               <Modal
-                hide={closeModal}
+                hide={closeSearch}
                 hideOnClickOutside={true}
               >
                 <SearchContents />
