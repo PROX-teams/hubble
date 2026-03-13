@@ -76,3 +76,17 @@ export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
     body: JSON.stringify(data),
   });
 };
+
+/**
+ * 조회수 많은 노트 Top 10 조회
+ */
+export const getTop10ViewedNotes = async (): Promise<Note[]> => {
+  return fetcher<Note[]>(`${API_ENDPOINTS.NOTE}/top10/view`);
+};
+
+/**
+ * 좋아요 많은 노트 Top 10 조회
+ */
+export const getTop10LikedNotes = async (): Promise<Note[]> => {
+  return fetcher<Note[]>(`${API_ENDPOINTS.NOTE}/top10/like`);
+};

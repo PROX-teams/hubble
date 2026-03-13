@@ -58,3 +58,10 @@ export const getStoryDetail = async (id: number): Promise<Story> => {
 export const getMyStories = async (page = 0, size = 50): Promise<PageResponse<Story>> => {
   return fetcher<PageResponse<Story>>(`${API_ENDPOINTS.STORY}/me?page=${page}&size=${size}`);
 };
+
+/**
+ * 좋아요 많은 스토리 Top 10 조회
+ */
+export const getTop10LikedStories = async (): Promise<Story[]> => {
+  return fetcher<Story[]>(`${API_ENDPOINTS.STORY}/top10`);
+};
