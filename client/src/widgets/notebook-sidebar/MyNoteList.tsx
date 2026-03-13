@@ -25,11 +25,11 @@ const MyNoteList = () => {
     queryFn: () => getMyNotes(0, 100),
   });
 
-  const stories = storiesData?.content || [];
-  const notes = notesData?.content || [];
-
   // 스토리별로 노트 그룹화
   const groupedNotes = useMemo(() => {
+    const stories = storiesData?.content || [];
+    const notes = notesData?.content || [];
+    
     const groups: Record<number, typeof notes> = {};
     const unclassifiedNotes: typeof notes = [];
 
@@ -61,7 +61,7 @@ const MyNoteList = () => {
     }
 
     return results;
-  }, [stories, notes, selectedStoryId]);
+  }, [storiesData, notesData, selectedStoryId]);
 
   const filteredGroups = selectedStoryId 
     ? groupedNotes.filter(g => g.id === selectedStoryId)
@@ -70,6 +70,9 @@ const MyNoteList = () => {
   if (isStoriesLoading || isNotesLoading) {
     return <div className={S.container}>불러오는 중...</div>;
   }
+
+  const stories = storiesData?.content || [];
+  const notes = notesData?.content || [];
 
   return (
     <div className={S.container}>

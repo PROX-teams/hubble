@@ -51,7 +51,11 @@ export const ThreadFilterBar = ({
       <AppToggleGroup 
         type="page"
         value={currentCategoryLabel}
-        onValueChange={(label) => onCategoryChange(CATEGORY_MAP[label])}
+        onValueChange={(label) => {
+          if (typeof label === 'string') {
+            onCategoryChange(CATEGORY_MAP[label]);
+          }
+        }}
       >
         {Object.keys(CATEGORY_MAP).map((label) => (
           <AppToggleGroup.Item key={label} value={label} />
@@ -75,15 +79,17 @@ export const ThreadFilterBar = ({
         <Dropdown className={S.dropdown}>
           <Dropdown.Trigger size='xl' variant='surface'>
             <Dropdown.Value>
-              {({ selectedOption }) => selectedOption || '정렬 기준'}
+              {({ selectedOption }) => 
+                selectedOption || Object.keys(SORT_MAP).find(key => SORT_MAP[key] === sortType) || '최신순'
+              }
             </Dropdown.Value>
             <Dropdown.Icon />
           </Dropdown.Trigger>
           <Dropdown.Menu>
-            {Object.entries(SORT_MAP).map(([label, value], index) => (
+            {Object.entries(SORT_MAP).map(([label, value]) => (
               <Dropdown.Option 
                 key={label} 
-                optionId={index}
+                optionId={label}
                 onClick={() => onSortChange(value)}
               >
                 {label}

@@ -7,11 +7,13 @@ import { DropdownOption } from './DropdownOption';
 import { DropdownIcon } from './DropdownIcon';
 import { DropdownValue } from './DropdownValue';
 
-type DropdownWrapperProps = ComponentProps<typeof DropdownWrapper>;
+interface DropdownRootProps extends Omit<ComponentProps<typeof DropdownWrapper>, 'onSelect'> {
+  onSelect?: (id: string | number) => void;
+}
 
-export default function DropdownRoot({ children, ...props }: DropdownWrapperProps) {
+export default function DropdownRoot({ children, onSelect, ...props }: DropdownRootProps) {
   return (
-    <DropdownContextProvider>
+    <DropdownContextProvider onSelect={onSelect}>
       <DropdownWrapper {...props}>{children}</DropdownWrapper>
     </DropdownContextProvider>
   );

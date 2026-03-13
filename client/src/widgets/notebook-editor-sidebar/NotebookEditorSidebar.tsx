@@ -118,7 +118,7 @@ export const NotebookEditorSidebar = () => {
               <Dropdown.Value>
                 {({ selectedOption }) => (
                   selectedOption 
-                    ? CATEGORIES.find(c => c.id === selectedOption)?.label 
+                    ? CATEGORIES.find(c => c.id === (selectedOption as CategoryType))?.label 
                     : CATEGORIES.find(c => c.id === category)?.label || '카테고리 설정'
                 )}
               </Dropdown.Value>
@@ -141,7 +141,7 @@ export const NotebookEditorSidebar = () => {
               <Dropdown.Value>
                 {({ selectedOption }) => (
                   selectedOption 
-                    ? MOCK_STORIES.find(s => s.id === selectedOption)?.title 
+                    ? MOCK_STORIES.find(s => s.id === Number(selectedOption))?.title 
                     : storyId 
                       ? MOCK_STORIES.find(s => s.id === storyId)?.title 
                       : '스토리를 선택해주세요'

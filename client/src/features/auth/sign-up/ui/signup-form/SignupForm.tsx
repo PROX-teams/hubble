@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Input } from '@/shared/ui/input/input/Input';
 import { useSignup } from '../../model/useSignup';
 import * as S from './SignupForm.css';
@@ -15,7 +15,6 @@ export const SignupForm = () => {
   const [rePassword, setRePassword] = useState('');
 
   // 검증 상태
-  const [isEmailChecked, setIsEmailChecked] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
@@ -28,9 +27,7 @@ export const SignupForm = () => {
       onSuccess: (data) => {
         if (data.isConflict) {
           alert('이미 사용 중인 이메일입니다.');
-          setIsEmailChecked(false);
         } else {
-          setIsEmailChecked(true);
           // 중복이 아니면 바로 인증 코드 발송
           handleSendCode();
         }
@@ -107,7 +104,6 @@ export const SignupForm = () => {
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                setIsEmailChecked(false);
                 setIsEmailVerified(false);
               }}
               placeholder="example@hubble.com"

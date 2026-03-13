@@ -7,9 +7,9 @@ export type DropdownContextType = {
   isBoxOpen: boolean;
   toggleBoxOpen: () => void;
   closeBox: () => void;
-  selectedId: number | null;
+  selectedId: string | number | null;
   selectedOption: ReactNode | null;
-  selectOption: (id: number, option: ReactNode) => void; 
+  selectOption: (id: string | number | null, option: ReactNode) => void; 
 };
 
 export const DropdownContext = createContext<DropdownContextType>({
@@ -21,15 +21,26 @@ export const DropdownContext = createContext<DropdownContextType>({
   selectOption: () => {},
 });
 
-function DropdownContextProvider({ children }: PropsWithChildren) {
+interface DropdownContextProviderProps extends PropsWithChildren {
+  onSelect?: (id: string | number) => void;
+}
+
+function DropdownContextProvider({ children, onSelect }: DropdownContextProviderProps) {
   const {
     selectedOption,
     selectedId,
-    selectOption,
+    selectOption: baseSelectOption,
     isBoxOpen,
     toggleBoxOpen,
     closeBox,
-  } = useDropdown<number>();
+  } = useDropdown<string | number | null>();
+
+  const selectOption = (id: string | number | null, option: ReactNode) => {
+    baseSelectOption(id, option);
+    if (id !== null) {
+      onSelect?.(id);
+    }
+  };
 
   return (
     <DropdownContext.Provider

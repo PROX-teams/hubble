@@ -14,11 +14,11 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (data: LoginRequest) => login(data),
     onSuccess: (response) => {
-      // UserInfo 객체 구성 (서버 응답에 따라 조정)
+      // UserInfo 객체 구성 (서버 응답에 포함된 필드 매핑)
       const userInfo = {
-        id: (response as any).id || 0,
-        email: (response as any).email || '',
-        nickname: (response as any).nickname || '',
+        id: response.id,
+        email: response.email,
+        nickname: response.nickname,
       };
 
       // 1. 유저 정보, 2. 액세스 토큰, 3. 리프레시 토큰 저장

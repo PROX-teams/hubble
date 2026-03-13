@@ -8,6 +8,9 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   grantType: string;
+  id: number;
+  email: string;
+  nickname: string;
 }
 
 // 이메일 인증 부분은 추후 백엔드에서 Auth -> User로 변경 에정

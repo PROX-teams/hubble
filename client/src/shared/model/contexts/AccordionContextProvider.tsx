@@ -13,9 +13,13 @@ export const AccordionContext = createContext<AccordionContextProps>({
   toggle: () => {},
 });
 
-function AccordionContextProvider({ children }: PropsWithChildren) {
+interface AccordionContextProviderProps extends PropsWithChildren {
+  defaultOpen?: boolean;
+}
 
-    const{ isOpen, toggle} = useToggle();
+function AccordionContextProvider({ children, defaultOpen = false }: AccordionContextProviderProps) {
+
+    const{ isOpen, toggle} = useToggle(defaultOpen);
 
 
     return (

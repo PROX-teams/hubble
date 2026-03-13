@@ -8,7 +8,7 @@ import * as S from "./Dropdown.css";
 
 interface DropdownOptionProps extends ComponentPropsWithoutRef<'div'> {
   // 필수 사용
-  optionId: number;
+  optionId: string | number | null;
 }
 
 function DropdownOption({

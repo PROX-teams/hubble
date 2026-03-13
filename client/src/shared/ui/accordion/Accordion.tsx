@@ -26,13 +26,17 @@ import {AccordionWrapper} from './AccordionWrapper';
  * @see Accordion.Content - 아코디언 열림 시 표시되는 콘텐츠 영역
  */
 
-export default function AccordionRoot({children, ...props}:ComponentProps<typeof AccordionWrapper>) {
+interface AccordionRootProps extends ComponentProps<typeof AccordionWrapper> {
+  defaultOpen?: boolean;
+}
 
-  return(
-    <AccordionContextProvider>
+export default function AccordionRoot({ children, defaultOpen, ...props }: AccordionRootProps) {
+
+  return (
+    <AccordionContextProvider defaultOpen={defaultOpen}>
       <AccordionWrapper {...props}>{children}</AccordionWrapper>
     </AccordionContextProvider>
-  )
+  );
 }
 
 AccordionRoot.displayName = 'Accordion';
