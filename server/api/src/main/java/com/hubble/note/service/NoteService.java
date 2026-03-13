@@ -127,6 +127,12 @@ public class NoteService {
                 .map(bookmark -> NoteResponse.of(bookmark.getNote(), isLiked(user, bookmark.getNote()), true));
     }
 
+    public Page<NoteResponse> getMyNotes(Long userId, Pageable pageable) {
+        User user = getUserEntity(userId);
+        return noteRepository.findAllByUserIdWithFetch(userId, pageable)
+                .map(note -> NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note)));
+    }
+
     public List<NoteResponse> getTop10LikedNotes(Long userId) {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         return noteRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10)).stream()

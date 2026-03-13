@@ -49,6 +49,10 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
            countQuery = "select count(s) from Story s where s.title like %:keyword% or s.description like %:keyword%")
     Page<Story> findByKeywordWithFetch(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query(value = "select s from Story s join fetch s.user where s.user.id = :userId",
+           countQuery = "select count(s) from Story s where s.user.id = :userId")
+    Page<Story> findAllByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
+
     @Query("select s from Story s join fetch s.user order by s.likeCount desc")
     List<Story> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
 

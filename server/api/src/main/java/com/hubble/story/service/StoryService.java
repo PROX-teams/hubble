@@ -109,6 +109,12 @@ public class StoryService {
                 .map(bookmark -> StoryResponse.of(bookmark.getStory(), isLiked(user, bookmark.getStory()), true));
     }
 
+    public Page<StoryResponse> getMyStories(Long userId, Pageable pageable) {
+        User user = getUserEntity(userId);
+        return storyRepository.findAllByUserIdWithFetch(userId, pageable)
+                .map(story -> StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story)));
+    }
+
     public List<StoryResponse> getTop10LikedStories(Long userId) {
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         return storyRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10)).stream()

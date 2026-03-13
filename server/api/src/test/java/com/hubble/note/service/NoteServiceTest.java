@@ -21,12 +21,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -98,5 +102,27 @@ class NoteServiceTest {
         // then
         verify(tagRepository, times(2)).save(any()); // 태그가 2개이므로 2번 호출되어야 함
         verify(noteTagRepository, times(2)).save(any());
+    }
+
+    @Test
+    @DisplayName("내가 작성한 노트 목록을 조회할 수 있어야 한다.")
+    void getMyNotes() {
+        // given
+        Long userId = 1L;
+        User user = User.builder().id(userId).email("test@test.com").build();
+        Note note = Note.builder().id(1L).title("제목").user(user).category(Category.DEVELOPMENT).build();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Note> notePage = new PageImpl<>(List.of(note), pageable, 1);
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(noteRepository.findAllByUserIdWithFetch(eq(userId), any(Pageable.class))).willReturn(notePage);
+
+        // when
+        Page<NoteResponse> response = noteService.getMyNotes(userId, pageable);
+
+        // then
+        assertThat(response.getContent()).hasSize(1);
+        assertThat(response.getContent().get(0).title()).isEqualTo("제목");
+        verify(noteRepository, times(1)).findAllByUserIdWithFetch(eq(userId), any(Pageable.class));
     }
 }

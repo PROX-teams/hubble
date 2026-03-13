@@ -79,6 +79,14 @@ public class NoteController {
         return ResponseEntity.ok(noteService.getBookmarkedNotes(userId, pageable));
     }
 
+    @Operation(summary = "내가 작성한 노트 목록 조회", description = "로그인한 사용자가 작성한 노트 목록을 조회합니다.")
+    @GetMapping("/me")
+    public ResponseEntity<Page<NoteResponse>> getMyNotes(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getMyNotes(userId, pageable));
+    }
+
     @Operation(summary = "좋아요 많은 노트 Top 10", description = "좋아요를 가장 많이 받은 노트 10개를 조회합니다.")
     @GetMapping("/top10/like")
     public ResponseEntity<List<NoteResponse>> getTop10LikedNotes(
