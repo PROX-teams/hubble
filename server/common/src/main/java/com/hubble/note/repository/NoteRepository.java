@@ -52,6 +52,10 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
            countQuery = "select count(distinct n) from Note n join n.noteTags nt join nt.tag t where t.name = :tagName")
     Page<Note> findAllByTagNameWithFetch(@Param("tagName") String tagName, Pageable pageable);
 
+    @Query(value = "select n from Note n join fetch n.user left join fetch n.story where n.user.id = :userId",
+           countQuery = "select count(n) from Note n where n.user.id = :userId")
+    Page<Note> findAllByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
+
     @Query("select n from Note n join fetch n.user left join fetch n.story order by n.likeCount desc")
     List<Note> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
 
