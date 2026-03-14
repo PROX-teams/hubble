@@ -4,6 +4,7 @@ import { CategoryType } from '@/shared/types/api.types';
 interface NoteEditorState {
   title: string;
   content: string;
+  description: string;
   category: CategoryType;
   tag: string[];
   imageUrl: string;
@@ -12,6 +13,7 @@ interface NoteEditorState {
   // Actions
   setTitle: (title: string) => void;
   setContent: (content: string) => void;
+  setDescription: (description: string) => void;
   setCategory: (category: CategoryType) => void;
   setTag: (tag: string[]) => void;
   setImageUrl: (imageUrl: string) => void;
@@ -22,6 +24,7 @@ interface NoteEditorState {
 const initialState = {
   title: '',
   content: '',
+  description: '',
   category: 'DEVELOPMENT' as CategoryType,
   tag: [],
   imageUrl: '',
@@ -33,6 +36,7 @@ export const useNoteEditorStore = create<NoteEditorState>((set) => ({
 
   setTitle: (title) => set({ title }),
   setContent: (content) => set({ content }),
+  setDescription: (description) => set({ description }),
   setCategory: (category) => set({ category }),
   setTag: (tag) => set({ tag }),
   setImageUrl: (imageUrl) => set({ imageUrl }),
