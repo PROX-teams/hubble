@@ -243,6 +243,7 @@ export const titleStyle = recipe({
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
+      wordBreak: "break-all",
     },
     tx.t1_md,
   ],
@@ -317,6 +318,8 @@ export const content = recipe({
     textOverflow: "ellipsis",
     WebkitBoxOrient: "vertical",
     color: vars.color.gray_500,
+    wordBreak: "break-all",
+    overflowWrap: "break-word",
   },
 
   variants: {
