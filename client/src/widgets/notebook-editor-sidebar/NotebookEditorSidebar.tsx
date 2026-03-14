@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import * as s from './NotebookEditorSidebar.css';
 import { SideBar } from '@/shared/ui/sidebar/SideBar';
@@ -46,9 +47,23 @@ export const NotebookEditorSidebar = () => {
     storyId,
     setCategory,
     setTag,
+    setImageUrl,
     setStoryId,
     reset
   } = useNoteEditorStore();
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -199,9 +214,49 @@ export const NotebookEditorSidebar = () => {
       {/* 이미지 첨부 */}
       <section className={s.section}>
         <h3 className={s.sectionTitle}>노트 커버 이미지</h3>
-        <div className={s.imageUploadBox}>
-          <AddIcon />
-          <span>이미지 업로드</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Input 
+            placeholder="이미지 URL을 입력하거나 파일을 선택하세요"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            size="sm"
+          />
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleImageUpload} 
+            style={{ display: 'none' }} 
+          />
+          <div 
+            className={s.imageUploadBox} 
+            onClick={() => fileInputRef.current?.click()}
+            style={{ position: 'relative', overflow: 'hidden' }}
+          >
+            {imageUrl ? (
+              <Image 
+                src={imageUrl} 
+                alt="미리보기" 
+                fill
+                style={{ objectFit: 'cover' }}
+                unoptimized // 프리뷰 이미지는 로컬/임시 데이터이므로 최적화 제외
+              />
+            ) : (
+              <>
+                <AddIcon />
+                <span>이미지 업로드</span>
+              </>
+            )}
+          </div>
+          {imageUrl && (
+            <Button 
+              variants="neutral" 
+              size="sm" 
+              onClick={() => setImageUrl('')}
+            >
+              이미지 삭제
+            </Button>
+          )}
         </div>
       </section>
 
