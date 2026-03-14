@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from "next/dynamic";
+import localFont from "next/font/local";
 import "@/shared/styles/global.css";
 import ThemeProvider from "@/shared/config/ThemeProvider";
 import QueryProvider from "@/shared/api/QueryProvider";
@@ -10,6 +11,13 @@ import { useSearchModalStore } from "@/features/search/search-contents/model/use
 import { SearchContents } from "@/features/search/search-contents/ui/SearchContents";
 import * as s from "@/shared/styles/rootLayout.css";
 import { darkTheme } from "@/shared/styles/theme.css";
+
+// 폰트 최적화 설정
+const pretendard = localFont({
+  src: "../../public/fonts/PretendardVariable.woff2",
+  display: "swap",
+  variable: "--font-pretendard",
+});
 
 // Modal 컴포넌트를 SSR 없이 동적으로 로드합니다.
 const Modal = dynamic(() => import("@/shared/ui/modal/modal/Modal"), {
@@ -25,8 +33,8 @@ export default function RootLayout({
   const { isOpen, openSearch, closeSearch } = useSearchModalStore();
 
   return (
-    <html lang="ko" className={darkTheme}>
-      <body>
+    <html lang="ko" className={`${darkTheme} ${pretendard.variable}`}>
+      <body className={pretendard.className}>
         <QueryProvider>
           <ThemeProvider>
             <HeaderGnb />

@@ -5,6 +5,7 @@ import { Variant } from "./NoteCard";
 interface CoverImageProps {
   imageUrl: string;
   variant: Variant;
+  priority?: boolean;
 }
 
 // next.config.ts의 remotePatterns와 동기화된 허용 도메인 목록
@@ -23,7 +24,7 @@ const isAllowedHost = (url: string) => {
   }
 };
 
-export default function CoverImage({ imageUrl, variant }: CoverImageProps) {
+export default function CoverImage({ imageUrl, variant, priority = false }: CoverImageProps) {
   // 허용되지 않은 도메인이거나 가짜 데이터인 경우, next/image 에러를 방지하기 위해 렌더링하지 않음
   const isValidImage = imageUrl && isAllowedHost(imageUrl);
 
@@ -35,7 +36,7 @@ export default function CoverImage({ imageUrl, variant }: CoverImageProps) {
           alt="cover-image"
           fill
           style={{ objectFit: "cover" }}
-          priority={variant === "large"} // Thread 페이지 상단 이미지는 우선 로딩
+          priority={priority}
         />
       ) : (
         /* 이미지가 없거나 잘못된 주소일 때 보여줄 기본 배경 (Placeholder) */
