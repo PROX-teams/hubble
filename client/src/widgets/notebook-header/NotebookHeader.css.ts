@@ -21,6 +21,7 @@ export const metaInfo = style({
   gap: '16px',
   fontSize: '14px',
   color: vars.color.gray_400,
+  marginRight: '48px'
 });
 
 export const metaItem = style({

@@ -3,7 +3,9 @@
 import React from 'react';
 import { SideBar } from "@/shared/ui/sidebar/SideBar";
 import { NotebookSidebar } from "@/widgets/notebook-sidebar/NotebookSidebar";
+import { NotebookMetaSidebar } from '@/widgets/notebook-meta-sidebar/NotebookMetaSidebar';
 import { NotebookHeader } from "@/widgets/notebook-header/NotebookHeader";
+import { SidebarButton } from '@/features/sidebar/SidebarButton';
 
 export default function NotebookLayout({
   children,
@@ -12,21 +14,16 @@ export default function NotebookLayout({
 }>) {
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', paddingTop: '3rem' }}>
-      {/* 상단 GNB (상태창) */}
+    <div>
       <NotebookHeader />
-
-      {/* 사이드바 영역 */}
       <SideBar isSidebarOpen={true} position="left">
         <NotebookSidebar />
       </SideBar>
-
-      {/* 메인 콘텐츠 영역 */}
-      <div>
-        <main>
-          {children}
-        </main>
-      </div>
+      <main>
+        {children}
+      </main>
+      <NotebookMetaSidebar/>
+      <SidebarButton/>
     </div>
   );
 }

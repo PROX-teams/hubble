@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Breadcrumb } from "@/shared/ui/breadcrumb/Breadcrumb";
 import { getNoteDetail } from '@/entities/note/api/note.api';
 import { getStoryDetail } from '@/entities/story/api/story.api';
+import { formatDate } from '@/shared/lib/utils/date';
 import * as s from './NotebookHeader.css';
 
 export const NotebookHeader = () => {
@@ -43,15 +44,7 @@ export const NotebookHeader = () => {
   };
 
   const breadcrumbItems = getBreadcrumbItems();
-
-  // 날짜 포맷팅
-  const formattedDate = note?.date 
-    ? new Date(note.date).toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).replace(/\. /g, '.').replace(/\.$/, '')
-    : '';
+  const formattedDate = formatDate(note?.date);
 
   return (
     <header className={s.header}>
