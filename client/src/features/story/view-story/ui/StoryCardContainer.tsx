@@ -5,7 +5,12 @@ import StoryCard from "@/entities/story/ui/story-card/StoryCard";
 import * as S from "./StoryCardContainer.css"
 import useStoryModal from "../model/useStoryModal";
 import { AnimatePresence } from "framer-motion";
-import StoryCardModal from "@/widgets/storycard-modal/StoryCardModal";
+import dynamic from "next/dynamic";
+
+// 모달 컴포넌트를 지연 로딩 (클라이언트 사이드 전용)
+const StoryCardModal = dynamic(() => import("@/widgets/storycard-modal/StoryCardModal"), {
+  ssr: false,
+});
 
 interface StoryGridWithModalProps {
   stories: Story[];

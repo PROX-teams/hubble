@@ -65,28 +65,30 @@ export default function ThreadPage() {
         sortType={sortType}
         onSortChange={setSortType}
       />
-
       {/* 리스트 영역 */}
       <div className={S.listSection}>
         {activeTab === '노트' 
           ? (noteQuery.data?.pages.map((page) => 
-              page.content.map((note) => (
+              page.content.map((note, index) => (
                 <NoteCard 
                   key={note.id} 
                   data={note} 
                   imageUrl={note.imageUrl} 
-                  variant="large" 
+                  variant="large"
+                  priority={index < 8} // 상위 8개 이미지 우선 로딩
                 />
               ))
             ))
           : (storyQuery.data?.pages.map((page) => 
               page.content.map((story) => (
-                <StoryCard key={story.id} data={story} />
+                <StoryCard 
+                  key={story.id} 
+                  data={story} 
+                />
               ))
             ))
         }
       </div>
-
       {/* 무한 스크롤 트리거 */}
       <InfiniteScrollTrigger 
         hasNextPage={!!hasNextPage}

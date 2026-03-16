@@ -22,6 +22,7 @@ interface NoteCardProps {
    * compact - 236 X 55 / Sidebar Bookmark
    */
   variant?: Variant;
+  priority?: boolean;
 }
 
 /**
@@ -33,6 +34,7 @@ export default function NoteCard({
   data,
   imageUrl,
   variant = "small",
+  priority = false,
 }: NoteCardProps) {
   const withImg = !!imageUrl;
 
@@ -42,7 +44,9 @@ export default function NoteCard({
       className={clsx(container({ variant }), hoverContainer)}
     >
       {/* 커버 이미지 */}
-      {imageUrl && <CoverImage imageUrl={imageUrl} variant={variant} />}
+      {imageUrl && (
+        <CoverImage imageUrl={imageUrl} variant={variant} priority={priority} />
+      )}
 
       <div className={contentContainer({ variant, withImg })}>
         {/* 제목 */}

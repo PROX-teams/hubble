@@ -5,12 +5,17 @@ const withVanillaExtract = createVanillaExtractPlugin();
 
 const nextConfig: NextConfig = {
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'example.com',
+        protocol: "https",
+        hostname: "**",
       },
-      // 필요 시 실제 이미지 서버 도메인을 추가할 수 있습니다.
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8080",
+      },
     ],
   },
   webpack: (config) => {

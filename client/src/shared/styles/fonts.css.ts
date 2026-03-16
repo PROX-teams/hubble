@@ -1,9 +1,6 @@
-import { createThemeContract, globalFontFace } from "@vanilla-extract/css";
+import { createThemeContract } from "@vanilla-extract/css";
 
-globalFontFace("Pretendard", {
-  src: 'url(/fonts/PretendardVariable.woff2) format("woff2")',
-});
-
+// 폰트 로딩은 app/layout.tsx의 next/font에서 담당합니다.
 export const fontVars = createThemeContract({
   size: {
     h1: null,
