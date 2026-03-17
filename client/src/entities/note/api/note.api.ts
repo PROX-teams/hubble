@@ -90,3 +90,21 @@ export const getTop10ViewedNotes = async (): Promise<Note[]> => {
 export const getTop10LikedNotes = async (): Promise<Note[]> => {
   return fetcher<Note[]>(`${API_ENDPOINTS.NOTE}/top10/like`);
 };
+
+/**
+ * 노트 좋아요 토글
+ */
+export const toggleLikeNote = async (id: number): Promise<void> => {
+  return fetcher<void>(`${API_ENDPOINTS.NOTE}/${id}/like`, {
+    method: 'POST',
+  });
+};
+
+/**
+ * 노트 북마크 토글
+ */
+export const toggleBookmarkNote = async (id: number): Promise<void> => {
+  return fetcher<void>(`${API_ENDPOINTS.NOTE}/${id}/bookmark`, {
+    method: 'POST',
+  });
+};

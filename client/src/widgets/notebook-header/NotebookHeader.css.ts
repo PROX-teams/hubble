@@ -18,20 +18,42 @@ export const header = style({
 export const metaInfo = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '16px',
-  fontSize: '14px',
+  gap: '18px',
   color: vars.color.gray_400,
-  marginRight: '48px'
+  marginRight: '32px'
 });
 
 export const metaItem = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '4px',
+  gap: '3px',
+  cursor: 'pointer',
+  borderRadius: '4px',
+  border: 'none',
+  color: vars.color.gray_400,
 });
 
-export const divider = style({
-  width: '1px',
-  height: '12px',
-  backgroundColor: vars.color.stroke_200,
+export const metaIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '3px',
+  cursor: 'pointer',
+  borderRadius: '4px',
+  border: 'none',
+  color: vars.color.gray_400,
+  transition: 'all 0.2s ease-in-out',
+  ':hover': {
+
+    color: vars.color.gray_700,
+  }
+});
+
+export const activeLike = style({
+  color: vars.color.system_red,
+  transition: 'all 0.2s ease-in-out',
+});
+
+export const activeBookmark = style({
+  color: vars.color.stroke_main_100, 
+  transition: 'all 0.2s ease-in-out',
 });

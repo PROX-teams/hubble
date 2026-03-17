@@ -1,6 +1,6 @@
 import { usePathname } from "next/navigation";
 import { SideBar } from "@/shared/ui/sidebar/SideBar";
-import { NotebookMetaEditor } from "../notebook-meta-editor/NotebookMetaEditor";
+import { NotebookMetaEditor } from "./notebook-meta-editor/NotebookMetaEditor";
 import { useSidebarStore } from "@/shared/model/stores/useSidebarStore";
 import * as s from './NotebookMetaSidebar.css';
 

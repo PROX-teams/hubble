@@ -2,33 +2,24 @@
 
 import React from 'react';
 import { useParams, usePathname } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import { Breadcrumb } from "@/shared/ui/breadcrumb/Breadcrumb";
-import { getNoteDetail } from '@/entities/note/api/note.api';
-import { getStoryDetail } from '@/entities/story/api/story.api';
+import { useNoteInteraction } from '@/features/note/toggle-interaction/model/useNoteInteraction';
 import { formatDate } from '@/shared/lib/utils/date';
+import { useNoteDetail } from '@/features/note/view-note/model/useNoteDetail';
+import { useStoryDetail } from '@/entities/story/model/useStoryDetail';
+import LikeIcon from '@/shared/assets/icons/common/heart.svg'
+import BookmarkIcon from '@/shared/assets/icons/common/bookmark.svg'
 import * as s from './NotebookHeader.css';
+import { clsx } from 'clsx';
 
 export const NotebookHeader = () => {
   const params = useParams();
   const pathname = usePathname();
   const noteId = params.id ? Number(params.id) : null;
+  const { note } = useNoteDetail(noteId)
+  const { story } = useStoryDetail(note?.storyId)
+  const { toggleLike, toggleBookmark, isLikePending, isBookmarkPending } = useNoteInteraction(noteId || 0); 
 
-  // 1. 노트 상세 정보 조회
-  const { data: note } = useQuery({
-    queryKey: ['note', noteId],
-    queryFn: () => getNoteDetail(noteId!),
-    enabled: !!noteId,
-  });
-
-  // 2. 노트가 속한 스토리 정보 조회
-  const { data: story } = useQuery({
-    queryKey: ['story', note?.storyId],
-    queryFn: () => getStoryDetail(note!.storyId!),
-    enabled: !!note?.storyId,
-  });
-
-  // 경로 및 데이터에 따른 브레드크럼 아이템 구성
   const isWritePage = pathname === '/notebook';
   
   const getBreadcrumbItems = () => {
@@ -60,21 +51,30 @@ export const NotebookHeader = () => {
           ))}
         </Breadcrumb.List>
       </Breadcrumb>
-
-      {/* 노트 상세 정보 표시 (노트 조회 중일 때만) */}
       {noteId && note && (
         <div className={s.metaInfo}>
           <div className={s.metaItem}>
             <span>{formattedDate}</span>
           </div>
-          <div className={s.divider} />
           <div className={s.metaItem}>
-            <span>좋아요 {note.likeCount || 0}</span>
+            <span>조회수 {note.viewCount || 0}</span>
           </div>
-          <div className={s.divider} />
-          <div className={s.metaItem}>
-            <span>북마크 {note.bookmarkCount || 0}</span>
-          </div>
+          <button 
+            className={clsx(s.metaIcon, note.isLiked && s.activeLike)}
+            onClick={() => toggleLike()}
+            disabled={isLikePending}
+          >
+            <LikeIcon width='16' height='16'/>
+            {note.likeCount || 0}
+          </button>
+          <button 
+            className={clsx(s.metaIcon, note.isBookmarked && s.activeBookmark)}
+            onClick={() => toggleBookmark()}
+            disabled={isBookmarkPending}
+          >
+            <BookmarkIcon width='16' height='16'/>
+            {note.bookmarkCount || 0}
+          </button>
         </div>
       )}
     </header>
