@@ -359,14 +359,14 @@ export const content = recipe({
         variant: "large",
         withImg: true,
       },
-      style: { height: "4.3125rem", WebkitLineClamp: 3 },
+      style: { maxHeight: "4.3125rem", WebkitLineClamp: 3 },
     },
     {
       variants: {
         variant: "large",
         withImg: false,
       },
-      style: { height: "5.75rem", WebkitLineClamp: 4 },
+      style: { maxHeight: "5.75rem", WebkitLineClamp: 4 },
     },
     // --- small ---
     {
@@ -374,14 +374,14 @@ export const content = recipe({
         variant: "small",
         withImg: true,
       },
-      style: { height: "2.75rem", WebkitLineClamp: 2 },
+      style: { maxHeight: "2.75rem", WebkitLineClamp: 2 },
     },
     {
       variants: {
         variant: "small",
         withImg: false,
       },
-      style: { height: "4.125rem", WebkitLineClamp: 3 },
+      style: { maxHeight: "4.125rem", WebkitLineClamp: 3 },
     },
     // --- wide ---
     {
