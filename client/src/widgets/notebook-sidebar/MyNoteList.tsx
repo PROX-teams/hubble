@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getMyNotes } from '@/entities/note/api/note.api';
-import { getMyStories } from '@/entities/story/api/story.api';
+import React, { useState } from 'react';
+import { useGroupedNotes } from '@/features/note/story-note-list/model/useGroupedNotes';
 import { Dropdown } from "@/shared/ui/dropdown/Dropdown";
 import { Accordion } from "@/shared/ui/accordion/Accordion";
 import NoteCard from "@/entities/note/ui/note-card/NoteCard";
@@ -12,67 +10,28 @@ import * as S from "./MyNoteList.css";
 
 const MyNoteList = () => {
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
+  
+  const { 
+    isLoggedIn, 
+    stories, 
+    notes, 
+    groupedNotes, 
+    isLoading 
+  } = useGroupedNotes(selectedStoryId);
 
-  // 내 스토리 목록 조회
-  const { data: storiesData, isLoading: isStoriesLoading } = useQuery({
-    queryKey: ['myStories'],
-    queryFn: () => getMyStories(0, 100),
-  });
-
-  // 내 노트 목록 조회
-  const { data: notesData, isLoading: isNotesLoading } = useQuery({
-    queryKey: ['myNotes'],
-    queryFn: () => getMyNotes(0, 100),
-  });
-
-  // 스토리별로 노트 그룹화
-  const groupedNotes = useMemo(() => {
-    const stories = storiesData?.content || [];
-    const notes = notesData?.content || [];
-    
-    const groups: Record<number, typeof notes> = {};
-    const unclassifiedNotes: typeof notes = [];
-
-    notes.forEach(note => {
-      if (note.storyId) {
-        if (!groups[note.storyId]) {
-          groups[note.storyId] = [];
-        }
-        groups[note.storyId].push(note);
-      } else {
-        unclassifiedNotes.push(note);
-      }
-    });
-
-    // 스토리 데이터와 노트를 결합
-    const results = stories.map(story => ({
-      id: story.id,
-      title: story.title,
-      notes: groups[story.id] || [],
-    })).filter(group => group.notes.length > 0 || !selectedStoryId);
-
-    // 미분류 노트가 있다면 추가
-    if (unclassifiedNotes.length > 0) {
-      results.push({
-        id: -1, // 임시 ID
-        title: "미분류",
-        notes: unclassifiedNotes,
-      });
-    }
-
-    return results;
-  }, [storiesData, notesData, selectedStoryId]);
-
-  const filteredGroups = selectedStoryId 
-    ? groupedNotes.filter(g => g.id === selectedStoryId)
-    : groupedNotes;
-
-  if (isStoriesLoading || isNotesLoading) {
+  if (isLoading) {
     return <div className={S.container}>불러오는 중...</div>;
   }
 
-  const stories = storiesData?.content || [];
-  const notes = notesData?.content || [];
+  if (!isLoggedIn) {
+    return (
+      <div className={S.container}>
+        <div style={{ padding: '40px 20px', color: '#888', textAlign: 'center' }}>
+          로그인이 필요한 서비스입니다.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={S.container}>
@@ -82,14 +41,14 @@ const MyNoteList = () => {
           <Dropdown.Trigger size="2xl" variant="muted">
             <Dropdown.Value>
               {({ selectedOption }) => {
-                if (selectedOption === null || selectedOption === undefined) return "스토리 선택";
-                if (selectedStoryId === null) return "전체 스토리";
-                const story = stories.find(s => s.id === selectedStoryId);
-                return story ? story.title : (selectedStoryId === -1 ? "미분류" : "스토리 선택");
+                if (selectedOption === null || selectedOption === undefined) return "전체 스토리";
+                if (selectedStoryId === -1) return "미분류";
+                return stories.find(s => s.id === selectedStoryId)?.title || "스토리 선택";
               }}
             </Dropdown.Value>
             <Dropdown.Icon />
           </Dropdown.Trigger>
+
           <Dropdown.Menu size="xl">
             <Dropdown.Option optionId={null} onClick={() => setSelectedStoryId(null)} >
               전체 스토리
@@ -103,6 +62,7 @@ const MyNoteList = () => {
                 {story.title}
               </Dropdown.Option>
             ))}
+            {/* 미분류 노트가 있다면 메뉴에 추가 */}
             {notes.some(n => !n.storyId) && (
               <Dropdown.Option 
                 optionId={-1}
@@ -117,8 +77,8 @@ const MyNoteList = () => {
 
       {/* 하단 아코디언 리스트 */}
       <div className={S.accordionListWrapper}>
-        {filteredGroups.length > 0 ? (
-          filteredGroups.map((group) => (
+        {groupedNotes.length > 0 ? (
+          groupedNotes.map((group) => (
             <Accordion key={group.id} defaultOpen={true}>
               <Accordion.Header>
                 <Accordion.Trigger rotatable={true}>

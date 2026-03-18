@@ -11,8 +11,9 @@ export const NotebookSidebar = () => {
       <div className={S.container}>
         <Tab>
           <Tab.List className={S.tabList}>
-            <Tab.Item tabIndex={0} className={S.tabItem} activeStyle={S.activeTab}>저장한 노트</Tab.Item>
-            <Tab.Item tabIndex={1} className={S.tabItem} activeStyle={S.activeTab}>북마크</Tab.Item>
+            <Tab.Item tabIndex={0} className={S.tabItem} activeStyle={S.activeTab}>My Note</Tab.Item>
+            <Tab.Item tabIndex={1} className={S.tabItem} activeStyle={S.activeTab}>Bookmark</Tab.Item>
+            <Tab.Item tabIndex={2} className={S.tabItem} activeStyle={S.activeTab}>Save</Tab.Item>
           </Tab.List>
           <Tab.Panels className={S.tabPanels}>
             <Tab.Panel tabIndex={0}>

@@ -1,24 +1,28 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getBookmarkedNotes } from '@/entities/note/api/note.api';
 import { Accordion } from "@/shared/ui/accordion/Accordion";
 import NoteCard from "@/entities/note/ui/note-card/NoteCard";
 import AccordionArrow from "@/shared/assets/icons/common/accordionArrow.svg";
 import * as S from "./MyNoteList.css";
+import { useBookmarkList } from '@/entities/note/model/useBookmarkList';
 
 const BookmarkList = () => {
-  const { data, isLoading } = useQuery({
-    queryKey: ['bookmarkedNotes'],
-    queryFn: () => getBookmarkedNotes(0, 50), // 일단 상위 50개만 가져옴
-  });
+  const { bookmarkList, isLoading, isLoggedIn } = useBookmarkList()
 
-  if (isLoading) {
-    return <div className={S.container}>불러오는 중...</div>;
-  }
-
-  const notes = data?.content || [];
+    if (isLoading) {
+      return <div className={S.container}>불러오는 중...</div>;
+    }
+  
+    if (!isLoggedIn) {
+      return (
+        <div className={S.container}>
+          <div style={{ padding: '40px 20px', color: '#888', textAlign: 'center' }}>
+            로그인이 필요한 서비스입니다.
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className={S.container}>
@@ -30,12 +34,12 @@ const BookmarkList = () => {
               <AccordionArrow width={16} height={16} />
             </Accordion.Trigger>
             <span className={S.storyTitle}>모든 북마크</span>
-            <span className={S.noteCount}>{notes.length}</span>
+            <span className={S.noteCount}>{bookmarkList.length}</span>
           </Accordion.Header>
           <Accordion.Content>
             <div className={S.noteListWrapper}>
-              {notes.length > 0 ? (
-                notes.map((note) => (
+              {bookmarkList.length > 0 ? (
+                bookmarkList.map((note) => (
                   <NoteCard 
                     key={note.id} 
                     data={note} 
