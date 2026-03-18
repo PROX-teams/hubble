@@ -8,7 +8,7 @@ export default function Meta({ author, date, likeCount }: NoteMeta) {
       <span>{author}</span>
       <span>{date}</span>
       <div className={S.metaIconWrapper}>
-        <HeartIcon />
+        <HeartIcon width='16px' height='16px'/>
         <span>{likeCount}</span>
       </div>
     </div>

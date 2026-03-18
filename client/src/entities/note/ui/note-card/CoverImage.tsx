@@ -3,7 +3,7 @@ import { dimmedOverlay, imgWrapper } from "./NoteCard.css";
 import { Variant } from "./NoteCard";
 
 interface CoverImageProps {
-  imageUrl: string;
+  imageUrl?: string;
   variant: Variant;
   priority?: boolean;
 }

@@ -1,6 +1,8 @@
 import clsx from "clsx";
 import Link from "next/link";
+import { formatDate } from "@/shared/lib/utils/date";
 import { Note } from "@/entities/note/note.types";
+import { stripHtml } from "@/shared/lib/utils/string";
 import {
   container,
   contentContainer,
@@ -37,6 +39,7 @@ export default function NoteCard({
   priority = false,
 }: NoteCardProps) {
   const withImg = !!imageUrl;
+  const maxLength = variant === "large" ? 150 : 80;
 
   return (
     <Link
@@ -44,9 +47,7 @@ export default function NoteCard({
       className={clsx(container({ variant }), hoverContainer)}
     >
       {/* 커버 이미지 */}
-      {imageUrl && (
-        <CoverImage imageUrl={imageUrl} variant={variant} priority={priority} />
-      )}
+      <CoverImage imageUrl={imageUrl} variant={variant} priority={priority} />
 
       <div className={contentContainer({ variant, withImg })}>
         {/* 제목 */}
@@ -58,13 +59,15 @@ export default function NoteCard({
         {variant === "large" && (
           <Meta
             author={data.author}
-            date={data.date}
+            date={formatDate(data.date)}
             likeCount={data.likeCount}
           />
         )}
 
         {/* 본문 */}
-        <div className={content({ variant, withImg })}>{data.description}</div>
+        <div className={content({ variant, withImg })}>
+          {stripHtml(data.description, maxLength)}
+        </div>
       </div>
     </Link>
   );

@@ -2,7 +2,7 @@ import { ReactRenderer, Editor } from '@tiptap/react';
 import { Range } from '@tiptap/core';
 import { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
 import tippy, { Instance } from 'tippy.js';
-import { SuggestionList, SuggestionItem, CommandProps, SuggestionListRef } from './SuggestionList';
+import { SuggestionList, SuggestionItem, CommandProps, SuggestionListRef } from '../ui/SuggestionList';
 
 export const suggestion = {
   items: ({ query }: { query: string }): SuggestionItem[] => {

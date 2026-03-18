@@ -1,50 +1,13 @@
 'use client';
 
-import { useEditor, EditorContent, Extension } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
-import Image from '@tiptap/extension-image';
-import Suggestion from '@tiptap/suggestion';
+import { EditorContent } from '@tiptap/react';
 import * as s from './Editor.css';
-import { suggestion } from './suggestion';
 import { useNoteEditorStore } from '../model/useNoteEditorStore';
+import { useNoteEditor } from '../model/useNoteEditor';
 
 const Editor = () => {
-  const { title, setTitle, setContent } = useNoteEditorStore();
-
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      Image,
-      Placeholder.configure({
-        placeholder: '/ 명령어로 기록을 남겨보세요',
-      }),
-      // 슬래시 메뉴(/) 확장
-      Extension.create({
-        name: 'slash-menu',
-        addProseMirrorPlugins() {
-          return [
-            Suggestion({
-              editor: this.editor,
-              char: '/',
-              ...suggestion,
-            }),
-          ];
-        },
-      }),
-    ],
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        class: s.editorContent,
-      },
-    },
-    onUpdate: ({ editor }) => {
-      setContent(editor.getHTML());
-    },
-  });
+  const { title, setTitle } = useNoteEditorStore();
+  const editor = useNoteEditor({className: s.editorContent})
 
   const handleTitleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -59,7 +22,6 @@ const Editor = () => {
 
   return (
     <div className={s.editorContainer}>
-      {/* 제목 입력 영역 */}
       <input
         type="text"
         className={s.titleInput}
@@ -67,9 +29,8 @@ const Editor = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={handleTitleKeyDown}
+        maxLength={10}
       />
-
-      {/* 본문 에디터 영역 */}
       <EditorContent editor={editor} />
     </div>
   );

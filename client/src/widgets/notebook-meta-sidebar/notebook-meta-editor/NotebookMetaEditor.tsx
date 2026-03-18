@@ -3,15 +3,13 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import * as s from './NotebookEditorSidebar.css';
-import { SideBar } from '@/shared/ui/sidebar/SideBar';
+import * as s from './NotebookMetaEditor.css';
 import { Input } from '@/shared/ui/input/input/Input';
 import { Textarea } from '@/shared/ui/input/textarea/Textarea';
 import { Dropdown } from '@/shared/ui/dropdown/Dropdown';
 import Button from '@/shared/ui/button/button/Button';
 import Tag from '@/shared/ui/tag/Tag';
 import AddIcon from '@/shared/assets/icons/common/add.svg';
-import { useSidebarStore } from '@/shared/model/stores/useSidebarStore';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
 import { createNote } from '@/entities/note/api/note.api';
 import { CategoryType } from '@/shared/types/api.types';
@@ -32,10 +30,9 @@ const MOCK_STORIES = [
   { id: 3, title: 'CS 기초 지식' },
 ];
 
-export const NotebookEditorSidebar = () => {
+export const NotebookMetaEditor = () => {
   const router = useRouter();
   const [tagInput, setTagInput] = useState('');
-  const { isSidebarOpen } = useSidebarStore();
   const { isLoggedIn } = useAuthStore();
   
   const { 
@@ -110,11 +107,7 @@ export const NotebookEditorSidebar = () => {
   };
 
   return (
-    <SideBar 
-      position="right" 
-      isSidebarOpen={isSidebarOpen} 
-      className={s.sidebarContainer}
-    >
+    <>
       <header>
         <h3>노트설정</h3>
       </header>
@@ -276,6 +269,6 @@ export const NotebookEditorSidebar = () => {
           게시하기
         </Button>
       </div>
-    </SideBar>
+    </>
   );
 };
