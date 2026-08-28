@@ -34,19 +34,16 @@ export const activeTagItem = style({
 
 export const grid = style({
   display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
+  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
   gap: "1.25rem",
   width: "100%",
 
   "@media": {
-    "screen and (max-width: 1200px)": {
-      gridTemplateColumns: "repeat(3, 1fr)",
+    "screen and (max-width: 768px)": {
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     },
-    "screen and (max-width: 900px)": {
-      gridTemplateColumns: "repeat(2, 1fr)",
-    },
-    "screen and (max-width: 600px)": {
-      gridTemplateColumns: "repeat(1, 1fr)",
+    "screen and (max-width: 480px)": {
+      gridTemplateColumns: "repeat(1, minmax(0, 1fr))",
     },
   },
 });

@@ -20,10 +20,9 @@ export default function NotebookDetailPage() {
   }
 
   return (
-      <div className={s.container}>
-        <NoteMeta note={note} />
-        <NoteViewer content={note.description ?? ''} />
-      </div>
-    );
-  }
-
+    <div className={s.container}>
+      <NoteMeta note={note} />
+      <NoteViewer content={note.description ?? ''} />
+    </div>
+  );
+}
