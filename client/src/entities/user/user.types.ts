@@ -13,7 +13,7 @@ export interface LoginResponse {
   nickname: string;
 }
 
-// 이메일 인증 부분은 추후 백엔드에서 Auth -> User로 변경 에정
+// 이메일 인증 부분은 추후 백엔드에서 Auth -> User로 변경 예정
 export interface EmailVerifyRequest {
   email: string;
   code: string;
@@ -23,6 +23,7 @@ export interface EmailVerifyRequest {
 export interface UserCreateRequest {
   email: string;
   password: string;
+  rePassword: string;
   nickname: string;
 }
 
@@ -35,7 +36,8 @@ export interface UserInfo {
 
 // 공통 응답 및 단순 요청 타입
 export interface ConflictCheckResponse {
-  isConflict: boolean;
+  isExists: boolean;
+  isConflict?: boolean;
 }
 
 export type EmailRequest = { email: string };
