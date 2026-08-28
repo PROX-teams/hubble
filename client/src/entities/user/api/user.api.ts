@@ -25,3 +25,6 @@ export const checkNicknameConflict = (data: NicknameRequest) =>
     method: 'POST',
     body: JSON.stringify(data),
   });
+
+export const getUserProfile = (userId: number) =>
+  fetcher<UserInfo>(`${API_ENDPOINTS.USER.PROFILE}/${userId}`);

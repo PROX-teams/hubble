@@ -13,5 +13,6 @@ export const API_ENDPOINTS = {
     SIGNUP: '/user/signup',
     CHECK_EMAIL: '/user/check-email',
     CHECK_NICKNAME: '/user/check-nickname',
+    PROFILE: '/user',
   },
 } as const;

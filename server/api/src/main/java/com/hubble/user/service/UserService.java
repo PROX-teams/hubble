@@ -36,6 +36,15 @@ public class UserService {
     }
 
     /**
+     * 사용자 프로필 정보 조회
+     */
+    public com.hubble.user.dto.response.UserProfileResponse getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        return com.hubble.user.dto.response.UserProfileResponse.from(user);
+    }
+
+    /**
      * 회원가입 (Signup)
      */
     @Transactional
