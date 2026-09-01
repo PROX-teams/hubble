@@ -1,6 +1,6 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
-import type { PageResponse, CategoryType, SortType } from '@/shared/types/api.types';
+import type { PageResponse, CategoryType, SortType } from '@/shared/types';
 import type { Story } from '../story.types';
 
 export interface GetStoriesParams {

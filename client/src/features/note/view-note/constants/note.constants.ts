@@ -1,4 +1,4 @@
-import { CategoryType } from '@/shared/types/api.types';
+import { CategoryType } from '@/shared/types';
 
 export const CATEGORY_MAP: Record<CategoryType, string> = {
   DEVELOPMENT: '개발',

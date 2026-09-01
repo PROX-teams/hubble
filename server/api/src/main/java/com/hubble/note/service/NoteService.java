@@ -2,6 +2,7 @@ package com.hubble.note.service;
 
 import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
+import com.hubble.note.dto.response.NoteHistoryResponse;
 import com.hubble.note.dto.response.NoteResponse;
 import com.hubble.note.dto.response.TagCountResponse;
 import com.hubble.note.entity.Note;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -146,6 +148,12 @@ public class NoteService {
         return noteTagRepository.findTagCountsByUserId(targetUserId).stream()
                 .map(dto -> new TagCountResponse(dto.name(), dto.count()))
                 .collect(Collectors.toList());
+    }
+
+    public Slice<NoteHistoryResponse> getRecentUpdates(Long userId, Pageable pageable) {
+        getUserEntity(userId); // 유저 존재 여부 검증
+        return noteRepository.findRecentUpdatesByUserId(userId, pageable)
+                .map(NoteHistoryResponse::from);
     }
 
     public List<NoteResponse> getTop10LikedNotes(Long userId) {

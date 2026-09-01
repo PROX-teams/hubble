@@ -65,4 +65,11 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     @Query("select n from Note n join fetch n.user left join fetch n.story order by n.viewCount desc")
     List<Note> findTop10ByOrderByViewCountDescWithFetch(Pageable pageable);
+
+    // 로그인 사용자의 최근 업데이트 노트 이력 조회 (경량 DTO 프로젝션 및 Slice 무한스크롤 최적화)
+    @Query("SELECT new com.hubble.note.dto.NoteHistoryDto(n.id, n.title, s.title, n.updatedAt) " +
+           "FROM Note n LEFT JOIN n.story s " +
+           "WHERE n.user.id = :userId " +
+           "ORDER BY n.updatedAt DESC")
+    org.springframework.data.domain.Slice<com.hubble.note.dto.NoteHistoryDto> findRecentUpdatesByUserId(@Param("userId") Long userId, Pageable pageable);
 }

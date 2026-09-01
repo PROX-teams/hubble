@@ -1,7 +1,13 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
-import type { PageResponse, CategoryType, SortType } from '@/shared/types/api.types';
-import type { Note, NoteCreateRequest, GetNotebookNotesParams } from '../note.types';
+import type { PageResponse, SliceResponse, CategoryType, SortType } from '@/shared/types';
+import type {
+  Note,
+  NoteCreateRequest,
+  GetNotebookNotesParams,
+  NoteHistoryItem,
+  GetRecentUpdatesParams,
+} from '../note.types';
 
 export interface GetNotesParams {
   category?: CategoryType;
@@ -112,4 +118,21 @@ export const toggleBookmarkNote = async (id: number): Promise<void> => {
   return fetcher<void>(`${API_ENDPOINTS.NOTE}/${id}/bookmark`, {
     method: 'POST',
   });
+};
+
+/**
+ * 로그인 사용자의 최근 수정 노트 이력 조회 (Slice 무한스크롤)
+ */
+export const getRecentUpdates = async (
+  params: GetRecentUpdatesParams = {}
+): Promise<SliceResponse<NoteHistoryItem>> => {
+  const { page = 0, size = 10 } = params;
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+
+  return fetcher<SliceResponse<NoteHistoryItem>>(
+    `${API_ENDPOINTS.NOTE}/me/recent-updates?${queryParams.toString()}`
+  );
 };

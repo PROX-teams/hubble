@@ -12,7 +12,7 @@ import Tag from '@/shared/ui/tag/Tag';
 import AddIcon from '@/shared/assets/icons/common/add.svg';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
 import { createNote } from '@/entities/note/api/note.api';
-import { CategoryType } from '@/shared/types/api.types';
+import { CategoryType } from '@/shared/types';
 import { useAuthStore } from '@/entities/user/model/useAuthStore';
 
 const CATEGORIES: { id: CategoryType; label: string }[] = [

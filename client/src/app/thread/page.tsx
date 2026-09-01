@@ -5,7 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { getNotes } from '@/entities/note/api/note.api';
 import { getStories } from '@/entities/story/api/story.api';
 import { InfiniteScrollTrigger } from '@/features/infinite-scroll/ui/InfiniteScrollTrigger';
-import { CategoryType, SortType } from '@/shared/types/api.types';
+import { CategoryType, SortType } from '@/shared/types';
 import NoteCard from '@/entities/note/ui/note-card/NoteCard';
 import StoryCard from '@/entities/story/ui/story-card/StoryCard';
 import { AppToggleGroup } from '@/shared/ui/toggle/app-toggle-group/AppToggleGroup';

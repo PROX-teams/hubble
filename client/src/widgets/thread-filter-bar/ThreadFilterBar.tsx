@@ -1,6 +1,6 @@
 'use client';
 
-import { CategoryType, SortType } from '@/shared/types/api.types';
+import { CategoryType, SortType } from '@/shared/types';
 import { Dropdown } from '@/shared/ui/dropdown/Dropdown';
 import { AppToggleGroup } from '@/shared/ui/toggle/app-toggle-group/AppToggleGroup';
 import Tag from '@/shared/ui/tag/Tag';

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CategoryType } from '@/shared/types/api.types';
+import { CategoryType } from '@/shared/types';
 
 interface NoteEditorState {
   title: string;

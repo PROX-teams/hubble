@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { StorySidebar } from "@/widgets/story-sidebar/StorySidebar";
 import StoryCard from "@/entities/story/ui/story-card/StoryCard";
 import type { Story } from "@/entities/story/story.types";
 import { UpdateHistory } from "@/widgets/update-history/UpdateHistory";
-import type { HistoryCardData } from "@/entities/note/ui/history-card/HistoryCard";
 import { StoryCardModal } from "@/widgets/storycard-modal/StoryCardModal";
 import { useMyStories } from "@/entities/story/model/useMyStories";
 import { useMyNotes } from "@/entities/note/model/useMyNotes";
@@ -19,29 +18,11 @@ function StorybookContent() {
   const { stories, isLoading: isStoriesLoading } = useMyStories();
   const { notes, isLoading: isNotesLoading } = useMyNotes({ size: 100 });
 
-  // 2. 실제 노트 목록 기반 최근 업데이트 히스토리 계산 (최신순 7건)
-  const historyItems: HistoryCardData[] = useMemo(() => {
-    if (!notes || notes.length === 0) return [];
-
-    return [...notes]
-      .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
-      .slice(0, 7)
-      .map((note) => {
-        const parentStory = stories.find((s) => s.articleIds?.includes(note.id));
-        return {
-          id: note.id,
-          title: note.title,
-          storyTitle: parentStory?.title ?? "스토리 미지정",
-          date: note.date || "",
-        };
-      });
-  }, [notes, stories]);
-
   const isLoading = isStoriesLoading || isNotesLoading;
 
   return (
     <>
-      {/* 좌측 고정 스토리 사이드바 (실제 스토리 및 소속 노트 목록 바인딩) */}
+      {/* 좌측 고정 스토리 사이드바 */}
       <StorySidebar stories={stories} notes={notes} />
 
       {/* 메인 콘텐츠 영역 */}
@@ -69,8 +50,8 @@ function StorybookContent() {
             ))}
         </section>
 
-        {/* 하단 최근 노트 업데이트 이력 섹션 */}
-        {historyItems.length > 0 && <UpdateHistory items={historyItems} />}
+        {/* 하단 최근 노트 업데이트 이력 섹션 (Slice 무한 스크롤 지원) */}
+        <UpdateHistory />
 
         {/* 메인 스토리 카드 클릭 시 열리는 상세 모달 */}
         {selectedStory && (

@@ -1,6 +1,7 @@
 import React, { ComponentPropsWithoutRef } from "react";
 import Link from "next/link";
 import clsx from "clsx";
+import { formatDate } from "@/shared/lib/utils/date";
 import NextIcon from "@/shared/assets/icons/common/next.svg";
 import RoutingIcon from "@/shared/assets/icons/main/routing.svg";
 import * as S from "./HistoryCard.css";
@@ -33,13 +34,13 @@ const HistoryCard = ({ data, className, ...props }: HistoryCardProps) => {
         <div className={S.textContent}>
           <strong className={S.title}>{data.title}</strong>
           <span className={S.meta}>
-            {data.storyTitle} | {data.date}
+            {data.storyTitle} | {formatDate(data.date)}
           </span>
         </div>
       </div>
 
       <span className={S.arrowIcon}>
-        <NextIcon width={16} height={16} />
+        <NextIcon />
       </span>
     </Link>
   );

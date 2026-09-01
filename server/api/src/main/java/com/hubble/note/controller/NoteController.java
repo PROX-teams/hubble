@@ -2,6 +2,7 @@ package com.hubble.note.controller;
 
 import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
+import com.hubble.note.dto.response.NoteHistoryResponse;
 import com.hubble.note.dto.response.NoteResponse;
 import com.hubble.note.dto.response.TagCountResponse;
 import com.hubble.note.service.NoteService;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,6 +89,14 @@ public class NoteController {
             @RequestParam(required = false) String tagName,
             @PageableDefault(size = 12) Pageable pageable) {
         return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable, userId));
+    }
+
+    @Operation(summary = "내가 작성한 노트의 최근 수정 이력 조회", description = "로그인한 사용자의 최근 수정된 노트 목록을 경량 DTO로 조회합니다. (Slice 무한스크롤 지원)")
+    @GetMapping("/me/recent-updates")
+    public ResponseEntity<Slice<NoteHistoryResponse>> getRecentUpdates(
+            @AuthenticationPrincipal Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getRecentUpdates(userId, pageable));
     }
 
     @Operation(summary = "내가 작성한 노트의 태그 통계 조회", description = "로그인한 사용자가 작성한 노트들의 태그 목록과 각 태그별 게시글 수를 조회합니다.")
