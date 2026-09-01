@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import * as s from './NotebookMetaEditor.css';
 import { Input } from '@/shared/ui/input/input/Input';
 import { Textarea } from '@/shared/ui/input/textarea/Textarea';
@@ -11,7 +12,7 @@ import Button from '@/shared/ui/button/button/Button';
 import Tag from '@/shared/ui/tag/Tag';
 import AddIcon from '@/shared/assets/icons/common/add.svg';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
-import { createNote } from '@/entities/note/api/note.api';
+import { createNote, updateNote } from '@/entities/note/api/note.api';
 import { CategoryType } from '@/shared/types';
 import { useAuthStore } from '@/entities/user/model/useAuthStore';
 
@@ -32,10 +33,12 @@ const MOCK_STORIES = [
 
 export const NotebookMetaEditor = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [tagInput, setTagInput] = useState('');
   const { isLoggedIn } = useAuthStore();
   
   const { 
+    noteId,
     title, 
     content, 
     category, 
@@ -48,6 +51,8 @@ export const NotebookMetaEditor = () => {
     setStoryId,
     reset
   } = useNoteEditorStore();
+
+  const isEdit = Boolean(noteId);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -88,21 +93,31 @@ export const NotebookMetaEditor = () => {
     }
 
     try {
-      await createNote({
+      const payload = {
         title,
         content,
         category,
         tag,
         imageUrl,
         storyId: storyId || undefined,
-      });
-      
-      alert('노트가 게시되었습니다.');
+      };
+
+      if (isEdit && noteId) {
+        await updateNote(noteId, payload);
+        alert('노트가 수정되었습니다.');
+        queryClient.invalidateQueries({ queryKey: ['noteDetail', noteId] });
+      } else {
+        await createNote(payload);
+        alert('노트가 게시되었습니다.');
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['notebookNotes'] });
+      queryClient.invalidateQueries({ queryKey: ['recentUpdatesInfinite'] });
       reset();
       router.push('/thread');
     } catch (error) {
-      console.error('Failed to publish note:', error);
-      alert('노트 게시 중 오류가 발생했습니다.');
+      console.error('Failed to save note:', error);
+      alert(isEdit ? '노트 수정 중 오류가 발생했습니다.' : '노트 게시 중 오류가 발생했습니다.');
     }
   };
 
@@ -266,7 +281,7 @@ export const NotebookMetaEditor = () => {
           size="lg" 
           onClick={handlePublish}
         >
-          게시하기
+          {isEdit ? '수정 완료' : '게시하기'}
         </Button>
       </div>
     </>

@@ -17,6 +17,7 @@ export type Variant = "large" | "small" | "wide" | "compact";
 interface NoteCardProps {
   data: Omit<Note, "imageUrl">;
   imageUrl?: string;
+  href?: string;
   /**
    * large -   305 X 304 / Thread Page
    * small -   202 X 198 / Main Page
@@ -35,6 +36,7 @@ interface NoteCardProps {
 export default function NoteCard({
   data,
   imageUrl,
+  href,
   variant = "small",
   priority = false,
 }: NoteCardProps) {
@@ -43,7 +45,7 @@ export default function NoteCard({
 
   return (
     <Link
-      href={`/notebook/${data.id}`}
+      href={href ?? `/notebook/${data.id}`}
       className={clsx(container({ variant }), hoverContainer)}
     >
       {/* 커버 이미지 (이미지가 있을 때만 렌더링) */}

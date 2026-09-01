@@ -89,6 +89,28 @@ export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
 };
 
 /**
+ * 기존 노트 수정
+ */
+export const updateNote = async (
+  id: number,
+  data: NoteCreateRequest
+): Promise<Note> => {
+  return fetcher<Note>(`${API_ENDPOINTS.NOTE}/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+/**
+ * 노트 삭제
+ */
+export const deleteNote = async (id: number): Promise<void> => {
+  return fetcher<void>(`${API_ENDPOINTS.NOTE}/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+/**
  * 조회수 많은 노트 Top 10 조회
  */
 export const getTop10ViewedNotes = async (): Promise<Note[]> => {

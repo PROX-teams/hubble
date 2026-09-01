@@ -94,6 +94,7 @@ const MyNoteList = () => {
                       key={note.id} 
                       data={note} 
                       variant="compact"
+                      href={`/notebook/${note.id}/edit`}
                     />
                   ))}
                 </div>
