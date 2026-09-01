@@ -49,4 +49,6 @@ next-env.d.ts
 
 # server
 server/.gradle
+server/**/application-local.properties
+server/**/application-local.yml
 
