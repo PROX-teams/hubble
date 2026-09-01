@@ -34,6 +34,7 @@ const FolderIcon = (props: React.SVGProps<SVGSVGElement>) => (
 interface StorySidebarProps {
   stories?: Story[];
   notes?: Note[];
+  onAddStory?: () => void;
 }
 
 /**
@@ -44,6 +45,7 @@ interface StorySidebarProps {
 export const StorySidebar = ({
   stories = [],
   notes = [],
+  onAddStory,
 }: StorySidebarProps) => {
   const recentStories = stories.slice(0, 2);
   const otherStories = stories.slice(2);
@@ -68,7 +70,12 @@ export const StorySidebar = ({
 
         {/* 2번째 툴바: 초록색 새 폴더 아이콘 + 정렬 아이콘 */}
         <div className={S.subToolbar}>
-          <button type="button" className={S.addFolderButton} aria-label="새 폴더 추가">
+          <button
+            type="button"
+            className={S.addFolderButton}
+            aria-label="새 폴더 추가"
+            onClick={onAddStory}
+          >
             <AddFolderIcon width={18} height={18} />
           </button>
           <button type="button" className={S.sortButton} aria-label="목록 정렬">

@@ -1,7 +1,7 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
 import type { PageResponse, CategoryType, SortType } from '@/shared/types';
-import type { Story } from '../story.types';
+import type { Story, StoryCreateRequest } from '../story.types';
 
 export interface GetStoriesParams {
   category?: CategoryType;
@@ -29,7 +29,6 @@ export const getStories = async (params: GetStoriesParams): Promise<PageResponse
         queryParams.append('sort', 'likeCount,desc');
         break;
       case 'mostViewed':
-        // 스토리에도 viewCount가 있다면 사용, 없다면 다른 기준 고려
         queryParams.append('sort', 'viewCount,desc');
         break;
       case 'latest':
@@ -43,6 +42,38 @@ export const getStories = async (params: GetStoriesParams): Promise<PageResponse
   const url = queryString ? `${API_ENDPOINTS.STORY}?${queryString}` : API_ENDPOINTS.STORY;
 
   return fetcher<PageResponse<Story>>(url);
+};
+
+/**
+ * 새로운 스토리 생성
+ */
+export const createStory = async (data: StoryCreateRequest): Promise<Story> => {
+  return fetcher<Story>(API_ENDPOINTS.STORY, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+/**
+ * 스토리 수정
+ */
+export const updateStory = async (
+  storyId: number,
+  data: StoryCreateRequest
+): Promise<Story> => {
+  return fetcher<Story>(`${API_ENDPOINTS.STORY}/${storyId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+/**
+ * 스토리 삭제
+ */
+export const deleteStory = async (storyId: number): Promise<void> => {
+  return fetcher<void>(`${API_ENDPOINTS.STORY}/${storyId}`, {
+    method: 'DELETE',
+  });
 };
 
 /**

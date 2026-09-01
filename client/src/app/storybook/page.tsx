@@ -6,6 +6,7 @@ import StoryCard from "@/entities/story/ui/story-card/StoryCard";
 import type { Story } from "@/entities/story/story.types";
 import { UpdateHistory } from "@/widgets/update-history/UpdateHistory";
 import { StoryCardModal } from "@/widgets/storycard-modal/StoryCardModal";
+import { CreateStoryModal } from "@/features/story/create-story/ui/CreateStoryModal";
 import { useMyStories } from "@/entities/story/model/useMyStories";
 import { useMyNotes } from "@/entities/note/model/useMyNotes";
 import { AuthGuard } from "@/features/auth/AuthGuard";
@@ -13,6 +14,7 @@ import * as S from "./page.css";
 
 function StorybookContent() {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [isCreateStoryModalOpen, setIsCreateStoryModalOpen] = useState(false);
 
   // 1. 실제 백엔드 API 연동
   const { stories, isLoading: isStoriesLoading } = useMyStories();
@@ -22,8 +24,12 @@ function StorybookContent() {
 
   return (
     <>
-      {/* 좌측 고정 스토리 사이드바 */}
-      <StorySidebar stories={stories} notes={notes} />
+      {/* 좌측 고정 스토리 사이드바 (폴더 버튼 클릭 시 모달 열기) */}
+      <StorySidebar
+        stories={stories}
+        notes={notes}
+        onAddStory={() => setIsCreateStoryModalOpen(true)}
+      />
 
       {/* 메인 콘텐츠 영역 */}
       <div className={S.container}>
@@ -61,6 +67,12 @@ function StorybookContent() {
             onClose={() => setSelectedStory(null)}
           />
         )}
+
+        {/* 사이드바 폴더 버튼 클릭 시 열리는 스토리 생성 모달 */}
+        <CreateStoryModal
+          isOpen={isCreateStoryModalOpen}
+          onClose={() => setIsCreateStoryModalOpen(false)}
+        />
       </div>
     </>
   );

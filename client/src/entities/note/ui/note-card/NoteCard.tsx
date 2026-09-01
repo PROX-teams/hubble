@@ -46,8 +46,10 @@ export default function NoteCard({
       href={`/notebook/${data.id}`}
       className={clsx(container({ variant }), hoverContainer)}
     >
-      {/* 커버 이미지 */}
-      <CoverImage imageUrl={imageUrl} variant={variant} priority={priority} />
+      {/* 커버 이미지 (이미지가 있을 때만 렌더링) */}
+      {withImg && (
+        <CoverImage imageUrl={imageUrl} variant={variant} priority={priority} />
+      )}
 
       <div className={contentContainer({ variant, withImg })}>
         {/* 제목 */}
