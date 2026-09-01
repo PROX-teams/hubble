@@ -46,4 +46,11 @@ public class UserController {
         boolean isConflict = userService.checkNicknameConflict(request.nickname());
         return ResponseEntity.ok(new NicknameConflictCheckResponse(isConflict));
     }
+
+    @Operation(summary = "사용자 프로필 정보 조회", description = "특정 사용자의 기본 프로필(ID, 이메일, 닉네임)을 조회합니다.")
+    @org.springframework.web.bind.annotation.GetMapping("/{userId}")
+    public ResponseEntity<com.hubble.user.dto.response.UserProfileResponse> getUserProfile(
+            @org.springframework.web.bind.annotation.PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserProfile(userId));
+    }
 }

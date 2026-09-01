@@ -23,14 +23,19 @@ export const SignupForm = () => {
 
   // 이메일 중복 확인
   const handleEmailCheck = () => {
+    if (!email) return;
     checkEmail.mutate({ email }, {
       onSuccess: (data) => {
-        if (data.isConflict) {
+        const isDuplicated = data.isExists ?? data.isConflict ?? false;
+        if (isDuplicated) {
           alert('이미 사용 중인 이메일입니다.');
         } else {
           // 중복이 아니면 바로 인증 코드 발송
           handleSendCode();
         }
+      },
+      onError: (error) => {
+        alert(error.message || '이메일 중복 확인에 실패했습니다.');
       }
     });
   };
@@ -40,13 +45,17 @@ export const SignupForm = () => {
     sendCode.mutate({ email }, {
       onSuccess: () => {
         setIsCodeSent(true);
-        alert('인증 코드가 발송되었습니다.');
+        alert('인증 코드가 발송되었습니다. (서버 콘솔 로그를 확인해 주세요)');
+      },
+      onError: (error) => {
+        alert(error.message || '인증 코드 발송에 실패했습니다.');
       }
     });
   };
 
   // 인증 코드 검증
   const handleVerifyCode = () => {
+    if (!authCode) return;
     verifyCode.mutate({ email, code: authCode }, {
       onSuccess: () => {
         setIsEmailVerified(true);
@@ -63,13 +72,17 @@ export const SignupForm = () => {
     if (!nickname) return;
     checkNickname.mutate({ nickname }, {
       onSuccess: (data) => {
-        if (data.isConflict) {
+        const isDuplicated = data.isExists ?? data.isConflict ?? false;
+        if (isDuplicated) {
           alert('이미 사용 중인 닉네임입니다.');
           setIsNicknameChecked(false);
         } else {
           setIsNicknameChecked(true);
           alert('사용 가능한 닉네임입니다.');
         }
+      },
+      onError: (error) => {
+        alert(error.message || '닉네임 중복 확인에 실패했습니다.');
       }
     });
   };
@@ -82,7 +95,7 @@ export const SignupForm = () => {
       return;
     }
 
-    signup.mutate({ email, password, nickname });
+    signup.mutate({ email, password, rePassword, nickname });
   };
 
   const isFormValid = isEmailVerified && isNicknameChecked && password && rePassword && password === rePassword;

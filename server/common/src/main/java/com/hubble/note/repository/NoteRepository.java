@@ -8,11 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
 
     @Modifying(clearAutomatically = true)
@@ -47,14 +45,20 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
            countQuery = "select count(n) from Note n where n.title like %:keyword% or n.content like %:keyword%")
     Page<Note> findByKeywordWithFetch(@Param("keyword") String keyword, Pageable pageable);
 
-    // 태그 이름으로 필터링 (ManyToOne fetch join 적용)
+    // 태그 이름으로 전체 필터링 (ManyToOne fetch join 적용)
     @Query(value = "select distinct n from Note n join fetch n.user left join fetch n.story join n.noteTags nt join nt.tag t where t.name = :tagName",
            countQuery = "select count(distinct n) from Note n join n.noteTags nt join nt.tag t where t.name = :tagName")
     Page<Note> findAllByTagNameWithFetch(@Param("tagName") String tagName, Pageable pageable);
 
+    // 로그인 사용자 전체 노트 조회
     @Query(value = "select n from Note n join fetch n.user left join fetch n.story where n.user.id = :userId",
            countQuery = "select count(n) from Note n where n.user.id = :userId")
     Page<Note> findAllByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
+
+    // 로그인 사용자의 특정 태그 노트 필터링
+    @Query(value = "select distinct n from Note n join fetch n.user left join fetch n.story join n.noteTags nt join nt.tag t where n.user.id = :userId and t.name = :tagName",
+           countQuery = "select count(distinct n) from Note n join n.noteTags nt join nt.tag t where n.user.id = :userId and t.name = :tagName")
+    Page<Note> findAllByUserIdAndTagNameWithFetch(@Param("userId") Long userId, @Param("tagName") String tagName, Pageable pageable);
 
     @Query("select n from Note n join fetch n.user left join fetch n.story order by n.likeCount desc")
     List<Note> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);

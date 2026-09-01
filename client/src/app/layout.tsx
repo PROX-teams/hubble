@@ -50,6 +50,7 @@ export default function RootLayout({
                 <SearchContents />
               </Modal>
             )}
+            <div id="modalRoot" />
           </ThemeProvider>
         </QueryProvider>
       </body>

@@ -1,4 +1,4 @@
-import { CategoryType } from '@/shared/types/api.types';
+import { CategoryType, SortType } from '@/shared/types/api.types';
 
 interface NoteMeta {
   author?: string;
@@ -30,4 +30,14 @@ interface NoteCreateRequest {
   storyId?: number;
 }
 
-export type { NoteMeta, Note, NoteCreateRequest };
+interface GetNotebookNotesParams {
+  userId?: number;
+  tagName?: string;
+  sortType?: SortType;
+  page?: number;
+  size?: number;
+}
+
+type GetMyNotesParams = GetNotebookNotesParams;
+
+export type { NoteMeta, Note, NoteCreateRequest, GetNotebookNotesParams, GetMyNotesParams };

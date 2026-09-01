@@ -3,6 +3,7 @@ package com.hubble.note.service;
 import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteResponse;
+import com.hubble.note.dto.response.TagCountResponse;
 import com.hubble.note.entity.Note;
 import com.hubble.note.entity.NoteBookmark;
 import com.hubble.note.entity.NoteLike;
@@ -127,10 +128,24 @@ public class NoteService {
                 .map(bookmark -> NoteResponse.of(bookmark.getNote(), isLiked(user, bookmark.getNote()), true));
     }
 
-    public Page<NoteResponse> getMyNotes(Long userId, Pageable pageable) {
-        User user = getUserEntity(userId);
-        return noteRepository.findAllByUserIdWithFetch(userId, pageable)
-                .map(note -> NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note)));
+    public Page<NoteResponse> getUserNotes(Long targetUserId, String tagName, Pageable pageable, Long viewerUserId) {
+        getUserEntity(targetUserId); // 타겟 유저 존재 여부 검증
+        User viewerUser = (viewerUserId != null) ? userRepository.findById(viewerUserId).orElse(null) : null;
+
+        Page<Note> notes;
+        if (tagName != null && !tagName.isBlank()) {
+            notes = noteRepository.findAllByUserIdAndTagNameWithFetch(targetUserId, tagName, pageable);
+        } else {
+            notes = noteRepository.findAllByUserIdWithFetch(targetUserId, pageable);
+        }
+        return notes.map(note -> NoteResponse.of(note, isLiked(viewerUser, note), isBookmarked(viewerUser, note)));
+    }
+
+    public List<TagCountResponse> getUserTags(Long targetUserId) {
+        getUserEntity(targetUserId); // 타겟 유저 존재 여부 검증
+        return noteTagRepository.findTagCountsByUserId(targetUserId).stream()
+                .map(dto -> new TagCountResponse(dto.name(), dto.count()))
+                .collect(Collectors.toList());
     }
 
     public List<NoteResponse> getTop10LikedNotes(Long userId) {

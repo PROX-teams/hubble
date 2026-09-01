@@ -23,5 +23,15 @@ export const fetcher = async <T>(url: string, options?: RequestInit): Promise<T>
     throw new Error(message);
   }
 
-  return response.json();
+  // 빈 응답(204 No Content, void API 등) 처리
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
 };

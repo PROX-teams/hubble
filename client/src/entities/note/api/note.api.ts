@@ -1,7 +1,7 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
 import type { PageResponse, CategoryType, SortType } from '@/shared/types/api.types';
-import type { Note, NoteCreateRequest } from '../note.types';
+import type { Note, NoteCreateRequest, GetNotebookNotesParams } from '../note.types';
 
 export interface GetNotesParams {
   category?: CategoryType;
@@ -12,38 +12,28 @@ export interface GetNotesParams {
   size?: number;
 }
 
+const SORT_PARAM_MAP: Record<SortType, string> = {
+  mostLiked: 'likeCount,desc',
+  mostViewed: 'viewCount,desc',
+  latest: 'createdAt,desc',
+};
+
 /**
- * 노트 목록 조회 (무한 스크롤 및 필터링)
+ * 전체 노트 목록 조회 (무한 스크롤 및 필터링)
  */
-export const getNotes = async (params: GetNotesParams): Promise<PageResponse<Note>> => {
-  const queryParams = new URLSearchParams();
-  
-  if (params.category) queryParams.append('category', params.category);
-  if (params.tagName) queryParams.append('tagName', params.tagName);
-  if (params.keyword) queryParams.append('keyword', params.keyword);
-  if (params.page !== undefined) queryParams.append('page', params.page.toString());
-  if (params.size !== undefined) queryParams.append('size', params.size.toString());
+export const getNotes = async (params: GetNotesParams = {}): Promise<PageResponse<Note>> => {
+  const { category, tagName, keyword, sortType, page = 0, size = 10 } = params;
 
-  // 정렬 파라미터 변환 (Spring Data JPA의 sort=field,direction 형식에 맞춤)
-  if (params.sortType) {
-    switch (params.sortType) {
-      case 'mostLiked':
-        queryParams.append('sort', 'likeCount,desc');
-        break;
-      case 'mostViewed':
-        queryParams.append('sort', 'viewCount,desc');
-        break;
-      case 'latest':
-      default:
-        queryParams.append('sort', 'createdAt,desc');
-        break;
-    }
-  }
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+    ...(category && { category }),
+    ...(tagName && { tagName }),
+    ...(keyword && { keyword }),
+    ...(sortType && { sort: SORT_PARAM_MAP[sortType] }),
+  });
 
-  const queryString = queryParams.toString();
-  const url = queryString ? `${API_ENDPOINTS.NOTE}?${queryString}` : API_ENDPOINTS.NOTE;
-
-  return fetcher<PageResponse<Note>>(url);
+  return fetcher<PageResponse<Note>>(`${API_ENDPOINTS.NOTE}?${queryParams.toString()}`);
 };
 
 /**
@@ -57,15 +47,30 @@ export const getNoteDetail = async (id: number): Promise<Note> => {
  * 북마크한 노트 목록 조회
  */
 export const getBookmarkedNotes = async (page = 0, size = 10): Promise<PageResponse<Note>> => {
-  return fetcher<PageResponse<Note>>(`${API_ENDPOINTS.NOTE}/bookmarks?page=${page}&size=${size}`);
+  const queryParams = new URLSearchParams({ page: String(page), size: String(size) });
+  return fetcher<PageResponse<Note>>(`${API_ENDPOINTS.NOTE}/bookmarks?${queryParams.toString()}`);
 };
 
 /**
- * 내 노트 목록 조회
+ * 사용자별 노트북 목록 조회 (userId 전달 시 특정 유저, 미전달 시 본인 노트 조회)
  */
-export const getMyNotes = async (page = 0, size = 50): Promise<PageResponse<Note>> => {
-  return fetcher<PageResponse<Note>>(`${API_ENDPOINTS.NOTE}/me?page=${page}&size=${size}`);
+export const getNotebookNotes = async (
+  params: GetNotebookNotesParams = {}
+): Promise<PageResponse<Note>> => {
+  const { userId, tagName, sortType, page = 0, size = 12 } = params;
+
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+    ...(tagName && { tagName }),
+    ...(sortType && { sort: SORT_PARAM_MAP[sortType] }),
+  });
+
+  const baseUrl = userId ? `${API_ENDPOINTS.NOTE}/user/${userId}` : `${API_ENDPOINTS.NOTE}/me`;
+  return fetcher<PageResponse<Note>>(`${baseUrl}?${queryParams.toString()}`);
 };
+
+export const getMyNotes = getNotebookNotes;
 
 /**
  * 새 노트 생성

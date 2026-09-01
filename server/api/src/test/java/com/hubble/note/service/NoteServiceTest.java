@@ -118,7 +118,7 @@ class NoteServiceTest {
         given(noteRepository.findAllByUserIdWithFetch(eq(userId), any(Pageable.class))).willReturn(notePage);
 
         // when
-        Page<NoteResponse> response = noteService.getMyNotes(userId, pageable);
+        Page<NoteResponse> response = noteService.getUserNotes(userId, null, pageable, userId);
 
         // then
         assertThat(response.getContent()).hasSize(1);
