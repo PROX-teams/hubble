@@ -25,5 +25,5 @@ export const NAV_ITEMS_PRIMARY: RouteConfig[] = [
 export const NAV_ITEMS_SECONDARY: RouteConfig[] = [
   { href: PATHS.DASHBOARD, icon: DashboardIcon, label: "Dashboard" },
   { href: PATHS.STORYBOOK, icon: StoryIcon, label: "Story Book" },
-  { href: PATHS.NOTEBOOK, icon: NoteIcon, label: "Note Book" },
+  { href: PATHS.NOTEBOOK_NEW, icon: NoteIcon, label: "Note Book" },
 ];
