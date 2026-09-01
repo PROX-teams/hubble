@@ -1,50 +1,68 @@
 'use client';
 
-import React from 'react';
-import { useMyNotes } from '@/entities/note/model/useMyNotes';
+import React, { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useNotebookNotes } from '@/entities/note/model/useMyNotes';
+import { useNotebookFilter } from '@/entities/note/model/useNotebookFilter';
+import { useAuthStore } from '@/entities/user/model/useAuthStore';
+import useModal from '@/shared/model/hooks/useModal';
+import { NotebookHeader } from '@/widgets/notebook-header/NotebookHeader';
+import { NotebookTagBar } from '@/widgets/notebook-tag-bar/NotebookTagBar';
 import { NotebookNoteGrid } from '@/widgets/notebook-note-grid/NotebookNoteGrid';
-import type { Note } from '@/entities/note/note.types';
-import articleMock from '@/shared/mock/article.json';
+import AuthRequiredModal from '@/shared/ui/modal/auth-modal/AuthRequiredModal';
+import { PATHS } from '@/shared/constants/paths';
 import * as s from './page.css';
 
-// 시안 프리뷰 및 기본 데이터용 목업 노트 목록
-const MOCK_THUMBNAILS = [
-  'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=600&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-];
+function NotebookContent() {
+  const router = useRouter();
+  const { isLoggedIn } = useAuthStore();
+  const { targetUserId, selectedTag, sortType } = useNotebookFilter('mostViewed');
+  
+  // 기존 공통 useModal 훅 사용
+  const { isOpen: isAuthModalOpen, openModal: openAuthModal, closeModal: closeAuthModal } = useModal();
 
-const DEFAULT_MOCK_NOTES: Note[] = Array.from({ length: 8 }, (_, i) => ({
-  id: i + 1,
-  title: '토스 PM 출신의 IA 및 화면설계서 실무 파일',
-  author: 'PROX 팀블로그',
-  date: '2025.06.29',
-  likeCount: 32 + i * 3,
-  viewCount: 120 + i * 15,
-  description:
-    '네이버 CTO 출신 프론트엔드의 Next.js를 구현하는 방법에 대해 작성하였습니다. 네이버 CTO 출신 프론트엔드의 Next.js를 구현하는',
-  imageUrl: MOCK_THUMBNAILS[i % MOCK_THUMBNAILS.length] || articleMock.imageUrl,
-  tag: ['Frontend', 'SEO', 'Code Review'],
-  category: 'DEVELOPMENT',
-}));
+  // 비로그인 상태에서 내 노트북(/notebook)에 접근했을 때 로그인 모달 오픈
+  useEffect(() => {
+    if (!isLoggedIn && !targetUserId) {
+      openAuthModal();
+    }
+  }, [isLoggedIn, targetUserId, openAuthModal]);
 
-export default function NotebookPage() {
-  const { notes: apiNotes } = useMyNotes();
-
-  // 실제 API 데이터가 있으면 우선 사용하고, 없으면 시안 목업 데이터를 렌더링
-  const notesToDisplay = apiNotes.length > 0 ? apiNotes : DEFAULT_MOCK_NOTES;
+  const { notes, totalElements, isLoading } = useNotebookNotes({
+    userId: targetUserId,
+    tagName: selectedTag || undefined,
+    sortType,
+  });
 
   return (
     <div className={s.container}>
+      {/* 1층: 타이틀(닉네임 자동), 전체 글 카운트, 우측 버튼(새글/팔로우) & 정렬 드롭다운 */}
+      <NotebookHeader totalCount={totalElements} />
+
+      {/* 2층: 태그 칩 필터 바 (Props 0개 자율형) */}
+      <NotebookTagBar />
+
+      {/* 3층: 3열 카드 그리드 */}
       <NotebookNoteGrid
-        title="FrontEnd 공부집"
-        notes={notesToDisplay}
+        notes={notes}
+        isLoading={isLoading}
       />
+
+      {/* 비로그인 안내 모달 (기존 useModal 훅으로 제어) */}
+      {isAuthModalOpen && (
+        <AuthRequiredModal
+          hide={closeAuthModal}
+          onCancel={() => router.push(PATHS.HOME)}
+        />
+      )}
     </div>
+  );
+}
+
+export default function NotebookPage() {
+  return (
+    <Suspense fallback={<div className={s.container}>노트를 불러오는 중입니다...</div>}>
+      <NotebookContent />
+    </Suspense>
   );
 }

@@ -3,6 +3,7 @@ package com.hubble.note.controller;
 import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteResponse;
+import com.hubble.note.dto.response.TagCountResponse;
 import com.hubble.note.service.NoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -79,12 +80,37 @@ public class NoteController {
         return ResponseEntity.ok(noteService.getBookmarkedNotes(userId, pageable));
     }
 
-    @Operation(summary = "내가 작성한 노트 목록 조회", description = "로그인한 사용자가 작성한 노트 목록을 조회합니다.")
+    @Operation(summary = "내가 작성한 노트 목록 조회", description = "로그인한 사용자가 작성한 노트 목록을 조회합니다. (태그 필터링 및 정렬 지원)")
     @GetMapping("/me")
     public ResponseEntity<Page<NoteResponse>> getMyNotes(
             @AuthenticationPrincipal Long userId,
-            @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(noteService.getMyNotes(userId, pageable));
+            @RequestParam(required = false) String tagName,
+            @PageableDefault(size = 12) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable, userId));
+    }
+
+    @Operation(summary = "내가 작성한 노트의 태그 통계 조회", description = "로그인한 사용자가 작성한 노트들의 태그 목록과 각 태그별 게시글 수를 조회합니다.")
+    @GetMapping("/me/tags")
+    public ResponseEntity<List<TagCountResponse>> getMyTags(
+            @AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(noteService.getUserTags(userId));
+    }
+
+    @Operation(summary = "특정 사용자의 노트 목록 조회", description = "특정 사용자가 작성한 공개 노트 목록을 조회합니다. (태그 필터링 및 정렬 지원)")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<NoteResponse>> getUserNotes(
+            @PathVariable Long userId,
+            @RequestParam(required = false) String tagName,
+            @AuthenticationPrincipal Long viewerUserId,
+            @PageableDefault(size = 12) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable, viewerUserId));
+    }
+
+    @Operation(summary = "특정 사용자의 태그 통계 조회", description = "특정 사용자가 작성한 노트들의 태그 목록과 각 태그별 게시글 수를 조회합니다.")
+    @GetMapping("/user/{userId}/tags")
+    public ResponseEntity<List<TagCountResponse>> getUserTags(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(noteService.getUserTags(userId));
     }
 
     @Operation(summary = "좋아요 많은 노트 Top 10", description = "좋아요를 가장 많이 받은 노트 10개를 조회합니다.")
