@@ -172,36 +172,36 @@ public class NoteService {
 
     @Transactional
     public void toggleLike(Long userId, Long noteId) {
-        User user = getUserEntity(userId);
+        if (noteLikeRepository.existsByUserIdAndNoteId(userId, noteId)) {
+            noteLikeRepository.deleteByUserIdAndNoteId(userId, noteId);
+        } else {
+            User user = getUserEntity(userId);
+            Note note = getNoteEntity(noteId);
+            noteLikeRepository.save(NoteLike.builder().user(user).note(note).build());
+        }
+        noteLikeRepository.flush();
+
+        // 실제 좋아요 테이블의 레코드 개수로 정확하게 동기화 (음수 및 불일치 원천 차단)
         Note note = getNoteEntity(noteId);
-        noteLikeRepository.findByUserAndNote(user, note)
-                .ifPresentOrElse(
-                        like -> {
-                            noteLikeRepository.delete(like);
-                            noteRepository.decrementLikeCount(noteId);
-                        },
-                        () -> {
-                            noteLikeRepository.save(NoteLike.builder().user(user).note(note).build());
-                            noteRepository.incrementLikeCount(noteId);
-                        }
-                );
+        long actualCount = noteLikeRepository.countByNoteId(noteId);
+        note.updateLikeCount(actualCount);
     }
 
     @Transactional
     public void toggleBookmark(Long userId, Long noteId) {
-        User user = getUserEntity(userId);
+        if (noteBookmarkRepository.existsByUserIdAndNoteId(userId, noteId)) {
+            noteBookmarkRepository.deleteByUserIdAndNoteId(userId, noteId);
+        } else {
+            User user = getUserEntity(userId);
+            Note note = getNoteEntity(noteId);
+            noteBookmarkRepository.save(NoteBookmark.builder().user(user).note(note).build());
+        }
+        noteBookmarkRepository.flush();
+
+        // 실제 북마크 테이블의 레코드 개수로 정확하게 동기화 (음수 및 불일치 원천 차단)
         Note note = getNoteEntity(noteId);
-        noteBookmarkRepository.findByUserAndNote(user, note)
-                .ifPresentOrElse(
-                        bookmark -> {
-                            noteBookmarkRepository.delete(bookmark);
-                            noteRepository.decrementBookmarkCount(noteId);
-                        },
-                        () -> {
-                            noteBookmarkRepository.save(NoteBookmark.builder().user(user).note(note).build());
-                            noteRepository.incrementBookmarkCount(noteId);
-                        }
-                );
+        long actualCount = noteBookmarkRepository.countByNoteId(noteId);
+        note.updateBookmarkCount(actualCount);
     }
 
     private void saveTags(Note note, List<String> tagNames) {
@@ -235,12 +235,12 @@ public class NoteService {
     }
 
     private boolean isLiked(User user, Note note) {
-        if (user == null) return false;
-        return noteLikeRepository.existsByUserAndNote(user, note);
+        if (user == null || user.getId() == null || note == null || note.getId() == null) return false;
+        return noteLikeRepository.existsByUserIdAndNoteId(user.getId(), note.getId());
     }
 
     private boolean isBookmarked(User user, Note note) {
-        if (user == null) return false;
-        return noteBookmarkRepository.existsByUserAndNote(user, note);
+        if (user == null || user.getId() == null || note == null || note.getId() == null) return false;
+        return noteBookmarkRepository.existsByUserIdAndNoteId(user.getId(), note.getId());
     }
 }

@@ -45,6 +45,12 @@ export default function ThreadPage() {
 
   return (
     <div className={S.container}>
+      {/* 상단 페이지 타이틀 영역 */}
+      <div className={S.headerSection}>
+        <h1 className={S.pageTitle}>Threads</h1>
+        <p className={S.pageSubtitle}>지금 주목받는 콘텐츠를 만나보세요.</p>
+      </div>
+
       {/* 상단 탭 메뉴 (AppToggleGroup 적용) */}
       <AppToggleGroup 
         type="page"

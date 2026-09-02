@@ -13,9 +13,14 @@ import java.util.Optional;
 @Repository
 public interface NoteBookmarkRepository extends JpaRepository<NoteBookmark, Long> {
     Optional<NoteBookmark> findByUserAndNote(User user, Note note);
+    Optional<NoteBookmark> findByUserIdAndNoteId(Long userId, Long noteId);
+    boolean existsByUserIdAndNoteId(Long userId, Long noteId);
+    void deleteByUserIdAndNoteId(Long userId, Long noteId);
+    long countByNoteId(Long noteId);
     long countByNote(Note note);
     boolean existsByUserAndNote(User user, Note note);
     
     // 사용자가 북마크한 노트 목록 조회 (최신순 등 정렬은 Pageable에서 처리)
     Page<NoteBookmark> findAllByUser(User user, Pageable pageable);
+    Page<NoteBookmark> findAllByUserId(Long userId, Pageable pageable);
 }

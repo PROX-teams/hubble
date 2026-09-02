@@ -24,10 +24,17 @@ export const title = style({
 export const meta = style({
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'space-between',
   gap: '12px',
   fontSize: '15px',
-  marginBottom: '12px',
+  marginBottom: '16px',
   color: vars.color.gray_400,
+});
+
+export const authorWrapper = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
 });
 
 export const author = style({

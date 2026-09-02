@@ -6,6 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Breadcrumb } from '@/shared/ui/breadcrumb/Breadcrumb';
 import { getNoteDetail } from '@/entities/note/api/note.api';
 import { getStoryDetail } from '@/entities/story/api/story.api';
+import { BookmarkButton } from '@/features/note/bookmark-note/ui/BookmarkButton';
+import { LikeButton } from '@/features/note/like-note/ui/LikeButton';
 import * as S from './ArticleHeader.css';
 
 /**
@@ -32,6 +34,7 @@ export const ArticleHeader = () => {
 
   // 경로 및 데이터에 따른 브레드크럼 아이템 구성
   const isWritePage = pathname?.includes('/new');
+  const isEditOrWritePage = pathname?.includes('/new') || pathname?.endsWith('/edit');
 
   const getBreadcrumbItems = () => {
     // 1. 노트 상세 페이지일 경우: [스토리 제목] / [노트 제목]
@@ -66,6 +69,22 @@ export const ArticleHeader = () => {
           ))}
         </Breadcrumb.List>
       </Breadcrumb>
+
+      {/* 오직 일반 노트 상세 조회 화면에서만 우측 좋아요 / 북마크 토글 버튼 노출 */}
+      {noteId && note && !isEditOrWritePage && (
+        <div className={S.actionsWrapper}>
+          <LikeButton
+            noteId={noteId}
+            isLiked={note.isLiked}
+            likeCount={note.likeCount}
+          />
+          <BookmarkButton
+            noteId={noteId}
+            isBookmarked={note.isBookmarked}
+            bookmarkCount={note.bookmarkCount}
+          />
+        </div>
+      )}
     </header>
   );
 };
