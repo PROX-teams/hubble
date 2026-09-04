@@ -105,6 +105,9 @@ public class NoteService {
         User user = getUserEntity(userId);
         Note note = getNoteEntity(noteId);
         validateOwner(user, note);
+
+        noteBookmarkRepository.deleteAllByNoteId(noteId);
+        noteLikeRepository.deleteAllByNoteId(noteId);
         noteRepository.delete(note);
     }
 

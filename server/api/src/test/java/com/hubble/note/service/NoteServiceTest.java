@@ -128,4 +128,25 @@ class NoteServiceTest {
         assertThat(response.getContent().get(0).title()).isEqualTo("제목");
         verify(noteRepository, times(1)).searchNotes(any(com.hubble.note.dto.NoteSearchCondition.class), any(Pageable.class));
     }
+
+    @Test
+    @DisplayName("노트 삭제 시 연관된 북마크와 좋아요가 함께 벌크 삭제되어야 한다.")
+    void deleteNoteWithAssociatedBookmarksAndLikes() {
+        // given
+        Long userId = 1L;
+        Long noteId = 100L;
+        User user = User.builder().id(userId).email("test@test.com").build();
+        Note note = Note.builder().id(noteId).title("제목").user(user).category(Category.DEVELOPMENT).build();
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(noteRepository.findById(noteId)).willReturn(Optional.of(note));
+
+        // when
+        noteService.deleteNote(userId, noteId);
+
+        // then
+        verify(noteBookmarkRepository, times(1)).deleteAllByNoteId(noteId);
+        verify(noteLikeRepository, times(1)).deleteAllByNoteId(noteId);
+        verify(noteRepository, times(1)).delete(note);
+    }
 }

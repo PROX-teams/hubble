@@ -4,10 +4,10 @@ import com.hubble.note.entity.Note;
 import com.hubble.note.entity.NoteLike;
 import com.hubble.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +25,8 @@ public interface NoteLikeRepository extends JpaRepository<NoteLike, Long> {
 
     @Query("SELECT nl.note.id FROM NoteLike nl WHERE nl.user.id = :userId AND nl.note.id IN :noteIds")
     Set<Long> findLikedNoteIdsByUserIdAndNoteIds(@Param("userId") Long userId, @Param("noteIds") List<Long> noteIds);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM NoteLike nl WHERE nl.note.id = :noteId")
+    void deleteAllByNoteId(@Param("noteId") Long noteId);
 }
