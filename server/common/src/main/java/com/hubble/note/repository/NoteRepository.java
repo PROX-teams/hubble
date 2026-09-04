@@ -13,24 +13,24 @@ import java.util.List;
 
 public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositoryCustom {
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.viewCount = n.viewCount + 1 WHERE n.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.likeCount = n.likeCount + 1 WHERE n.id = :id")
     void incrementLikeCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Note n SET n.likeCount = n.likeCount - 1 WHERE n.id = :id")
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Note n SET n.likeCount = CASE WHEN n.likeCount > 0 THEN n.likeCount - 1 ELSE 0 END WHERE n.id = :id")
     void decrementLikeCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.bookmarkCount = n.bookmarkCount + 1 WHERE n.id = :id")
     void incrementBookmarkCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Note n SET n.bookmarkCount = n.bookmarkCount - 1 WHERE n.id = :id")
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Note n SET n.bookmarkCount = CASE WHEN n.bookmarkCount > 0 THEN n.bookmarkCount - 1 ELSE 0 END WHERE n.id = :id")
     void decrementBookmarkCount(@Param("id") Long id);
 
     @Query("select n from Note n join fetch n.user left join fetch n.story order by n.likeCount desc")

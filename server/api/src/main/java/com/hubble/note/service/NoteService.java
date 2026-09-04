@@ -173,7 +173,7 @@ public class NoteService {
         } else {
             User userRef = entityManager.getReference(User.class, userId);
             Note noteRef = entityManager.getReference(Note.class, noteId);
-            noteLikeRepository.save(NoteLike.builder().user(userRef).note(noteRef).build());
+            noteLikeRepository.saveAndFlush(NoteLike.builder().user(userRef).note(noteRef).build());
             noteRepository.incrementLikeCount(noteId);
         }
     }
@@ -187,7 +187,7 @@ public class NoteService {
         } else {
             User userRef = entityManager.getReference(User.class, userId);
             Note noteRef = entityManager.getReference(Note.class, noteId);
-            noteBookmarkRepository.save(NoteBookmark.builder().user(userRef).note(noteRef).build());
+            noteBookmarkRepository.saveAndFlush(NoteBookmark.builder().user(userRef).note(noteRef).build());
             noteRepository.incrementBookmarkCount(noteId);
         }
     }

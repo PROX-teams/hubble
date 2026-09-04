@@ -143,7 +143,7 @@ public class StoryService {
         } else {
             User userRef = entityManager.getReference(User.class, userId);
             Story storyRef = entityManager.getReference(Story.class, storyId);
-            storyLikeRepository.save(StoryLike.builder().user(userRef).story(storyRef).build());
+            storyLikeRepository.saveAndFlush(StoryLike.builder().user(userRef).story(storyRef).build());
             storyRepository.incrementLikeCount(storyId);
         }
     }
@@ -157,7 +157,7 @@ public class StoryService {
         } else {
             User userRef = entityManager.getReference(User.class, userId);
             Story storyRef = entityManager.getReference(Story.class, storyId);
-            storyBookmarkRepository.save(StoryBookmark.builder().user(userRef).story(storyRef).build());
+            storyBookmarkRepository.saveAndFlush(StoryBookmark.builder().user(userRef).story(storyRef).build());
             storyRepository.incrementBookmarkCount(storyId);
         }
     }

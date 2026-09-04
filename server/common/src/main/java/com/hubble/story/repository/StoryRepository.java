@@ -17,24 +17,24 @@ import java.util.Optional;
 @Repository
 public interface StoryRepository extends JpaRepository<Story, Long> {
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Story s SET s.viewCount = s.viewCount + 1 WHERE s.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Story s SET s.likeCount = s.likeCount + 1 WHERE s.id = :id")
     void incrementLikeCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Story s SET s.likeCount = s.likeCount - 1 WHERE s.id = :id")
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Story s SET s.likeCount = CASE WHEN s.likeCount > 0 THEN s.likeCount - 1 ELSE 0 END WHERE s.id = :id")
     void decrementLikeCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Story s SET s.bookmarkCount = s.bookmarkCount + 1 WHERE s.id = :id")
     void incrementBookmarkCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Story s SET s.bookmarkCount = s.bookmarkCount - 1 WHERE s.id = :id")
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Story s SET s.bookmarkCount = CASE WHEN s.bookmarkCount > 0 THEN s.bookmarkCount - 1 ELSE 0 END WHERE s.id = :id")
     void decrementBookmarkCount(@Param("id") Long id);
 
     @Query(value = "select s from Story s join fetch s.user",
