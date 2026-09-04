@@ -6,7 +6,12 @@ import com.hubble.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface NoteLikeRepository extends JpaRepository<NoteLike, Long> {
@@ -17,4 +22,7 @@ public interface NoteLikeRepository extends JpaRepository<NoteLike, Long> {
     long countByNoteId(Long noteId);
     long countByNote(Note note);
     boolean existsByUserAndNote(User user, Note note);
+
+    @Query("SELECT nl.note.id FROM NoteLike nl WHERE nl.user.id = :userId AND nl.note.id IN :noteIds")
+    Set<Long> findLikedNoteIdsByUserIdAndNoteIds(@Param("userId") Long userId, @Param("noteIds") List<Long> noteIds);
 }

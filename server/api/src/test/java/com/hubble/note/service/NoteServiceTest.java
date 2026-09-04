@@ -57,6 +57,8 @@ class NoteServiceTest {
     private StoryService storyService;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private jakarta.persistence.EntityManager entityManager;
 
     @Test
     @DisplayName("노트 생성 시 스토리가 없으면 기본 폴더가 자동으로 생성되어야 한다.")
@@ -94,14 +96,14 @@ class NoteServiceTest {
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(storyRepository.findById(1L)).willReturn(Optional.of(story));
         given(noteRepository.save(any(Note.class))).willAnswer(invocation -> invocation.getArgument(0));
-        given(tagRepository.findByName(any())).willReturn(Optional.empty());
+        given(tagRepository.findAllByNameIn(anyList())).willReturn(List.of());
 
         // when
         noteService.createNote(userId, request);
 
         // then
-        verify(tagRepository, times(2)).save(any()); // 태그가 2개이므로 2번 호출되어야 함
-        verify(noteTagRepository, times(2)).save(any());
+        verify(tagRepository, times(1)).saveAll(anyList());
+        verify(noteTagRepository, times(1)).saveAll(anyList());
     }
 
     @Test

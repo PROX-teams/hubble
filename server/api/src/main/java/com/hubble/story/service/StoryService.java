@@ -11,15 +11,18 @@ import com.hubble.story.repository.StoryLikeRepository;
 import com.hubble.story.repository.StoryRepository;
 import com.hubble.user.entity.User;
 import com.hubble.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class StoryService {
     private final StoryLikeRepository storyLikeRepository;
     private final StoryBookmarkRepository storyBookmarkRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager;
 
     private static final String DEFAULT_STORY_TITLE = "기본 폴더";
 
@@ -90,7 +94,6 @@ public class StoryService {
     }
 
     public Page<StoryResponse> getStories(Category category, String keyword, Pageable pageable, Long userId) {
-        User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         Page<Story> stories;
         if (category != null) {
             stories = storyRepository.findAllByCategoryWithFetch(category, pageable);
@@ -100,60 +103,96 @@ public class StoryService {
             stories = storyRepository.findAllWithFetch(pageable);
         }
 
-        return stories.map(story -> StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story)));
+        return convertToStoryResponses(stories, userId);
     }
 
     public Page<StoryResponse> getBookmarkedStories(Long userId, Pageable pageable) {
         User user = getUserEntity(userId);
-        return storyBookmarkRepository.findAllByUser(user, pageable)
-                .map(bookmark -> StoryResponse.of(bookmark.getStory(), isLiked(user, bookmark.getStory()), true));
+        Page<StoryBookmark> bookmarks = storyBookmarkRepository.findAllByUser(user, pageable);
+        List<Story> stories = bookmarks.map(StoryBookmark::getStory).getContent();
+
+        List<Long> storyIds = stories.stream().map(Story::getId).toList();
+        Set<Long> likedStoryIds = (!storyIds.isEmpty())
+                ? storyLikeRepository.findLikedStoryIdsByUserIdAndStoryIds(userId, storyIds)
+                : Collections.emptySet();
+
+        List<StoryResponse> responses = stories.stream()
+                .map(story -> StoryResponse.of(story, likedStoryIds.contains(story.getId()), true))
+                .toList();
+
+        return new PageImpl<>(responses, pageable, bookmarks.getTotalElements());
     }
 
     public Page<StoryResponse> getMyStories(Long userId, Pageable pageable) {
-        User user = getUserEntity(userId);
-        return storyRepository.findAllByUserIdWithFetch(userId, pageable)
-                .map(story -> StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story)));
+        getUserEntity(userId); // 유저 검증
+        Page<Story> stories = storyRepository.findAllByUserIdWithFetch(userId, pageable);
+        return convertToStoryResponses(stories, userId);
     }
 
     public List<StoryResponse> getTop10LikedStories(Long userId) {
-        User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
-        return storyRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10)).stream()
-                .map(story -> StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story)))
-                .collect(Collectors.toList());
+        List<Story> stories = storyRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10));
+        return convertToStoryResponses(stories, userId);
     }
 
+    // 🚀 [최적화 3] 원자적 증감 쿼리 및 getReference 프록시 적용 (SELECT 0건 Zero-I/O 및 불필요한 엔티티 조회 제거)
     @Transactional
     public void toggleLike(Long userId, Long storyId) {
-        User user = getUserEntity(userId);
-        Story story = getStoryEntity(storyId);
-        storyLikeRepository.findByUserAndStory(user, story)
-                .ifPresentOrElse(
-                        like -> {
-                            storyLikeRepository.delete(like);
-                            storyRepository.decrementLikeCount(storyId);
-                        },
-                        () -> {
-                            storyLikeRepository.save(StoryLike.builder().user(user).story(story).build());
-                            storyRepository.incrementLikeCount(storyId);
-                        }
-                );
+        if (storyLikeRepository.existsByUserIdAndStoryId(userId, storyId)) {
+            storyLikeRepository.deleteByUserIdAndStoryId(userId, storyId);
+            storyRepository.decrementLikeCount(storyId);
+        } else {
+            User userRef = entityManager.getReference(User.class, userId);
+            Story storyRef = entityManager.getReference(Story.class, storyId);
+            storyLikeRepository.save(StoryLike.builder().user(userRef).story(storyRef).build());
+            storyRepository.incrementLikeCount(storyId);
+        }
     }
 
+    // 🚀 [최적화 3] 원자적 증감 쿼리 및 getReference 프록시 적용 (SELECT 0건 Zero-I/O 및 불필요한 엔티티 조회 제거)
     @Transactional
     public void toggleBookmark(Long userId, Long storyId) {
-        User user = getUserEntity(userId);
-        Story story = getStoryEntity(storyId);
-        storyBookmarkRepository.findByUserAndStory(user, story)
-                .ifPresentOrElse(
-                        bookmark -> {
-                            storyBookmarkRepository.delete(bookmark);
-                            storyRepository.decrementBookmarkCount(storyId);
-                        },
-                        () -> {
-                            storyBookmarkRepository.save(StoryBookmark.builder().user(user).story(story).build());
-                            storyRepository.incrementBookmarkCount(storyId);
-                        }
-                );
+        if (storyBookmarkRepository.existsByUserIdAndStoryId(userId, storyId)) {
+            storyBookmarkRepository.deleteByUserIdAndStoryId(userId, storyId);
+            storyRepository.decrementBookmarkCount(storyId);
+        } else {
+            User userRef = entityManager.getReference(User.class, userId);
+            Story storyRef = entityManager.getReference(Story.class, storyId);
+            storyBookmarkRepository.save(StoryBookmark.builder().user(userRef).story(storyRef).build());
+            storyRepository.incrementBookmarkCount(storyId);
+        }
+    }
+
+    // 🚀 [최적화 핵심] N+1 방지를 위한 IN 쿼리 배치 매핑 공통 헬퍼 메서드 (Page)
+    private Page<StoryResponse> convertToStoryResponses(Page<Story> storyPage, Long userId) {
+        List<Story> stories = storyPage.getContent();
+        List<StoryResponse> responses = convertToStoryResponses(stories, userId);
+        return new PageImpl<>(responses, storyPage.getPageable(), storyPage.getTotalElements());
+    }
+
+    // 🚀 [최적화 핵심] N+1 방지를 위한 IN 쿼리 배치 매핑 공통 헬퍼 메서드 (List)
+    private List<StoryResponse> convertToStoryResponses(List<Story> stories, Long userId) {
+        if (stories == null || stories.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> storyIds = stories.stream().map(Story::getId).toList();
+
+        // IN 쿼리 2회로 현재 페이지에 속한 모든 스토리의 좋아요/북마크 상태 일괄 조회 (O(1) Set)
+        Set<Long> likedStoryIds = (userId != null)
+                ? storyLikeRepository.findLikedStoryIdsByUserIdAndStoryIds(userId, storyIds)
+                : Collections.emptySet();
+
+        Set<Long> bookmarkedStoryIds = (userId != null)
+                ? storyBookmarkRepository.findBookmarkedStoryIdsByUserIdAndStoryIds(userId, storyIds)
+                : Collections.emptySet();
+
+        return stories.stream()
+                .map(story -> StoryResponse.of(
+                        story,
+                        likedStoryIds.contains(story.getId()),
+                        bookmarkedStoryIds.contains(story.getId())
+                ))
+                .toList();
     }
 
     private User getUserEntity(Long userId) {
@@ -173,12 +212,12 @@ public class StoryService {
     }
 
     private boolean isLiked(User user, Story story) {
-        if (user == null) return false;
+        if (user == null || user.getId() == null || story == null || story.getId() == null) return false;
         return storyLikeRepository.existsByUserAndStory(user, story);
     }
 
     private boolean isBookmarked(User user, Story story) {
-        if (user == null) return false;
+        if (user == null || user.getId() == null || story == null || story.getId() == null) return false;
         return storyBookmarkRepository.existsByUserAndStory(user, story);
     }
 }
