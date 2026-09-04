@@ -4,6 +4,7 @@ import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteHistoryResponse;
 import com.hubble.note.dto.response.NoteResponse;
+import com.hubble.note.dto.response.NoteSummaryResponse;
 import com.hubble.note.dto.response.TagCountResponse;
 import com.hubble.note.service.NoteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,18 +66,17 @@ public class NoteController {
 
     @Operation(summary = "노트 목록 조회", description = "필터링(카테고리, 태그) 및 검색 기능을 포함한 노트 목록을 조회합니다. (무한 스크롤)")
     @GetMapping
-    public ResponseEntity<Page<NoteResponse>> getNotes(
-            @AuthenticationPrincipal Long userId,
+    public ResponseEntity<Page<NoteSummaryResponse>> getNotes(
             @RequestParam(required = false) Category category,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String tagName,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(noteService.getNotes(category, keyword, tagName, pageable, userId));
+        return ResponseEntity.ok(noteService.getNotes(category, keyword, tagName, pageable));
     }
 
     @Operation(summary = "북마크한 노트 목록 조회", description = "로그인한 사용자가 북마크한 노트 목록을 조회합니다.")
     @GetMapping("/bookmarks")
-    public ResponseEntity<Page<NoteResponse>> getBookmarkedNotes(
+    public ResponseEntity<Page<NoteSummaryResponse>> getBookmarkedNotes(
             @AuthenticationPrincipal Long userId,
             @PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(noteService.getBookmarkedNotes(userId, pageable));
@@ -84,11 +84,11 @@ public class NoteController {
 
     @Operation(summary = "내가 작성한 노트 목록 조회", description = "로그인한 사용자가 작성한 노트 목록을 조회합니다. (태그 필터링 및 정렬 지원)")
     @GetMapping("/me")
-    public ResponseEntity<Page<NoteResponse>> getMyNotes(
+    public ResponseEntity<Page<NoteSummaryResponse>> getMyNotes(
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) String tagName,
             @PageableDefault(size = 12) Pageable pageable) {
-        return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable, userId));
+        return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable));
     }
 
     @Operation(summary = "내가 작성한 노트의 최근 수정 이력 조회", description = "로그인한 사용자의 최근 수정된 노트 목록을 경량 DTO로 조회합니다. (Slice 무한스크롤 지원)")
@@ -108,12 +108,11 @@ public class NoteController {
 
     @Operation(summary = "특정 사용자의 노트 목록 조회", description = "특정 사용자가 작성한 공개 노트 목록을 조회합니다. (태그 필터링 및 정렬 지원)")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<NoteResponse>> getUserNotes(
+    public ResponseEntity<Page<NoteSummaryResponse>> getUserNotes(
             @PathVariable Long userId,
             @RequestParam(required = false) String tagName,
-            @AuthenticationPrincipal Long viewerUserId,
             @PageableDefault(size = 12) Pageable pageable) {
-        return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable, viewerUserId));
+        return ResponseEntity.ok(noteService.getUserNotes(userId, tagName, pageable));
     }
 
     @Operation(summary = "특정 사용자의 태그 통계 조회", description = "특정 사용자가 작성한 노트들의 태그 목록과 각 태그별 게시글 수를 조회합니다.")
@@ -125,16 +124,14 @@ public class NoteController {
 
     @Operation(summary = "좋아요 많은 노트 Top 10", description = "좋아요를 가장 많이 받은 노트 10개를 조회합니다.")
     @GetMapping("/top10/like")
-    public ResponseEntity<List<NoteResponse>> getTop10LikedNotes(
-            @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(noteService.getTop10LikedNotes(userId));
+    public ResponseEntity<List<NoteSummaryResponse>> getTop10LikedNotes() {
+        return ResponseEntity.ok(noteService.getTop10LikedNotes());
     }
 
     @Operation(summary = "조회수 많은 노트 Top 10", description = "조회수가 가장 높은 노트 10개를 조회합니다.")
     @GetMapping("/top10/view")
-    public ResponseEntity<List<NoteResponse>> getTop10ViewedNotes(
-            @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(noteService.getTop10ViewedNotes(userId));
+    public ResponseEntity<List<NoteSummaryResponse>> getTop10ViewedNotes() {
+        return ResponseEntity.ok(noteService.getTop10ViewedNotes());
     }
 
     @Operation(summary = "노트 좋아요 토글", description = "노트에 좋아요를 누르거나 취소합니다.")

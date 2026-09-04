@@ -3,6 +3,7 @@ package com.hubble.note.service;
 import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteResponse;
+import com.hubble.note.dto.response.NoteSummaryResponse;
 import com.hubble.note.entity.Note;
 import com.hubble.note.repository.NoteBookmarkRepository;
 import com.hubble.note.repository.NoteLikeRepository;
@@ -117,14 +118,14 @@ class NoteServiceTest {
         Page<Note> notePage = new PageImpl<>(List.of(note), pageable, 1);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(noteRepository.findAllByUserIdWithFetch(eq(userId), any(Pageable.class))).willReturn(notePage);
+        given(noteRepository.searchNotes(any(com.hubble.note.dto.NoteSearchCondition.class), any(Pageable.class))).willReturn(notePage);
 
         // when
-        Page<NoteResponse> response = noteService.getUserNotes(userId, null, pageable, userId);
+        Page<NoteSummaryResponse> response = noteService.getUserNotes(userId, null, pageable);
 
         // then
         assertThat(response.getContent()).hasSize(1);
         assertThat(response.getContent().get(0).title()).isEqualTo("제목");
-        verify(noteRepository, times(1)).findAllByUserIdWithFetch(eq(userId), any(Pageable.class));
+        verify(noteRepository, times(1)).searchNotes(any(com.hubble.note.dto.NoteSearchCondition.class), any(Pageable.class));
     }
 }

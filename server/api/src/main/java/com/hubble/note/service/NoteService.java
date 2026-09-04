@@ -1,9 +1,11 @@
 package com.hubble.note.service;
 
 import com.hubble.common.entity.Category;
+import com.hubble.note.dto.NoteSearchCondition;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteHistoryResponse;
 import com.hubble.note.dto.response.NoteResponse;
+import com.hubble.note.dto.response.NoteSummaryResponse;
 import com.hubble.note.dto.response.TagCountResponse;
 import com.hubble.note.entity.Note;
 import com.hubble.note.entity.NoteBookmark;
@@ -116,39 +118,24 @@ public class NoteService {
         return NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note));
     }
 
-    public Page<NoteResponse> getNotes(Category category, String keyword, String tagName, Pageable pageable, Long userId) {
-        Page<Note> notes;
-        
-        if (tagName != null && !tagName.isBlank()) {
-            notes = noteRepository.findAllByTagNameWithFetch(tagName, pageable);
-        } else if (category != null) {
-            notes = noteRepository.findAllByCategoryWithFetch(category, pageable);
-        } else if (keyword != null && !keyword.isBlank()) {
-            notes = noteRepository.findByKeywordWithFetch(keyword, pageable);
-        } else {
-            notes = noteRepository.findAllWithFetch(pageable);
-        }
-
-        return convertToNoteResponses(notes, userId);
+    public Page<NoteSummaryResponse> getNotes(Category category, String keyword, String tagName, Pageable pageable) {
+        NoteSearchCondition condition = NoteSearchCondition.forFeed(category, keyword, tagName);
+        Page<Note> notes = noteRepository.searchNotes(condition, pageable);
+        return convertToNoteSummaryResponses(notes);
     }
 
-    // 🚀 [최적화 2] getBookmarkedNotes Fetch Join 단일 페이징 및 IN 쿼리 매핑
-    public Page<NoteResponse> getBookmarkedNotes(Long userId, Pageable pageable) {
+    // 🚀 [최적화 2] getBookmarkedNotes Fetch Join 단일 페이징 및 경량 DTO 매핑
+    public Page<NoteSummaryResponse> getBookmarkedNotes(Long userId, Pageable pageable) {
         getUserEntity(userId); // 유저 존재 여부 검증
         Page<Note> notes = noteRepository.findBookmarkedNotesByUserIdWithFetch(userId, pageable);
-        return convertToNoteResponses(notes, userId);
+        return convertToNoteSummaryResponses(notes);
     }
 
-    public Page<NoteResponse> getUserNotes(Long targetUserId, String tagName, Pageable pageable, Long viewerUserId) {
+    public Page<NoteSummaryResponse> getUserNotes(Long targetUserId, String tagName, Pageable pageable) {
         getUserEntity(targetUserId); // 타겟 유저 존재 여부 검증
-
-        Page<Note> notes;
-        if (tagName != null && !tagName.isBlank()) {
-            notes = noteRepository.findAllByUserIdAndTagNameWithFetch(targetUserId, tagName, pageable);
-        } else {
-            notes = noteRepository.findAllByUserIdWithFetch(targetUserId, pageable);
-        }
-        return convertToNoteResponses(notes, viewerUserId);
+        NoteSearchCondition condition = NoteSearchCondition.forUser(targetUserId, tagName);
+        Page<Note> notes = noteRepository.searchNotes(condition, pageable);
+        return convertToNoteSummaryResponses(notes);
     }
 
     public List<TagCountResponse> getUserTags(Long targetUserId) {
@@ -164,14 +151,14 @@ public class NoteService {
                 .map(NoteHistoryResponse::from);
     }
 
-    public List<NoteResponse> getTop10LikedNotes(Long userId) {
+    public List<NoteSummaryResponse> getTop10LikedNotes() {
         List<Note> notes = noteRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10));
-        return convertToNoteResponses(notes, userId);
+        return convertToNoteSummaryResponses(notes);
     }
 
-    public List<NoteResponse> getTop10ViewedNotes(Long userId) {
+    public List<NoteSummaryResponse> getTop10ViewedNotes() {
         List<Note> notes = noteRepository.findTop10ByOrderByViewCountDescWithFetch(PageRequest.of(0, 10));
-        return convertToNoteResponses(notes, userId);
+        return convertToNoteSummaryResponses(notes);
     }
 
     // 🚀 [최적화 3] 원자적 증감 쿼리 및 getReference 프록시 적용 (SELECT 0건 Zero-I/O 및 Full Scan 오버헤드 제거)
@@ -202,36 +189,21 @@ public class NoteService {
         }
     }
 
-    // 🚀 [최적화 핵심] N+1 방지를 위한 IN 쿼리 배치 매핑 공통 헬퍼 메서드 (Page)
-    private Page<NoteResponse> convertToNoteResponses(Page<Note> notePage, Long userId) {
-        List<Note> notes = notePage.getContent();
-        List<NoteResponse> responses = convertToNoteResponses(notes, userId);
+    // 🚀 [최적화 핵심] 추가 IN 쿼리 없는 경량 DTO 변환 헬퍼 메서드 (Page)
+    private Page<NoteSummaryResponse> convertToNoteSummaryResponses(Page<Note> notePage) {
+        List<NoteSummaryResponse> responses = notePage.getContent().stream()
+                .map(NoteSummaryResponse::from)
+                .toList();
         return new PageImpl<>(responses, notePage.getPageable(), notePage.getTotalElements());
     }
 
-    // 🚀 [최적화 핵심] N+1 방지를 위한 IN 쿼리 배치 매핑 공통 헬퍼 메서드 (List)
-    private List<NoteResponse> convertToNoteResponses(List<Note> notes, Long userId) {
+    // 🚀 [최적화 핵심] 추가 IN 쿼리 없는 경량 DTO 변환 헬퍼 메서드 (List)
+    private List<NoteSummaryResponse> convertToNoteSummaryResponses(List<Note> notes) {
         if (notes == null || notes.isEmpty()) {
             return Collections.emptyList();
         }
-
-        List<Long> noteIds = notes.stream().map(Note::getId).toList();
-
-        // IN 쿼리 2회로 현재 페이지에 속한 모든 노트의 좋아요/북마크 상태 일괄 조회 (O(1) Set)
-        Set<Long> likedNoteIds = (userId != null)
-                ? noteLikeRepository.findLikedNoteIdsByUserIdAndNoteIds(userId, noteIds)
-                : Collections.emptySet();
-
-        Set<Long> bookmarkedNoteIds = (userId != null)
-                ? noteBookmarkRepository.findBookmarkedNoteIdsByUserIdAndNoteIds(userId, noteIds)
-                : Collections.emptySet();
-
         return notes.stream()
-                .map(note -> NoteResponse.of(
-                        note,
-                        likedNoteIds.contains(note.getId()),
-                        bookmarkedNoteIds.contains(note.getId())
-                ))
+                .map(NoteSummaryResponse::from)
                 .toList();
     }
 
