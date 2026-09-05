@@ -33,10 +33,10 @@ public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositor
     @Query("UPDATE Note n SET n.bookmarkCount = CASE WHEN n.bookmarkCount > 0 THEN n.bookmarkCount - 1 ELSE 0 END WHERE n.id = :id")
     void decrementBookmarkCount(@Param("id") Long id);
 
-    @Query("select n from Note n join fetch n.user left join fetch n.story order by n.likeCount desc")
+    @Query("select n from Note n join fetch n.user order by n.likeCount desc")
     List<Note> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
 
-    @Query("select n from Note n join fetch n.user left join fetch n.story order by n.viewCount desc")
+    @Query("select n from Note n join fetch n.user order by n.viewCount desc")
     List<Note> findTop10ByOrderByViewCountDescWithFetch(Pageable pageable);
 
     // 로그인 사용자의 최근 업데이트 노트 이력 조회 (경량 DTO 프로젝션 및 Slice 무한스크롤 최적화)
@@ -47,7 +47,7 @@ public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositor
     org.springframework.data.domain.Slice<com.hubble.note.dto.NoteHistoryDto> findRecentUpdatesByUserId(@Param("userId") Long userId, Pageable pageable);
 
     // 로그인 사용자의 북마크한 노트 목록 조회 (Fetch Join 적용 및 페이징 N+1 완전 해결)
-    @Query(value = "select n from NoteBookmark nb join nb.note n join fetch n.user left join fetch n.story where nb.user.id = :userId",
+    @Query(value = "select n from NoteBookmark nb join nb.note n join fetch n.user where nb.user.id = :userId",
            countQuery = "select count(nb) from NoteBookmark nb where nb.user.id = :userId")
     Page<Note> findBookmarkedNotesByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
 }

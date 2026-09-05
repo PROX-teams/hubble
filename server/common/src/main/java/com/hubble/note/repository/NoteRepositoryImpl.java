@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 import static com.hubble.note.entity.QNote.note;
-import static com.hubble.story.entity.QStory.story;
 import static com.hubble.user.entity.QUser.user;
 
 @Repository
@@ -30,7 +29,6 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
         List<Note> content = queryFactory
                 .selectFrom(note)
                 .join(note.user, user).fetchJoin()
-                .leftJoin(note.story, story).fetchJoin()
                 .where(
                         userEq(condition.userId()),
                         storyEq(condition.storyId()),
