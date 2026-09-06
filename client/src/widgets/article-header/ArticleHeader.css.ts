@@ -8,7 +8,14 @@ export const header = style({
   height: '3rem',
   display: 'flex',
   alignItems: 'center',
-  padding: '0 1.25rem',
+  justifyContent: 'space-between',
+  padding: '0 3.5rem 0 1.25rem',
   zIndex: 5,
   backgroundColor: 'transparent',
+});
+
+export const actionsWrapper = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
 });

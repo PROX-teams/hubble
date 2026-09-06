@@ -2,7 +2,7 @@
   "id": 1,
   "title": "프론트엔드 공부집",
   "description": "포스트 31개를 학습하는 시리즈 단위의 학습일지입니다. \nSEO부터 UI 컴포넌트, DevOps 등 프론트엔드 전반의 학습 내용을 기록합니다.",
-  "category": "프론트엔드",
+  "category": "DEVELOPMENT",
   "icon": "chart",
   "articleIds": [1, 2, 3]
 }

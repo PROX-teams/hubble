@@ -35,6 +35,8 @@ const meta: Meta<typeof StoryGridWithModal> = {
   },
 } satisfies Meta<typeof StoryGridWithModal>;
 
+import type { Story as StoryEntity } from "@/entities/story/story.types";
+
 export default meta;
 
 type Story = StoryObj<typeof meta>;
@@ -43,7 +45,7 @@ const list = Array.from({ length: 6 }).map((_, i) => ({
   ...data,
   id: i + 1,
   title: `${data.title} ${i + 1}`,
-}));
+})) as unknown as StoryEntity[];
 
 export const Default: Story = {
   args: { stories: list },

@@ -3,6 +3,7 @@ package com.hubble.note.service;
 import com.hubble.common.entity.Category;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteResponse;
+import com.hubble.note.dto.response.NoteSummaryResponse;
 import com.hubble.note.entity.Note;
 import com.hubble.note.repository.NoteBookmarkRepository;
 import com.hubble.note.repository.NoteLikeRepository;
@@ -57,6 +58,10 @@ class NoteServiceTest {
     private StoryService storyService;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+    @Mock
+    private jakarta.persistence.EntityManager entityManager;
 
     @Test
     @DisplayName("노트 생성 시 스토리가 없으면 기본 폴더가 자동으로 생성되어야 한다.")
@@ -94,14 +99,14 @@ class NoteServiceTest {
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(storyRepository.findById(1L)).willReturn(Optional.of(story));
         given(noteRepository.save(any(Note.class))).willAnswer(invocation -> invocation.getArgument(0));
-        given(tagRepository.findByName(any())).willReturn(Optional.empty());
+        given(tagRepository.findAllByNameIn(anyList())).willReturn(List.of());
 
         // when
         noteService.createNote(userId, request);
 
         // then
-        verify(tagRepository, times(2)).save(any()); // 태그가 2개이므로 2번 호출되어야 함
-        verify(noteTagRepository, times(2)).save(any());
+        verify(tagRepository, times(1)).saveAll(anyList());
+        verify(noteTagRepository, times(1)).saveAll(anyList());
     }
 
     @Test
@@ -115,14 +120,34 @@ class NoteServiceTest {
         Page<Note> notePage = new PageImpl<>(List.of(note), pageable, 1);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(noteRepository.findAllByUserIdWithFetch(eq(userId), any(Pageable.class))).willReturn(notePage);
+        given(noteRepository.searchNotes(any(com.hubble.note.dto.NoteSearchCondition.class), any(Pageable.class))).willReturn(notePage);
 
         // when
-        Page<NoteResponse> response = noteService.getUserNotes(userId, null, pageable, userId);
+        Page<NoteSummaryResponse> response = noteService.getUserNotes(userId, null, pageable);
 
         // then
         assertThat(response.getContent()).hasSize(1);
         assertThat(response.getContent().get(0).title()).isEqualTo("제목");
-        verify(noteRepository, times(1)).findAllByUserIdWithFetch(eq(userId), any(Pageable.class));
+        verify(noteRepository, times(1)).searchNotes(any(com.hubble.note.dto.NoteSearchCondition.class), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("노트 삭제 시 부모 노트가 소프트 삭제되고 삭제 이벤트가 발행되어야 한다.")
+    void deleteNoteWithAssociatedBookmarksAndLikes() {
+        // given
+        Long userId = 1L;
+        Long noteId = 100L;
+        User user = User.builder().id(userId).email("test@test.com").build();
+        Note note = Note.builder().id(noteId).title("제목").user(user).category(Category.DEVELOPMENT).build();
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(noteRepository.findById(noteId)).willReturn(Optional.of(note));
+
+        // when
+        noteService.deleteNote(userId, noteId);
+
+        // then
+        verify(noteRepository, times(1)).delete(note);
+        verify(eventPublisher, times(1)).publishEvent(any(com.hubble.note.event.NoteDeletedEvent.class));
     }
 }

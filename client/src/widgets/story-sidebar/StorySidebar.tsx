@@ -34,6 +34,7 @@ const FolderIcon = (props: React.SVGProps<SVGSVGElement>) => (
 interface StorySidebarProps {
   stories?: Story[];
   notes?: Note[];
+  onAddStory?: () => void;
 }
 
 /**
@@ -44,17 +45,10 @@ interface StorySidebarProps {
 export const StorySidebar = ({
   stories = [],
   notes = [],
+  onAddStory,
 }: StorySidebarProps) => {
   const recentStories = stories.slice(0, 2);
   const otherStories = stories.slice(2);
-
-  // 기본 fallback 노트 목록
-  const defaultSubNotes = [
-    { id: 1, title: "Kotlin 코테 준비 1주차" },
-    { id: 2, title: "Kotlin 코테 준비 1주차" },
-    { id: 3, title: "Kotlin 코테 준비 1주차" },
-    { id: 4, title: "Kotlin 코테 준비 1주차" },
-  ];
 
   return (
     <SideBar isSidebarOpen={true} position="left">
@@ -63,20 +57,25 @@ export const StorySidebar = ({
         <div className={S.header}>
           <span className={S.myStoryBadge}>My Story</span>
           <div className={S.metaBadgeGroup}>
-            <span className={S.metaItem}>
+            <span className={S.metaItem} title="스토리 개수">
               <FolderIcon width={13} height={13} />
-              <span>4</span>
+              <span>{stories.length}</span>
             </span>
-            <span className={S.metaItem}>
+            <span className={S.metaItem} title="노트 개수">
               <CountIcon width={13} height={13} />
-              <span>32</span>
+              <span>{notes.length}</span>
             </span>
           </div>
         </div>
 
         {/* 2번째 툴바: 초록색 새 폴더 아이콘 + 정렬 아이콘 */}
         <div className={S.subToolbar}>
-          <button type="button" className={S.addFolderButton} aria-label="새 폴더 추가">
+          <button
+            type="button"
+            className={S.addFolderButton}
+            aria-label="새 폴더 추가"
+            onClick={onAddStory}
+          >
             <AddFolderIcon width={18} height={18} />
           </button>
           <button type="button" className={S.sortButton} aria-label="목록 정렬">
@@ -87,42 +86,47 @@ export const StorySidebar = ({
         {/* 트리 목록 컨텐츠 */}
         <div className={S.content}>
           {/* 최근 업데이트 섹션 */}
-          <div>
-            <div className={S.sectionTitle}>최근 업데이트</div>
-            <div className={S.treeList}>
-              {recentStories.map((story, index) => {
-                const storyNotes = notes.filter((n) =>
-                  story.articleIds?.includes(n.id)
-                );
-                const subNotes = storyNotes.length > 0 ? storyNotes : defaultSubNotes;
+          {recentStories.length > 0 && (
+            <div>
+              <div className={S.sectionTitle}>최근 업데이트</div>
+              <div className={S.treeList}>
+                {recentStories.map((story, index) => {
+                  const storyNotes = notes.filter((n) =>
+                    story.articleIds?.includes(n.id)
+                  );
 
-                return (
-                  <Accordion key={story.id} defaultOpen={index === 0}>
-                    <Accordion.Header className={S.treeItem}>
-                      <Accordion.Trigger rotatable={true}>
-                        <AccordionArrow width={12} height={12} />
-                      </Accordion.Trigger>
-                      <span className={S.treeItemLabel}>{story.title}</span>
-                    </Accordion.Header>
+                  return (
+                    <Accordion key={story.id} defaultOpen={index === 0}>
+                      <Accordion.Header className={S.treeItem}>
+                        <Accordion.Trigger rotatable={true}>
+                          <AccordionArrow width={12} height={12} />
+                        </Accordion.Trigger>
+                        <span className={S.treeItemLabel}>{story.title}</span>
+                      </Accordion.Header>
 
-                    <Accordion.Content>
-                      <div className={S.subNoteList}>
-                        {subNotes.map((note, idx) => (
-                          <Link
-                            key={`${note.id}-${idx}`}
-                            href={`/notebook/${note.id}`}
-                            className={S.subNoteItem}
-                          >
-                            <span className={S.subNoteTitle}>{note.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </Accordion.Content>
-                  </Accordion>
-                );
-              })}
+                      <Accordion.Content>
+                        <div className={S.subNoteList}>
+                          {storyNotes.length > 0 ? (
+                            storyNotes.map((note) => (
+                              <Link
+                                key={note.id}
+                                href={`/notebook/${note.id}`}
+                                className={S.subNoteItem}
+                              >
+                                <span className={S.subNoteTitle}>{note.title}</span>
+                              </Link>
+                            ))
+                          ) : (
+                            <div className={S.emptySubNote}>노트가 없습니다.</div>
+                          )}
+                        </div>
+                      </Accordion.Content>
+                    </Accordion>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 가로 구분선 */}
           <div className={S.divider} />

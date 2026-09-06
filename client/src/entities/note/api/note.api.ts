@@ -1,7 +1,13 @@
 import { fetcher } from '@/shared/api/base';
 import { API_ENDPOINTS } from '@/shared/api/constants';
-import type { PageResponse, CategoryType, SortType } from '@/shared/types/api.types';
-import type { Note, NoteCreateRequest, GetNotebookNotesParams } from '../note.types';
+import type { PageResponse, SliceResponse, CategoryType, SortType } from '@/shared/types';
+import type {
+  Note,
+  NoteCreateRequest,
+  GetNotebookNotesParams,
+  NoteHistoryItem,
+  GetRecentUpdatesParams,
+} from '../note.types';
 
 export interface GetNotesParams {
   category?: CategoryType;
@@ -83,6 +89,28 @@ export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
 };
 
 /**
+ * 기존 노트 수정
+ */
+export const updateNote = async (
+  id: number,
+  data: NoteCreateRequest
+): Promise<Note> => {
+  return fetcher<Note>(`${API_ENDPOINTS.NOTE}/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+/**
+ * 노트 삭제
+ */
+export const deleteNote = async (id: number): Promise<void> => {
+  return fetcher<void>(`${API_ENDPOINTS.NOTE}/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+/**
  * 조회수 많은 노트 Top 10 조회
  */
 export const getTop10ViewedNotes = async (): Promise<Note[]> => {
@@ -112,4 +140,21 @@ export const toggleBookmarkNote = async (id: number): Promise<void> => {
   return fetcher<void>(`${API_ENDPOINTS.NOTE}/${id}/bookmark`, {
     method: 'POST',
   });
+};
+
+/**
+ * 로그인 사용자의 최근 수정 노트 이력 조회 (Slice 무한스크롤)
+ */
+export const getRecentUpdates = async (
+  params: GetRecentUpdatesParams = {}
+): Promise<SliceResponse<NoteHistoryItem>> => {
+  const { page = 0, size = 10 } = params;
+  const queryParams = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+
+  return fetcher<SliceResponse<NoteHistoryItem>>(
+    `${API_ENDPOINTS.NOTE}/me/recent-updates?${queryParams.toString()}`
+  );
 };

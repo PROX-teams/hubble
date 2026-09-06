@@ -1,13 +1,21 @@
-import { NoteMeta } from "../note/note.types";
+import { CategoryType } from '@/shared/types';
+import { NoteMeta } from '../note/note.types';
 
-// 임시로 NoteMeta를 extends함
 interface Story extends NoteMeta {
-  id: number;          
-  title: string;          
-  description?: string;   
-  category?: string;       
-  icon?: string; 
-  articleIds: number[]
+  id: number;
+  title: string;
+  description?: string;
+  category?: CategoryType;
+  icon?: string;
+  articleIds: number[];
+  authorId?: number;
 }
 
-export type { Story };
+interface StoryCreateRequest {
+  title: string;
+  description?: string;
+  category: CategoryType;
+  icon?: string;
+}
+
+export type { Story, StoryCreateRequest };

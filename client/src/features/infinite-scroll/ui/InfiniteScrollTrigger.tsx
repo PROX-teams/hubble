@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import * as S from './InfiniteScrollTrigger.css';
 
 interface InfiniteScrollTriggerProps {
   /** 다음 페이지를 불러올 수 있는지 여부 */
@@ -44,9 +45,12 @@ export const InfiniteScrollTrigger = ({
   }, [hasNextPage, fetchNextPage, isFetching]);
 
   return (
-    <div ref={observerRef} style={{ width: '100%', minHeight: '50px' }}>
-      {isFetching && (loadingComponent || <div>Loading more...</div>)}
-      {!hasNextPage && (endComponent || <div>End of content.</div>)}
+    <div
+      ref={observerRef}
+      className={hasNextPage ? S.trigger : S.hiddenTrigger}
+    >
+      {isFetching && (loadingComponent || null)}
+      {!hasNextPage && (endComponent || null)}
     </div>
   );
 };

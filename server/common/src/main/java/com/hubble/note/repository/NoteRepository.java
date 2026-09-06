@@ -11,58 +11,47 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface NoteRepository extends JpaRepository<Note, Long> {
+public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositoryCustom {
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.viewCount = n.viewCount + 1 WHERE n.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.likeCount = n.likeCount + 1 WHERE n.id = :id")
     void incrementLikeCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Note n SET n.likeCount = n.likeCount - 1 WHERE n.id = :id")
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Note n SET n.likeCount = CASE WHEN n.likeCount > 0 THEN n.likeCount - 1 ELSE 0 END WHERE n.id = :id")
     void decrementLikeCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.bookmarkCount = n.bookmarkCount + 1 WHERE n.id = :id")
     void incrementBookmarkCount(@Param("id") Long id);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Note n SET n.bookmarkCount = n.bookmarkCount - 1 WHERE n.id = :id")
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Note n SET n.bookmarkCount = CASE WHEN n.bookmarkCount > 0 THEN n.bookmarkCount - 1 ELSE 0 END WHERE n.id = :id")
     void decrementBookmarkCount(@Param("id") Long id);
 
-    @Query(value = "select n from Note n join fetch n.user left join fetch n.story",
-           countQuery = "select count(n) from Note n")
-    Page<Note> findAllWithFetch(Pageable pageable);
-
-    @Query(value = "select n from Note n join fetch n.user left join fetch n.story where n.category = :category",
-           countQuery = "select count(n) from Note n where n.category = :category")
-    Page<Note> findAllByCategoryWithFetch(@Param("category") Category category, Pageable pageable);
-
-    @Query(value = "select n from Note n join fetch n.user left join fetch n.story where n.title like %:keyword% or n.content like %:keyword%",
-           countQuery = "select count(n) from Note n where n.title like %:keyword% or n.content like %:keyword%")
-    Page<Note> findByKeywordWithFetch(@Param("keyword") String keyword, Pageable pageable);
-
-    // 태그 이름으로 전체 필터링 (ManyToOne fetch join 적용)
-    @Query(value = "select distinct n from Note n join fetch n.user left join fetch n.story join n.noteTags nt join nt.tag t where t.name = :tagName",
-           countQuery = "select count(distinct n) from Note n join n.noteTags nt join nt.tag t where t.name = :tagName")
-    Page<Note> findAllByTagNameWithFetch(@Param("tagName") String tagName, Pageable pageable);
-
-    // 로그인 사용자 전체 노트 조회
-    @Query(value = "select n from Note n join fetch n.user left join fetch n.story where n.user.id = :userId",
-           countQuery = "select count(n) from Note n where n.user.id = :userId")
-    Page<Note> findAllByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
-
-    // 로그인 사용자의 특정 태그 노트 필터링
-    @Query(value = "select distinct n from Note n join fetch n.user left join fetch n.story join n.noteTags nt join nt.tag t where n.user.id = :userId and t.name = :tagName",
-           countQuery = "select count(distinct n) from Note n join n.noteTags nt join nt.tag t where n.user.id = :userId and t.name = :tagName")
-    Page<Note> findAllByUserIdAndTagNameWithFetch(@Param("userId") Long userId, @Param("tagName") String tagName, Pageable pageable);
-
-    @Query("select n from Note n join fetch n.user left join fetch n.story order by n.likeCount desc")
+    @Query("select n from Note n join fetch n.user order by n.likeCount desc")
     List<Note> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
 
-    @Query("select n from Note n join fetch n.user left join fetch n.story order by n.viewCount desc")
+    @Query("select n from Note n join fetch n.user order by n.viewCount desc")
     List<Note> findTop10ByOrderByViewCountDescWithFetch(Pageable pageable);
+
+    // 로그인 사용자의 최근 업데이트 노트 이력 조회 (경량 DTO 프로젝션 및 Slice 무한스크롤 최적화)
+    @Query("SELECT new com.hubble.note.dto.NoteHistoryDto(n.id, n.title, s.title, n.updatedAt) " +
+           "FROM Note n LEFT JOIN n.story s " +
+           "WHERE n.user.id = :userId " +
+           "ORDER BY n.updatedAt DESC")
+    org.springframework.data.domain.Slice<com.hubble.note.dto.NoteHistoryDto> findRecentUpdatesByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    // 로그인 사용자의 북마크한 노트 목록 조회 (Fetch Join 적용 및 페이징 N+1 완전 해결)
+    @Query(value = "select n from NoteBookmark nb join nb.note n join fetch n.user where nb.user.id = :userId",
+           countQuery = "select count(nb) from NoteBookmark nb where nb.user.id = :userId")
+    Page<Note> findBookmarkedNotesByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
+
+    // 상위 스토리 조회수 비동기 롤업을 위한 storyId 단건 스칼라 조회 (조인 없는 Zero-Join 인덱스 스캔)
+    @Query("SELECT n.story.id FROM Note n WHERE n.id = :id")
+    Long findStoryIdByNoteId(@Param("id") Long id);
 }

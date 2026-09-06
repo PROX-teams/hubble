@@ -175,6 +175,14 @@ export const subNoteTitle = style([
   },
 ]);
 
+export const emptySubNote = style([
+  tx.cap2_rg,
+  {
+    padding: "6px 8px",
+    color: vars.color.gray_300,
+  },
+]);
+
 export const divider = style({
   height: "1px",
   backgroundColor: vars.color.stroke_200,

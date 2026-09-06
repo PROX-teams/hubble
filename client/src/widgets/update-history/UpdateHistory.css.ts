@@ -28,6 +28,8 @@ export const listContainer = style({
   display: "flex",
   flexDirection: "column",
   width: "100%",
+  maxHeight: "420px",
+  overflowY: "auto",
   backgroundColor: vars.color.gray_100,
   border: `1px solid ${vars.color.stroke_200}`,
   borderRadius: "0.5rem",

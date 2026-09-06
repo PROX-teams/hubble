@@ -3,7 +3,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { AuthGuard } from '@/features/auth/AuthGuard';
-import * as s from '../../page.css';
+import * as s from './page.css';
 
 const Editor = dynamic(() => import('@/features/note/write-note/ui/Editor'), {
   ssr: false,

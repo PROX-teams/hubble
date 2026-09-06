@@ -19,6 +19,8 @@ interface StoryGridWithModalProps {
 const StoryCardContainer = ({ stories }: StoryGridWithModalProps) => {
   const { isOpen, selectedId, open, close } = useStoryModal();
 
+  const selectedStory = stories.find((item) => item.id === selectedId);
+
   return (
     <>
       <div className={S.gridContainer}>
@@ -28,8 +30,8 @@ const StoryCardContainer = ({ stories }: StoryGridWithModalProps) => {
         ))}
       </div>
       <AnimatePresence>
-        {isOpen && selectedId != null && (
-          <StoryCardModal id={selectedId} onClose={close} />
+        {isOpen && selectedStory && (
+          <StoryCardModal story={selectedStory} onClose={close} />
         )}
       </AnimatePresence>
     </>

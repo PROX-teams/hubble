@@ -40,14 +40,18 @@ const meta: Meta<typeof StoryCard> = {
 
 export default meta;
 
+import type { Story as StoryEntity } from "@/entities/story/story.types";
+
 type Story = StoryObj<typeof meta>;
 
+const storyData = data as unknown as StoryEntity;
+
 export const Comfortable: Story = {
-  args: {data, density: "comfortable"},
+  args: { data: storyData, density: "comfortable" },
   render: (args) => <div style={{ width: "394px" }}><StoryCard {...args} /></div>,
 };
 
 export const Compact: Story = {
-  args: {data, density: "compact"},
+  args: { data: storyData, density: "compact" },
   render: (args) => <div style={{ width: "414px" }}><StoryCard {...args} /></div>,
 };
