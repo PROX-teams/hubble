@@ -12,6 +12,7 @@ import com.hubble.note.entity.NoteBookmark;
 import com.hubble.note.entity.NoteLike;
 import com.hubble.note.entity.NoteTag;
 import com.hubble.note.entity.Tag;
+import com.hubble.note.event.NoteDeletedEvent;
 import com.hubble.note.event.NoteViewedEvent;
 import com.hubble.note.repository.*;
 import com.hubble.story.entity.Story;
@@ -106,9 +107,8 @@ public class NoteService {
         Note note = getNoteEntity(noteId);
         validateOwner(user, note);
 
-        noteBookmarkRepository.deleteAllByNoteId(noteId);
-        noteLikeRepository.deleteAllByNoteId(noteId);
         noteRepository.delete(note);
+        eventPublisher.publishEvent(new NoteDeletedEvent(noteId));
     }
 
     // 🚀 [최적화 1] getNote 순수 읽기 전용 격리 & 조회수 비동기 이벤트 발행 (Row Lock 경합 0건)

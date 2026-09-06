@@ -50,4 +50,8 @@ public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositor
     @Query(value = "select n from NoteBookmark nb join nb.note n join fetch n.user where nb.user.id = :userId",
            countQuery = "select count(nb) from NoteBookmark nb where nb.user.id = :userId")
     Page<Note> findBookmarkedNotesByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
+
+    // 상위 스토리 조회수 비동기 롤업을 위한 storyId 단건 스칼라 조회 (조인 없는 Zero-Join 인덱스 스캔)
+    @Query("SELECT n.story.id FROM Note n WHERE n.id = :id")
+    Long findStoryIdByNoteId(@Param("id") Long id);
 }

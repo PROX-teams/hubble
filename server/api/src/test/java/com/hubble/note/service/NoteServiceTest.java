@@ -59,6 +59,8 @@ class NoteServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+    @Mock
     private jakarta.persistence.EntityManager entityManager;
 
     @Test
@@ -130,7 +132,7 @@ class NoteServiceTest {
     }
 
     @Test
-    @DisplayName("노트 삭제 시 연관된 북마크와 좋아요가 함께 벌크 삭제되어야 한다.")
+    @DisplayName("노트 삭제 시 부모 노트가 소프트 삭제되고 삭제 이벤트가 발행되어야 한다.")
     void deleteNoteWithAssociatedBookmarksAndLikes() {
         // given
         Long userId = 1L;
@@ -145,8 +147,7 @@ class NoteServiceTest {
         noteService.deleteNote(userId, noteId);
 
         // then
-        verify(noteBookmarkRepository, times(1)).deleteAllByNoteId(noteId);
-        verify(noteLikeRepository, times(1)).deleteAllByNoteId(noteId);
         verify(noteRepository, times(1)).delete(note);
+        verify(eventPublisher, times(1)).publishEvent(any(com.hubble.note.event.NoteDeletedEvent.class));
     }
 }

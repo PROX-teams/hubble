@@ -84,10 +84,7 @@ public class StoryService {
         storyRepository.delete(story);
     }
 
-    @Transactional
     public StoryResponse getStory(Long storyId, Long userId) {
-        storyRepository.incrementViewCount(storyId);
-        
         Story story = getStoryEntity(storyId);
         User user = (userId != null) ? userRepository.findById(userId).orElse(null) : null;
         return StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story));
