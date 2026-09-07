@@ -17,6 +17,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,6 +133,50 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     private BooleanExpression tagEq(String tagName) {
         return StringUtils.hasText(tagName) ? note.noteTags.any().tag.name.eq(tagName) : null;
+    }
+
+    @Override
+    public List<Note> findMostLovedNotes(int limit) {
+        NumberExpression<Long> popularityScore = note.bookmarkCount.multiply(5L)
+                .add(note.likeCount.multiply(3L))
+                .add(note.viewCount.divide(10L));
+
+        return queryFactory
+                .selectFrom(note)
+                .join(note.user, user).fetchJoin()
+                .orderBy(popularityScore.desc(), note.createdAt.desc())
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<Note> findDiscoverNotes(List<Long> excludeIds, int limit) {
+        NumberExpression<Long> popularityScore = note.bookmarkCount.multiply(5L)
+                .add(note.likeCount.multiply(3L))
+                .add(note.viewCount.divide(10L));
+
+        LocalDateTime fourteenDaysAgo = LocalDateTime.now().minusDays(14);
+
+        // 1-Query Fallback: 최근 14일 이내 글(Tier 1) 우선, 부족하면 이전 글(Tier 2)로 채움
+        NumberExpression<Integer> timeTier = new CaseBuilder()
+                .when(note.createdAt.goe(fourteenDaysAgo)).then(1)
+                .otherwise(2);
+
+        BooleanExpression excludeCondition = (excludeIds != null && !excludeIds.isEmpty())
+                ? note.id.notIn(excludeIds)
+                : null;
+
+        return queryFactory
+                .selectFrom(note)
+                .join(note.user, user).fetchJoin()
+                .where(excludeCondition)
+                .orderBy(
+                        timeTier.asc(),
+                        popularityScore.desc(),
+                        note.createdAt.desc()
+                )
+                .limit(limit)
+                .fetch();
     }
 
     private BooleanExpression keywordContains(String keyword) {
