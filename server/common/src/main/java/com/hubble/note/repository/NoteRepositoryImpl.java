@@ -4,15 +4,20 @@ import com.hubble.common.entity.Category;
 import com.hubble.note.dto.NoteSearchCondition;
 import com.hubble.note.entity.Note;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hubble.note.entity.QNote.note;
@@ -23,6 +28,64 @@ import static com.hubble.user.entity.QUser.user;
 public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public Slice<Note> searchNotesSlice(String keyword, Pageable pageable) {
+        int pageSize = pageable.getPageSize();
+
+        // 인기도 점수: 북마크 * 5 + 좋아요 * 3 + 조회수 / 10
+        NumberExpression<Long> popularityScore = note.bookmarkCount.multiply(5L)
+                .add(note.likeCount.multiply(3L))
+                .add(note.viewCount.divide(10L));
+
+        var query = queryFactory
+                .selectFrom(note)
+                .join(note.user, user).fetchJoin()
+                .where(integratedKeywordPredicate(keyword))
+                .offset(pageable.getOffset())
+                .limit(pageSize + 1); // LIMIT N + 1 (다음 페이지 확인용)
+
+        if (StringUtils.hasText(keyword)) {
+            String trimmed = keyword.trim();
+            // 1순위: 제목 일치(Tier 1), 2순위: 태그 일치(Tier 2), 3순위: 기타(Tier 3)
+            NumberExpression<Integer> relevanceTier = new CaseBuilder()
+                    .when(note.title.containsIgnoreCase(trimmed)).then(1)
+                    .when(note.noteTags.any().tag.name.equalsIgnoreCase(trimmed)).then(2)
+                    .otherwise(3);
+
+            query.orderBy(
+                    relevanceTier.asc(),
+                    popularityScore.desc(),
+                    note.createdAt.desc()
+            );
+        } else {
+            // 키워드가 없을 경우: 순수 인기도 높은 순 -> 최신순
+            query.orderBy(
+                    popularityScore.desc(),
+                    note.createdAt.desc()
+            );
+        }
+
+        List<Note> content = new ArrayList<>(query.fetch());
+
+        boolean hasNext = content.size() > pageSize;
+        if (hasNext) {
+            content.remove(pageSize);
+        }
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    private BooleanExpression integratedKeywordPredicate(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        return note.title.containsIgnoreCase(trimmed)
+                .or(note.content.containsIgnoreCase(trimmed))
+                .or(note.noteTags.any().tag.name.containsIgnoreCase(trimmed))
+                .or(note.user.nickname.containsIgnoreCase(trimmed));
+    }
 
     @Override
     public Page<Note> searchNotes(NoteSearchCondition condition, Pageable pageable) {

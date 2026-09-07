@@ -5,6 +5,7 @@ import com.hubble.story.entity.Story;
 import com.hubble.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -55,6 +56,20 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
 
     @Query("select s from Story s join fetch s.user order by s.likeCount desc")
     List<Story> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
+
+    @Query("SELECT s FROM Story s JOIN FETCH s.user " +
+           "WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "   OR LOWER(s.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "   OR LOWER(s.user.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "ORDER BY " +
+           "  CASE WHEN LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 2 END ASC, " +
+           "  (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, " +
+           "  s.createdAt DESC")
+    Slice<Story> searchStoriesSlice(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Story s JOIN FETCH s.user " +
+           "ORDER BY (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, s.createdAt DESC")
+    Slice<Story> findPopularStoriesSlice(Pageable pageable);
 
     Optional<Story> findByTitleAndUser(String title, User user);
 }
