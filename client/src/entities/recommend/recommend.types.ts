@@ -1,4 +1,5 @@
 import type { Note } from '@/entities/note/note.types';
+import type { Story } from '@/entities/story/story.types';
 
 /**
  * 인기 크리에이터 인터페이스
@@ -19,4 +20,6 @@ export interface MainRecommendResponse {
   mostLovedNotes: Note[];
   discoverNotes: Note[];
   creators: TrendingCreator[];
+  popularStories: Story[];
 }
+

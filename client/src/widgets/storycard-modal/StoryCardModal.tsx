@@ -10,6 +10,7 @@ import { StoryNoteGrid } from "@/widgets/story-note-grid/StoryNoteGrid";
 import { StoryCardModalHeader } from "./StoryCardModalHeader";
 import { CreateStoryModal } from "@/features/story/create-story/ui/CreateStoryModal";
 import { deleteStory } from "@/entities/story/api/story.api";
+import { useAuthStore } from "@/entities/user/model/useAuthStore";
 import * as S from "./StoryCardModal.css";
 
 // 더보기(케밥) SVG 아이콘
@@ -89,6 +90,47 @@ export const StoryCardModal = ({
 
   const noteCount = story.articleIds?.length ?? notes.length;
 
+  // 현재 로그인 사용자 및 스토리 소유자(작성자) 여부 검증
+  const currentUser = useAuthStore((state) => state.user);
+  const isOwner = Boolean(
+    currentUser &&
+      ((story.authorId && currentUser.id === story.authorId) ||
+        (story.author && currentUser.nickname === story.author))
+  );
+
+  const defaultActionSlot = isOwner ? (
+    <div className={S.moreMenuWrapper}>
+      <button
+        type="button"
+        className={S.moreButton}
+        aria-label="더보기"
+        onClick={() => setIsMenuOpen((prev) => !prev)}
+      >
+        <MoreIcon />
+      </button>
+
+      {isMenuOpen && (
+        <div className={S.dropdownMenu}>
+          <button
+            type="button"
+            className={S.dropdownItem}
+            onClick={onClickEdit}
+          >
+            스토리 수정
+          </button>
+          <button
+            type="button"
+            className={S.deleteItem}
+            onClick={onClickDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "삭제 중..." : "스토리 삭제"}
+          </button>
+        </div>
+      )}
+    </div>
+  ) : null;
+
   return (
     <>
       <Modal hide={onClose} hideOnClickOutside className={S.modal}>
@@ -98,40 +140,7 @@ export const StoryCardModal = ({
           icon={story.icon}
           noteCount={noteCount}
           latestDate={latestDate}
-          actionSlot={
-            actionSlot || (
-              <div className={S.moreMenuWrapper}>
-                <button
-                  type="button"
-                  className={S.moreButton}
-                  aria-label="더보기"
-                  onClick={() => setIsMenuOpen((prev) => !prev)}
-                >
-                  <MoreIcon />
-                </button>
-
-                {isMenuOpen && (
-                  <div className={S.dropdownMenu}>
-                    <button
-                      type="button"
-                      className={S.dropdownItem}
-                      onClick={onClickEdit}
-                    >
-                      스토리 수정
-                    </button>
-                    <button
-                      type="button"
-                      className={S.deleteItem}
-                      onClick={onClickDelete}
-                      disabled={isDeleting}
-                    >
-                      {isDeleting ? "삭제 중..." : "스토리 삭제"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )
-          }
+          actionSlot={actionSlot ?? defaultActionSlot}
         />
 
         {/* 모달 본문 (태그 필터 바 + 4열 노트 그리드) */}
@@ -140,12 +149,14 @@ export const StoryCardModal = ({
         </div>
       </Modal>
 
-      {/* 수정 클릭 시 열리는 스토리 편집 모달 */}
-      <CreateStoryModal
-        isOpen={isEditModalOpen}
-        initialStory={story}
-        onClose={() => setIsEditModalOpen(false)}
-      />
+      {/* 수정 클릭 시 열리는 스토리 편집 모달 (작성자 본인일 때만 마운트) */}
+      {isOwner && (
+        <CreateStoryModal
+          isOpen={isEditModalOpen}
+          initialStory={story}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </>
   );
 };

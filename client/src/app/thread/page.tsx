@@ -8,6 +8,8 @@ import { InfiniteScrollTrigger } from '@/features/infinite-scroll/ui/InfiniteScr
 import { CategoryType, SortType } from '@/shared/types';
 import NoteCard from '@/entities/note/ui/note-card/NoteCard';
 import StoryCard from '@/entities/story/ui/story-card/StoryCard';
+import { StoryCardModal } from '@/widgets/storycard-modal/StoryCardModal';
+import type { Story } from '@/entities/story/story.types';
 import { AppToggleGroup } from '@/shared/ui/toggle/app-toggle-group/AppToggleGroup';
 import { ThreadFilterBar } from '@/widgets/thread-filter-bar/ThreadFilterBar';
 import * as S from './page.css';
@@ -18,6 +20,7 @@ export default function ThreadPage() {
   const [category, setCategory] = useState<CategoryType>();
   const [tagName, setTagName] = useState<string>('');
   const [sortType, setSortType] = useState<SortType>('latest');
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 
   // 노트 무한 스크롤 쿼리
   const noteQuery = useInfiniteQuery({
@@ -90,6 +93,7 @@ export default function ThreadPage() {
                 <StoryCard 
                   key={story.id} 
                   data={story} 
+                  onClick={() => setSelectedStory(story)}
                 />
               ))
             ))
@@ -101,6 +105,14 @@ export default function ThreadPage() {
         fetchNextPage={fetchNextPage}
         isFetching={isFetchingNextPage}
       />
+
+      {/* 스토리 상세 모달 */}
+      {selectedStory && (
+        <StoryCardModal
+          story={selectedStory}
+          onClose={() => setSelectedStory(null)}
+        />
+      )}
     </div>
   );
 }

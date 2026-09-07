@@ -1,6 +1,7 @@
 package com.hubble.recommend.dto.response;
 
 import com.hubble.note.dto.response.NoteSummaryResponse;
+import com.hubble.story.dto.response.StoryResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -14,13 +15,17 @@ public record MainRecommendResponse(
         List<NoteSummaryResponse> discoverNotes,
 
         @Schema(description = "주목받는 크리에이터 목록 (5명)")
-        List<TrendingCreatorResponse> creators
+        List<TrendingCreatorResponse> creators,
+
+        @Schema(description = "인기 스토리 목록 (12개)")
+        List<StoryResponse> popularStories
 ) {
     public static MainRecommendResponse of(
             List<NoteSummaryResponse> mostLovedNotes,
             List<NoteSummaryResponse> discoverNotes,
-            List<TrendingCreatorResponse> creators
+            List<TrendingCreatorResponse> creators,
+            List<StoryResponse> popularStories
     ) {
-        return new MainRecommendResponse(mostLovedNotes, discoverNotes, creators);
+        return new MainRecommendResponse(mostLovedNotes, discoverNotes, creators, popularStories);
     }
 }

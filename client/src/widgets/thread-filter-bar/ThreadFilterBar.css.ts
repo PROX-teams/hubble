@@ -39,19 +39,18 @@ export const dropdown = style([
   }
 ]);
 
-export const tagElement = style([
-  tx.cap1_rg,
-  {
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-    color: vars.color.gray_500,
-  }
-]);
-
-export const activeTagElement = style([
-  tagElement,
-  {
-    fontWeight: 'bold',
-    color: vars.color.black,
+export const tagElement = style({
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  transition: 'all 0.2s ease-in-out',
+  selectors: {
+    '&:hover': {
+      borderColor: vars.color.stroke_main_100,
+    },
   },
-]);
+});
+
+export const activeTagElement = style({
+  backgroundColor: vars.color.main,
+  borderColor: vars.color.stroke_main_100,
+});

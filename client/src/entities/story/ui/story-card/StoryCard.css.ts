@@ -33,9 +33,9 @@ export const storyCard = recipe({
       comfortable: [
         tx.h5_md,
         {
-          padding: "1.875rem",   
-          height: "10.625rem",  
-          gap: "1.125rem",      
+          padding: "2rem 1.875rem",   
+          height: "12.5rem",  
+          gap: "1.25rem",      
         },
       ],
     },
