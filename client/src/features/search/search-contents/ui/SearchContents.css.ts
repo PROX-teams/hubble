@@ -7,10 +7,60 @@ export const container = style({
   flexDirection: "column",
 });
 
-export const searchInput  = style({
+export const searchBarWrapper = style({
+  position: "relative",
   display: "flex",
-  width:"100%",
-  borderRadius: 0,
+  alignItems: "center",
+  width: "100%",
+  borderBottom: `1px solid ${vars.color.stroke_200}`,
+  backgroundColor: "transparent",
+});
+
+export const searchInput = style([
+  tx.b1_rg,
+  {
+    width: "100%",
+    padding: "16px 44px 16px 20px",
+    border: "none",
+    outline: "none",
+    backgroundColor: "transparent",
+    color: vars.color.white,
+    selectors: {
+      "&::placeholder": {
+        color: vars.color.gray_400,
+      },
+      "&:focus": {
+        outline: "none",
+      },
+      "&::-webkit-search-decoration": {
+        display: "none",
+      },
+      "&::-webkit-search-cancel-button": {
+        display: "none", // 브라우저 기본 x 버튼 숨김
+      },
+    },
+  },
+]);
+
+export const clearButton = style({
+  position: "absolute",
+  right: "16px",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "none",
+  border: "none",
+  padding: "4px",
+  cursor: "pointer",
+  color: vars.color.gray_400,
+  borderRadius: "50%",
+  transition: "color 0.15s ease, background-color 0.15s ease",
+  selectors: {
+    "&:hover": {
+      color: vars.color.white,
+      backgroundColor: vars.color.gray_200,
+    },
+  },
 });
 
 

@@ -3,6 +3,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost
 export const API_ENDPOINTS = {
   NOTE: '/note',
   STORY: '/story',
+  SEARCH: '/search',
   AUTH: {
     LOGIN: '/auth/login',
     REISSUE: '/auth/reissue',
