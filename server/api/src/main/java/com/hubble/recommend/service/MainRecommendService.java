@@ -15,7 +15,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +42,51 @@ public class MainRecommendService {
                 .map(NoteSummaryResponse::from)
                 .toList();
 
-        // 2. Discover: Most Loved 글 제외(중복 방지) 및 최근 트렌딩 우선 16개 조회
-        List<Long> excludeIds = mostLovedEntities.stream().map(Note::getId).toList();
-        List<Note> discoverEntities = noteRepository.findDiscoverNotes(excludeIds, DISCOVER_LIMIT);
+        // 2. Discover: 최근 14일 인덱스 탐색 + Set 메모리 중복 필터링(DB NOT IN 0건) + 부족 시 2단계 Fallback
+        LocalDateTime fourteenDaysAgo = LocalDateTime.now().minusDays(14);
+        Set<Long> mostLovedIdSet = mostLovedEntities.stream()
+                .map(Note::getId)
+                .collect(Collectors.toSet());
 
-        // 등록된 전체 글 수가 적어 제외 후 결과가 비어있는 경우 Fallback으로 채움 (Graceful Fallback)
-        if (discoverEntities.isEmpty()) {
-            discoverEntities = noteRepository.findDiscoverNotes(null, DISCOVER_LIMIT);
+        // 1차 조회: 최근 14일 트렌딩 후보 (중복 대비 넉넉하게 30건 조회)
+        List<Note> recentCandidates = noteRepository.findRecentTrendingNotes(
+                fourteenDaysAgo, 
+                DISCOVER_LIMIT + MOST_LOVED_LIMIT
+        );
+
+        List<Note> discoverEntities = new ArrayList<>(
+                recentCandidates.stream()
+                        .filter(note -> !mostLovedIdSet.contains(note.getId()))
+                        .limit(DISCOVER_LIMIT)
+                        .toList()
+        );
+
+        // 2차 조회 (부족분 Fallback): 최근 14일 글이 16건 미만일 때만 과거 인기글에서 보충 (DB 부하 최소화)
+        if (discoverEntities.size() < DISCOVER_LIMIT) {
+            int neededCount = DISCOVER_LIMIT - discoverEntities.size();
+            List<Note> fallbackCandidates = noteRepository.findFallbackTrendingNotes(
+                    fourteenDaysAgo,
+                    neededCount + MOST_LOVED_LIMIT + discoverEntities.size()
+            );
+
+            Set<Long> alreadyIncludedIds = discoverEntities.stream()
+                    .map(Note::getId)
+                    .collect(Collectors.toSet());
+            alreadyIncludedIds.addAll(mostLovedIdSet);
+
+            fallbackCandidates.stream()
+                    .filter(note -> !alreadyIncludedIds.contains(note.getId()))
+                    .limit(neededCount)
+                    .forEach(discoverEntities::add);
+
+            // [극단적 Cold Start 대응] 전체 글이 극소수일 경우 빈 화면 방지를 위해 가용 노트로 보충
+            if (discoverEntities.size() < DISCOVER_LIMIT && !mostLovedEntities.isEmpty()) {
+                int stillNeed = DISCOVER_LIMIT - discoverEntities.size();
+                mostLovedEntities.stream()
+                        .filter(note -> !discoverEntities.contains(note))
+                        .limit(stillNeed)
+                        .forEach(discoverEntities::add);
+            }
         }
 
         List<NoteSummaryResponse> discoverNotes = discoverEntities.stream()

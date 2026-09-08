@@ -2,6 +2,7 @@ package com.hubble.note.repository;
 
 import com.hubble.note.dto.NoteSearchCondition;
 import com.hubble.note.entity.Note;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,5 +16,7 @@ public interface NoteRepositoryCustom {
 
     List<Note> findMostLovedNotes(int limit);
 
-    List<Note> findDiscoverNotes(List<Long> excludeIds, int limit);
+    List<Note> findRecentTrendingNotes(LocalDateTime after, int limit);
+
+    List<Note> findFallbackTrendingNotes(LocalDateTime before, int limit);
 }

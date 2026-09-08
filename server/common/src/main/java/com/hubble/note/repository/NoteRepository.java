@@ -14,23 +14,28 @@ import java.util.List;
 public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositoryCustom {
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Note n SET n.viewCount = n.viewCount + 1 WHERE n.id = :id")
+    @Query("UPDATE Note n SET n.viewCount = n.viewCount + 1, " +
+           "n.popularityScore = (n.bookmarkCount * 5) + (n.likeCount * 3) + ((n.viewCount + 1) / 10) WHERE n.id = :id")
     void incrementViewCount(@Param("id") Long id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Note n SET n.likeCount = n.likeCount + 1 WHERE n.id = :id")
+    @Query("UPDATE Note n SET n.likeCount = n.likeCount + 1, " +
+           "n.popularityScore = (n.bookmarkCount * 5) + ((n.likeCount + 1) * 3) + (n.viewCount / 10) WHERE n.id = :id")
     void incrementLikeCount(@Param("id") Long id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Note n SET n.likeCount = CASE WHEN n.likeCount > 0 THEN n.likeCount - 1 ELSE 0 END WHERE n.id = :id")
+    @Query("UPDATE Note n SET n.likeCount = CASE WHEN n.likeCount > 0 THEN n.likeCount - 1 ELSE 0 END, " +
+           "n.popularityScore = (n.bookmarkCount * 5) + (CASE WHEN n.likeCount > 0 THEN (n.likeCount - 1) * 3 ELSE 0 END) + (n.viewCount / 10) WHERE n.id = :id")
     void decrementLikeCount(@Param("id") Long id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Note n SET n.bookmarkCount = n.bookmarkCount + 1 WHERE n.id = :id")
+    @Query("UPDATE Note n SET n.bookmarkCount = n.bookmarkCount + 1, " +
+           "n.popularityScore = ((n.bookmarkCount + 1) * 5) + (n.likeCount * 3) + (n.viewCount / 10) WHERE n.id = :id")
     void incrementBookmarkCount(@Param("id") Long id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Note n SET n.bookmarkCount = CASE WHEN n.bookmarkCount > 0 THEN n.bookmarkCount - 1 ELSE 0 END WHERE n.id = :id")
+    @Query("UPDATE Note n SET n.bookmarkCount = CASE WHEN n.bookmarkCount > 0 THEN n.bookmarkCount - 1 ELSE 0 END, " +
+           "n.popularityScore = (CASE WHEN n.bookmarkCount > 0 THEN (n.bookmarkCount - 1) * 5 ELSE 0 END) + (n.likeCount * 3) + (n.viewCount / 10) WHERE n.id = :id")
     void decrementBookmarkCount(@Param("id") Long id);
 
     @Query("select n from Note n join fetch n.user order by n.likeCount desc")

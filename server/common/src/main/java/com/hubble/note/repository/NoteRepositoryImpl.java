@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.hubble.note.entity.QNote.note;
@@ -34,40 +35,17 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
     public Slice<Note> searchNotesSlice(String keyword, Pageable pageable) {
         int pageSize = pageable.getPageSize();
 
-        // 인기도 점수: 북마크 * 5 + 좋아요 * 3 + 조회수 / 10
-        NumberExpression<Long> popularityScore = note.bookmarkCount.multiply(5L)
-                .add(note.likeCount.multiply(3L))
-                .add(note.viewCount.divide(10L));
-
-        var query = queryFactory
+        List<Note> content = queryFactory
                 .selectFrom(note)
                 .join(note.user, user).fetchJoin()
                 .where(integratedKeywordPredicate(keyword))
                 .offset(pageable.getOffset())
-                .limit(pageSize + 1); // LIMIT N + 1 (다음 페이지 확인용)
-
-        if (StringUtils.hasText(keyword)) {
-            String trimmed = keyword.trim();
-            // 1순위: 제목 일치(Tier 1), 2순위: 태그 일치(Tier 2), 3순위: 기타(Tier 3)
-            NumberExpression<Integer> relevanceTier = new CaseBuilder()
-                    .when(note.title.containsIgnoreCase(trimmed)).then(1)
-                    .when(note.noteTags.any().tag.name.equalsIgnoreCase(trimmed)).then(2)
-                    .otherwise(3);
-
-            query.orderBy(
-                    relevanceTier.asc(),
-                    popularityScore.desc(),
-                    note.createdAt.desc()
-            );
-        } else {
-            // 키워드가 없을 경우: 순수 인기도 높은 순 -> 최신순
-            query.orderBy(
-                    popularityScore.desc(),
-                    note.createdAt.desc()
-            );
-        }
-
-        List<Note> content = new ArrayList<>(query.fetch());
+                .limit(pageSize + 1)
+                .orderBy(
+                        note.popularityScore.desc(),
+                        note.createdAt.desc()
+                )
+                .fetch();
 
         boolean hasNext = content.size() > pageSize;
         if (hasNext) {
@@ -137,45 +115,71 @@ public class NoteRepositoryImpl implements NoteRepositoryCustom {
 
     @Override
     public List<Note> findMostLovedNotes(int limit) {
-        NumberExpression<Long> popularityScore = note.bookmarkCount.multiply(5L)
-                .add(note.likeCount.multiply(3L))
-                .add(note.viewCount.divide(10L));
+        // [지연 조인] PK만 먼저 정렬 추출 후 필요한 페치 조인 수행 (Sort Buffer 메모리 낭비 원천 차단)
+        List<Long> targetIds = queryFactory
+                .select(note.id)
+                .from(note)
+                .orderBy(note.popularityScore.desc(), note.createdAt.desc())
+                .limit(limit)
+                .fetch();
+
+        if (targetIds.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         return queryFactory
                 .selectFrom(note)
                 .join(note.user, user).fetchJoin()
-                .orderBy(popularityScore.desc(), note.createdAt.desc())
-                .limit(limit)
+                .where(note.id.in(targetIds))
+                .orderBy(note.popularityScore.desc(), note.createdAt.desc())
                 .fetch();
     }
 
     @Override
-    public List<Note> findDiscoverNotes(List<Long> excludeIds, int limit) {
-        NumberExpression<Long> popularityScore = note.bookmarkCount.multiply(5L)
-                .add(note.likeCount.multiply(3L))
-                .add(note.viewCount.divide(10L));
+    public List<Note> findRecentTrendingNotes(LocalDateTime after, int limit) {
+        // [지연 조인 1단계] 복합 인덱스(createdAt DESC, popularityScore DESC)로 초고속 인덱스 스캔 + PK만 추출
+        List<Long> targetIds = queryFactory
+                .select(note.id)
+                .from(note)
+                .where(note.createdAt.goe(after))
+                .orderBy(note.popularityScore.desc(), note.createdAt.desc())
+                .limit(limit)
+                .fetch();
 
-        LocalDateTime fourteenDaysAgo = LocalDateTime.now().minusDays(14);
+        if (targetIds.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        // 1-Query Fallback: 최근 14일 이내 글(Tier 1) 우선, 부족하면 이전 글(Tier 2)로 채움
-        NumberExpression<Integer> timeTier = new CaseBuilder()
-                .when(note.createdAt.goe(fourteenDaysAgo)).then(1)
-                .otherwise(2);
-
-        BooleanExpression excludeCondition = (excludeIds != null && !excludeIds.isEmpty())
-                ? note.id.notIn(excludeIds)
-                : null;
-
+        // [지연 조인 2단계] 최종 확정된 ID들만 fetchJoin 수행
         return queryFactory
                 .selectFrom(note)
                 .join(note.user, user).fetchJoin()
-                .where(excludeCondition)
-                .orderBy(
-                        timeTier.asc(),
-                        popularityScore.desc(),
-                        note.createdAt.desc()
-                )
+                .where(note.id.in(targetIds))
+                .orderBy(note.popularityScore.desc(), note.createdAt.desc())
+                .fetch();
+    }
+
+    @Override
+    public List<Note> findFallbackTrendingNotes(LocalDateTime before, int limit) {
+        // [지연 조인 1단계] 과거 글 대상 PK만 인덱스/정렬 추출
+        List<Long> targetIds = queryFactory
+                .select(note.id)
+                .from(note)
+                .where(note.createdAt.lt(before))
+                .orderBy(note.popularityScore.desc(), note.createdAt.desc())
                 .limit(limit)
+                .fetch();
+
+        if (targetIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // [지연 조인 2단계] 최종 확정된 ID들만 fetchJoin 수행
+        return queryFactory
+                .selectFrom(note)
+                .join(note.user, user).fetchJoin()
+                .where(note.id.in(targetIds))
+                .orderBy(note.popularityScore.desc(), note.createdAt.desc())
                 .fetch();
     }
 
