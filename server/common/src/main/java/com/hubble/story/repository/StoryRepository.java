@@ -61,10 +61,7 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
            "WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "   OR LOWER(s.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "   OR LOWER(s.user.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "ORDER BY " +
-           "  CASE WHEN LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 2 END ASC, " +
-           "  (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, " +
-           "  s.createdAt DESC")
+           "ORDER BY (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, s.createdAt DESC")
     Slice<Story> searchStoriesSlice(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT s FROM Story s JOIN FETCH s.user " +

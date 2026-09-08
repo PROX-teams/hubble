@@ -1,5 +1,6 @@
 'use client';
 
+import clsx from 'clsx';
 import { CategoryType, SortType } from '@/shared/types';
 import { Dropdown } from '@/shared/ui/dropdown/Dropdown';
 import { AppToggleGroup } from '@/shared/ui/toggle/app-toggle-group/AppToggleGroup';
@@ -69,7 +70,10 @@ export const ThreadFilterBar = ({
             <Tag
               key={tagName}
               label={tagName}
-              className={selectedTag === tagName ? S.activeTagElement : S.tagElement}
+              className={clsx(
+                S.tagElement,
+                selectedTag === tagName && S.activeTagElement
+              )}
               onClick={() => onTagChange(selectedTag === tagName ? '' : tagName)}
             />
           ))}

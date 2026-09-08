@@ -20,7 +20,8 @@ import java.util.List;
         @Index(name = "idx_note_category", columnList = "category"),
         @Index(name = "idx_note_view_count", columnList = "viewCount"),
         @Index(name = "idx_note_like_count", columnList = "likeCount"),
-        @Index(name = "idx_note_created_at", columnList = "createdAt")
+        @Index(name = "idx_note_created_at", columnList = "createdAt"),
+        @Index(name = "idx_note_trending", columnList = "createdAt DESC, popularityScore DESC")
 })
 @SQLDelete(sql = "UPDATE notes SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
@@ -74,18 +75,29 @@ public class Note extends BaseTimeEntity {
     @Column(nullable = false)
     private long bookmarkCount;
 
+    @ColumnDefault("0")
+    @Column(nullable = false)
+    private long popularityScore;
+
     private LocalDateTime deletedAt;
 
     public void incrementViewCount() {
         this.viewCount++;
+        recalculatePopularityScore();
     }
 
     public void updateLikeCount(long count) {
         this.likeCount = count;
+        recalculatePopularityScore();
     }
 
     public void updateBookmarkCount(long count) {
         this.bookmarkCount = count;
+        recalculatePopularityScore();
+    }
+
+    public void recalculatePopularityScore() {
+        this.popularityScore = (this.bookmarkCount * 5) + (this.likeCount * 3) + (this.viewCount / 10);
     }
 
     public void update(String title, String content, Category category, Story story, String imageUrl) {

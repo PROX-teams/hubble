@@ -4,11 +4,13 @@ import { vars } from '@/shared/styles/theme.css';
 
 export const bannerContainer = style({
   position: 'relative',
-  width: '850px',
+  width: '100%',
   height: '240px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  borderRadius: '12px',
+  overflow: 'hidden',
   
   '@media': {
     'screen and (max-width: 768px)': {

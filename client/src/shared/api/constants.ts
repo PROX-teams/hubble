@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
   NOTE: '/note',
   STORY: '/story',
   SEARCH: '/search',
+  RECOMMEND: '/main/recommend',
   AUTH: {
     LOGIN: '/auth/login',
     REISSUE: '/auth/reissue',
