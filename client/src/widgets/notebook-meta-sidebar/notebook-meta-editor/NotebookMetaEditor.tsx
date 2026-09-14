@@ -40,7 +40,7 @@ export const NotebookMetaEditor = () => {
   const { 
     noteId,
     title, 
-    content, 
+    getContent, 
     category, 
     tag, 
     imageUrl, 
@@ -87,7 +87,9 @@ export const NotebookMetaEditor = () => {
       return;
     }
 
-    if (!title.trim() || !content.trim()) {
+    const currentContent = getContent();
+
+    if (!title.trim() || !currentContent.trim()) {
       alert('제목과 내용을 입력해주세요.');
       return;
     }
@@ -95,7 +97,7 @@ export const NotebookMetaEditor = () => {
     try {
       const payload = {
         title,
-        content,
+        content: currentContent,
         category,
         tag,
         imageUrl,
