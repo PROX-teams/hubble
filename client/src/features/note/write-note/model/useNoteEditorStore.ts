@@ -25,6 +25,8 @@ interface NoteEditorState {
   setStoryId: (storyId: number | null) => void;
   setEditor: (editor: Editor | null) => void;
   getContent: () => string;
+  getTitle: () => string;
+  setTitleGetter: (getter: () => string) => void;
   initNote: (note: Note) => void;
   reset: () => void;
 }
@@ -57,6 +59,8 @@ export const useNoteEditorStore = create<NoteEditorState>((set, get) => ({
     const { editor, content } = get();
     return editor ? editor.getHTML() : content;
   },
+  getTitle: () => get().title,
+  setTitleGetter: (getter) => set({ getTitle: getter }),
   initNote: (note) =>
     set({
       noteId: note.id,

@@ -36,23 +36,27 @@ export const SuggestionList = forwardRef<SuggestionListRef, SuggestionListProps>
       }
     };
 
-    useImperativeHandle(ref, () => ({
-      onKeyDown: ({ event }) => {
-        if (event.key === 'ArrowUp') {
-          setSelectedIndex((selectedIndex + items.length - 1) % items.length);
-          return true;
-        }
-        if (event.key === 'ArrowDown') {
-          setSelectedIndex((selectedIndex + 1) % items.length);
-          return true;
-        }
-        if (event.key === 'Enter') {
-          selectItem(items[selectedIndex]);
-          return true;
-        }
-        return false;
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        onKeyDown: ({ event }) => {
+          if (event.key === 'ArrowUp') {
+            setSelectedIndex((selectedIndex + items.length - 1) % items.length);
+            return true;
+          }
+          if (event.key === 'ArrowDown') {
+            setSelectedIndex((selectedIndex + 1) % items.length);
+            return true;
+          }
+          if (event.key === 'Enter') {
+            selectItem(items[selectedIndex]);
+            return true;
+          }
+          return false;
+        },
+      }),
+      [items, selectedIndex]
+    );
 
     useEffect(() => setSelectedIndex(0), [items]);
 

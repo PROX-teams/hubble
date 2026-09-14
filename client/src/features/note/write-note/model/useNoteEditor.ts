@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useEditor, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -10,11 +10,11 @@ import { useNoteEditorStore } from '../model/useNoteEditorStore';
 
 interface UseNoteEditorProps {
   className: string;
+  initialContent?: string;
 }
 
-export const useNoteEditor = ({ className }: UseNoteEditorProps) => {
-  const { content, noteId, setEditor } = useNoteEditorStore();
-  const loadedNoteIdRef = useRef<number | null>(null);
+export const useNoteEditor = ({ className, initialContent }: UseNoteEditorProps) => {
+  const { content, setEditor } = useNoteEditorStore();
 
   const editor = useEditor({
     extensions: [
@@ -37,14 +37,14 @@ export const useNoteEditor = ({ className }: UseNoteEditorProps) => {
         },
       }),
     ],
-    content: content || '',
+    // Props로 전달된 initialContent가 우선하며, 첫 마운트 시 완벽한 본문을 품고 생성됨
+    content: initialContent ?? content ?? '',
     immediatelyRender: false,
     editorProps: {
       attributes: {
         class: className,
       },
     },
-    // 대안 A: 매 타이핑마다 거대한 HTML을 직렬화하여 Zustand를 업데이트하지 않음 (입력 렉 및 불필요한 리렌더링 제거)
   });
 
   // Zustand 스토어에 에디터 인스턴스 등록 및 언마운트 시 클린업
@@ -56,19 +56,6 @@ export const useNoteEditor = ({ className }: UseNoteEditorProps) => {
       setEditor(null);
     };
   }, [editor, setEditor]);
-
-  // 외부(글 수정 페이지의 initNote 등)에서 데이터가 주입될 때만 에디터 본문 초기화
-  useEffect(() => {
-    if (!editor) return;
-
-    const isNewNoteLoaded = loadedNoteIdRef.current !== noteId;
-    const isInitialLoad = !editor.isFocused && editor.isEmpty && Boolean(content);
-
-    if (isNewNoteLoaded || isInitialLoad) {
-      editor.commands.setContent(content || '', { emitUpdate: false });
-      loadedNoteIdRef.current = noteId;
-    }
-  }, [editor, content, noteId]);
 
   return editor;
 };

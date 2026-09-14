@@ -11,6 +11,7 @@ import { Dropdown } from '@/shared/ui/dropdown/Dropdown';
 import Button from '@/shared/ui/button/button/Button';
 import Tag from '@/shared/ui/tag/Tag';
 import AddIcon from '@/shared/assets/icons/common/add.svg';
+import { useShallow } from 'zustand/react/shallow';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
 import { createNote, updateNote } from '@/entities/note/api/note.api';
 import { CategoryType } from '@/shared/types';
@@ -37,10 +38,9 @@ export const NotebookMetaEditor = () => {
   const [tagInput, setTagInput] = useState('');
   const { isLoggedIn } = useAuthStore();
   
+  // 사이드바 UI 렌더링에 필요한 메타데이터 상태만 useShallow로 핀셋 구독 (제목 타이핑 리렌더링 완전 차단)
   const { 
     noteId,
-    title, 
-    getContent, 
     category, 
     tag, 
     imageUrl, 
@@ -49,8 +49,21 @@ export const NotebookMetaEditor = () => {
     setTag,
     setImageUrl,
     setStoryId,
-    reset
-  } = useNoteEditorStore();
+    reset,
+  } = useNoteEditorStore(
+    useShallow((state) => ({
+      noteId: state.noteId,
+      category: state.category,
+      tag: state.tag,
+      imageUrl: state.imageUrl,
+      storyId: state.storyId,
+      setCategory: state.setCategory,
+      setTag: state.setTag,
+      setImageUrl: state.setImageUrl,
+      setStoryId: state.setStoryId,
+      reset: state.reset,
+    }))
+  );
 
   const isEdit = Boolean(noteId);
 
@@ -87,16 +100,19 @@ export const NotebookMetaEditor = () => {
       return;
     }
 
+    // 제목과 본문은 발행을 누른 바로 이 순간에 1회 지연 평가(Pull)로 수거
+    const { getTitle, getContent } = useNoteEditorStore.getState();
+    const currentTitle = getTitle();
     const currentContent = getContent();
 
-    if (!title.trim() || !currentContent.trim()) {
+    if (!currentTitle.trim() || !currentContent.trim()) {
       alert('제목과 내용을 입력해주세요.');
       return;
     }
 
     try {
       const payload = {
-        title,
+        title: currentTitle,
         content: currentContent,
         category,
         tag,

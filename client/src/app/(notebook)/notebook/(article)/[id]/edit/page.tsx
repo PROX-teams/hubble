@@ -19,23 +19,23 @@ export default function NotebookEditPage() {
   const router = useRouter();
   const noteId = Number(params.id);
   const { note, isLoading, isError } = useNoteDetail(noteId);
-  const { initNote, reset } = useNoteEditorStore();
+  const initNote = useNoteEditorStore((state) => state.initNote);
   const { user } = useAuthStore();
 
   useEffect(() => {
+    if (!note || !user) return;
+
+    if (note.author && user.nickname && note.author !== user.nickname) {
+      alert('본인이 작성한 글만 수정할 수 있습니다.');
+      router.replace(`/notebook/${noteId}`);
+    }
+  }, [note, user, noteId, router]);
+
+  useEffect(() => {
     if (note) {
-      // 본인 글이 아닐 경우 일반 조회 화면으로 이동
-      if (note.author && user?.nickname && note.author !== user.nickname) {
-        alert('본인이 작성한 글만 수정할 수 있습니다.');
-        router.replace(`/notebook/${noteId}`);
-        return;
-      }
       initNote(note);
     }
-    return () => {
-      reset();
-    };
-  }, [note, user, noteId, router, initNote, reset]);
+  }, [note, initNote]);
 
   if (isLoading) {
     return <div className={s.container}>노트를 불러오는 중입니다...</div>;
@@ -49,7 +49,10 @@ export default function NotebookEditPage() {
     <AuthGuard>
       <div className={s.container}>
         <main className={s.editorWrapper}>
-          <Editor />
+          <Editor 
+            initialContent={note.description} 
+            initialTitle={note.title} 
+          />
         </main>
       </div>
     </AuthGuard>
