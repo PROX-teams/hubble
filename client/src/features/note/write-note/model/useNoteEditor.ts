@@ -10,10 +10,11 @@ import { useNoteEditorStore } from '../model/useNoteEditorStore';
 
 interface UseNoteEditorProps {
   className: string;
+  initialContent?: string;
 }
 
-export const useNoteEditor = ({ className }: UseNoteEditorProps) => {
-  const { content, setContent } = useNoteEditorStore();
+export const useNoteEditor = ({ className, initialContent }: UseNoteEditorProps) => {
+  const { content, setEditor } = useNoteEditorStore();
 
   const editor = useEditor({
     extensions: [
@@ -36,24 +37,25 @@ export const useNoteEditor = ({ className }: UseNoteEditorProps) => {
         },
       }),
     ],
-    content: content || '',
+    // Props로 전달된 initialContent가 우선하며, 첫 마운트 시 완벽한 본문을 품고 생성됨
+    content: initialContent ?? content ?? '',
     immediatelyRender: false,
     editorProps: {
       attributes: {
         class: className,
       },
     },
-    onUpdate: ({ editor }) => {
-      setContent(editor.getHTML());
-    },
   });
 
-  // 기존 글 데이터가 스토어에 세팅되면 Tiptap 에디터 본문 동기화
+  // Zustand 스토어에 에디터 인스턴스 등록 및 언마운트 시 클린업
   useEffect(() => {
-    if (editor && content && editor.getHTML() !== content) {
-      editor.commands.setContent(content);
+    if (editor) {
+      setEditor(editor);
     }
-  }, [editor, content]);
+    return () => {
+      setEditor(null);
+    };
+  }, [editor, setEditor]);
 
   return editor;
 };

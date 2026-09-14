@@ -1,289 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import * as s from './NotebookMetaEditor.css';
-import { Input } from '@/shared/ui/input/input/Input';
+import React from 'react';
 import { Textarea } from '@/shared/ui/input/textarea/Textarea';
-import { Dropdown } from '@/shared/ui/dropdown/Dropdown';
 import Button from '@/shared/ui/button/button/Button';
-import Tag from '@/shared/ui/tag/Tag';
-import AddIcon from '@/shared/assets/icons/common/add.svg';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
-import { createNote, updateNote } from '@/entities/note/api/note.api';
-import { CategoryType } from '@/shared/types';
-import { useAuthStore } from '@/entities/user/model/useAuthStore';
-
-const CATEGORIES: { id: CategoryType; label: string }[] = [
-  { id: 'DEVELOPMENT', label: '개발' },
-  { id: 'DESIGN', label: '디자인' },
-  { id: 'PLANNING', label: '기획' },
-  { id: 'MARKETING', label: '마케팅' },
-  { id: 'LIFE', label: '일상' },
-  { id: 'OTHER', label: '기타' },
-];
-
-const MOCK_STORIES = [
-  { id: 1, title: '프론트엔드 공부집' },
-  { id: 2, title: '리액트 마스터' },
-  { id: 3, title: 'CS 기초 지식' },
-];
+import { usePublishNote } from './model/usePublishNote';
+import { CategoryStorySection } from './ui/sections/CategoryStorySection';
+import { TagEditorSection } from './ui/sections/TagEditorSection';
+import { CoverImageSection } from './ui/sections/CoverImageSection';
+import * as s from './NotebookMetaEditor.css';
 
 export const NotebookMetaEditor = () => {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const [tagInput, setTagInput] = useState('');
-  const { isLoggedIn } = useAuthStore();
-  
-  const { 
-    noteId,
-    title, 
-    content, 
-    category, 
-    tag, 
-    imageUrl, 
-    storyId,
-    setCategory,
-    setTag,
-    setImageUrl,
-    setStoryId,
-    reset
-  } = useNoteEditorStore();
-
-  const isEdit = Boolean(noteId);
-
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      if (!tag.includes(tagInput.trim())) {
-        setTag([...tag, tagInput.trim()]);
-      }
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTag(tag.filter((t) => t !== tagToRemove));
-  };
-
-  const handlePublish = async () => {
-    if (!isLoggedIn) {
-      alert('로그인이 필요한 서비스입니다.');
-      router.push('/login');
-      return;
-    }
-
-    if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 입력해주세요.');
-      return;
-    }
-
-    try {
-      const payload = {
-        title,
-        content,
-        category,
-        tag,
-        imageUrl,
-        storyId: storyId || undefined,
-      };
-
-      if (isEdit && noteId) {
-        await updateNote(noteId, payload);
-        alert('노트가 수정되었습니다.');
-        queryClient.invalidateQueries({ queryKey: ['noteDetail', noteId] });
-      } else {
-        await createNote(payload);
-        alert('노트가 게시되었습니다.');
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['notebookNotes'] });
-      queryClient.invalidateQueries({ queryKey: ['recentUpdatesInfinite'] });
-      reset();
-      router.push('/thread');
-    } catch (error) {
-      console.error('Failed to save note:', error);
-      alert(isEdit ? '노트 수정 중 오류가 발생했습니다.' : '노트 게시 중 오류가 발생했습니다.');
-    }
-  };
+  const isEdit = Boolean(useNoteEditorStore((state) => state.noteId));
+  const { handlePublish } = usePublishNote();
 
   return (
-    <>
-      <header>
-        <h3>노트설정</h3>
-      </header>
+    <div className={s.sidebarContainer}>
+      {/* 1. 카테고리 및 스토리 연결 */}
+      <CategoryStorySection />
 
-      {/* 노트 정보 (타이틀) */}
-      <section className={s.section}>
-        <h3 className={s.sectionTitle}>노트 정보</h3>
-      </section>
-
-      {/* 카테고리 및 스토리에 추가 */}
-      <section className={s.section}>
-        <h3 className={s.sectionTitle}>카테고리 및 스토리</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Dropdown onSelect={(id) => setCategory(id as CategoryType)}>
-            <Dropdown.Trigger>
-              <Dropdown.Value>
-                {({ selectedOption }) => (
-                  selectedOption 
-                    ? CATEGORIES.find(c => c.id === (selectedOption as CategoryType))?.label 
-                    : CATEGORIES.find(c => c.id === category)?.label || '카테고리 설정'
-                )}
-              </Dropdown.Value>
-              <Dropdown.Icon />
-            </Dropdown.Trigger>
-            <Dropdown.Menu>
-              {CATEGORIES.map((cat) => (
-                <Dropdown.Option 
-                  key={cat.id} 
-                  optionId={cat.id}
-                >
-                  {cat.label}
-                </Dropdown.Option>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-
-          <Dropdown onSelect={(id) => setStoryId(Number(id))}>
-            <Dropdown.Trigger size="3xl">
-              <Dropdown.Value>
-                {({ selectedOption }) => (
-                  selectedOption 
-                    ? MOCK_STORIES.find(s => s.id === Number(selectedOption))?.title 
-                    : storyId 
-                      ? MOCK_STORIES.find(s => s.id === storyId)?.title 
-                      : '스토리를 선택해주세요'
-                )}
-              </Dropdown.Value>
-              <Dropdown.Icon />
-            </Dropdown.Trigger>
-            <Dropdown.Menu size="2xl">
-              {MOCK_STORIES.map((story) => (
-                <Dropdown.Option 
-                  key={story.id} 
-                  optionId={story.id}
-                >
-                  {story.title}
-                </Dropdown.Option>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-      </section>
-
-      {/* 노트 소개 */}
+      {/* 2. 노트 소개 */}
       <section className={s.section}>
         <h3 className={s.sectionTitle}>노트 소개</h3>
-        <Textarea 
-          placeholder="노트에 대한 짧은 소개글을 작성해주세요 (현재는 본문 내용이 저장됩니다)" 
+        <Textarea
+          placeholder="노트에 대한 짧은 소개글을 작성해주세요 (현재는 본문 내용이 저장됩니다)"
           variant="solid"
           size="md"
           disabled
         />
       </section>
 
-      {/* 태그 추가 */}
-      <section className={s.section}>
-        <h3 className={s.sectionTitle}>태그 추가</h3>
-        <Input 
-          placeholder="태그를 입력하고 Enter를 누르세요" 
-          variant="solid"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleAddTag}
-          size="sm"
-        />
-        <div className={s.tagList}>
-          {tag.map((t) => (
-            <Tag 
-              key={t} 
-              label={t} 
-              onRemove={() => handleRemoveTag(t)} 
-            />
-          ))}
-        </div>
-      </section>
+      {/* 3. 태그 추가 및 목록 */}
+      <TagEditorSection />
 
-      {/* 이미지 첨부 */}
-      <section className={s.section}>
-        <h3 className={s.sectionTitle}>노트 커버 이미지</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <Input 
-            placeholder="이미지 URL을 입력하거나 파일을 선택하세요"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            size="sm"
-          />
-          <input 
-            type="file" 
-            accept="image/*" 
-            ref={fileInputRef} 
-            onChange={handleImageUpload} 
-            style={{ display: 'none' }} 
-          />
-          <div 
-            className={s.imageUploadBox} 
-            onClick={() => fileInputRef.current?.click()}
-            style={{ position: 'relative', overflow: 'hidden' }}
-          >
-            {imageUrl ? (
-              <Image 
-                src={imageUrl} 
-                alt="미리보기" 
-                fill
-                style={{ objectFit: 'cover' }}
-                unoptimized // 프리뷰 이미지는 로컬/임시 데이터이므로 최적화 제외
-              />
-            ) : (
-              <>
-                <AddIcon />
-                <span>이미지 업로드</span>
-              </>
-            )}
-          </div>
-          {imageUrl && (
-            <Button 
-              variants="neutral" 
-              size="sm" 
-              onClick={() => setImageUrl('')}
-            >
-              이미지 삭제
-            </Button>
-          )}
-        </div>
-      </section>
+      {/* 4. 커버 이미지 업로드 */}
+      <CoverImageSection />
 
-      {/* 버튼 그룹 */}
+      {/* 5. 하단 발행/저장 액션 버튼 그룹 */}
       <div className={s.buttonGroup}>
-        <Button 
-          variants="neutral" 
-          size="lg" 
-        >
+        <Button variants="neutral" size="lg">
           임시저장
         </Button>
-        <Button 
-          variants="colored" 
-          size="lg" 
-          onClick={handlePublish}
-        >
+        <Button variants="colored" size="lg" onClick={handlePublish}>
           {isEdit ? '수정 완료' : '게시하기'}
         </Button>
       </div>
-    </>
+    </div>
   );
 };

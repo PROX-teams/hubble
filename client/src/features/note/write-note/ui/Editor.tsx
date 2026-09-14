@@ -1,20 +1,22 @@
 'use client';
 
+import React, { useCallback } from 'react';
 import { EditorContent } from '@tiptap/react';
 import * as s from './Editor.css';
-import { useNoteEditorStore } from '../model/useNoteEditorStore';
 import { useNoteEditor } from '../model/useNoteEditor';
+import { TitleInput } from './TitleInput';
 
-const Editor = () => {
-  const { title, setTitle } = useNoteEditorStore();
-  const editor = useNoteEditor({className: s.editorContent})
+interface EditorProps {
+  initialContent?: string;
+  initialTitle?: string;
+}
 
-  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      editor?.commands.focus();
-    }
-  };
+const Editor = ({ initialContent, initialTitle }: EditorProps) => {
+  const editor = useNoteEditor({ className: s.editorContent, initialContent });
+
+  const handleTitleEnter = useCallback(() => {
+    editor?.commands.focus();
+  }, [editor]);
 
   if (!editor) {
     return null;
@@ -22,15 +24,7 @@ const Editor = () => {
 
   return (
     <div className={s.editorContainer}>
-      <input
-        type="text"
-        className={s.titleInput}
-        placeholder="제목을 입력하세요"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={handleTitleKeyDown}
-        maxLength={10}
-      />
+      <TitleInput initialTitle={initialTitle} onEnter={handleTitleEnter} />
       <EditorContent editor={editor} />
     </div>
   );

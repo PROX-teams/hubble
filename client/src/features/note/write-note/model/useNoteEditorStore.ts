@@ -1,16 +1,18 @@
 import { create } from 'zustand';
+import type { Editor } from '@tiptap/react';
 import { CategoryType } from '@/shared/types';
 import type { Note } from '@/entities/note/note.types';
 
 interface NoteEditorState {
   noteId: number | null;
   title: string;
-  content: string;
+  content: string; // 초기 데이터 주입용 본문
   description: string;
   category: CategoryType;
   tag: string[];
   imageUrl: string;
   storyId: number | null;
+  editor: Editor | null;
 
   // Actions
   setNoteId: (noteId: number | null) => void;
@@ -21,6 +23,10 @@ interface NoteEditorState {
   setTag: (tag: string[]) => void;
   setImageUrl: (imageUrl: string) => void;
   setStoryId: (storyId: number | null) => void;
+  setEditor: (editor: Editor | null) => void;
+  getContent: () => string;
+  getTitle: () => string;
+  setTitleGetter: (getter: () => string) => void;
   initNote: (note: Note) => void;
   reset: () => void;
 }
@@ -34,9 +40,10 @@ const initialState = {
   tag: [],
   imageUrl: '',
   storyId: null,
+  editor: null,
 };
 
-export const useNoteEditorStore = create<NoteEditorState>((set) => ({
+export const useNoteEditorStore = create<NoteEditorState>((set, get) => ({
   ...initialState,
 
   setNoteId: (noteId) => set({ noteId }),
@@ -47,6 +54,13 @@ export const useNoteEditorStore = create<NoteEditorState>((set) => ({
   setTag: (tag) => set({ tag }),
   setImageUrl: (imageUrl) => set({ imageUrl }),
   setStoryId: (storyId) => set({ storyId }),
+  setEditor: (editor) => set({ editor }),
+  getContent: () => {
+    const { editor, content } = get();
+    return editor ? editor.getHTML() : content;
+  },
+  getTitle: () => get().title,
+  setTitleGetter: (getter) => set({ getTitle: getter }),
   initNote: (note) =>
     set({
       noteId: note.id,
