@@ -34,10 +34,26 @@ export const imageUploadBox = style({
   cursor: 'pointer',
   gap: '8px',
   color: vars.color.gray_500,
+  position: 'relative',
+  overflow: 'hidden',
   transition: 'background-color 0.2s',
   ':hover': {
     backgroundColor: vars.color.gray_200,
   },
+});
+
+export const coverImageContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+});
+
+export const hiddenFileInput = style({
+  display: 'none',
+});
+
+export const previewImage = style({
+  objectFit: 'cover',
 });
 
 export const tagList = style({
