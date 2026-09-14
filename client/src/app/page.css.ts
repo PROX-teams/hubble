@@ -83,6 +83,20 @@ export const divider = style({
   margin: '48px 0',
 });
 
+export const skeletonRow = style({
+  display: 'flex',
+  gap: '16px',
+});
+
+export const skeletonRowWide = style({
+  display: 'flex',
+  gap: '24px',
+});
+
+export const skeletonItemFlex = style({
+  flex: 1,
+});
+
 export const storyItemWrapper = style({
   padding: '0 12px',
   boxSizing: 'border-box',

@@ -28,8 +28,24 @@ export const Carousel = forwardRef<CarouselRef, CarouselProps>(
     });
 
     const displayItems = isLoop
-      ? [...items.slice(-visibleCount), ...items, ...items.slice(0, visibleCount)]
-      : items;
+      ? [
+          ...items.slice(-visibleCount).map((item, i) => ({
+            node: item,
+            key: `clone-prev-${(item as React.ReactElement)?.key ?? i}`,
+          })),
+          ...items.map((item, i) => ({
+            node: item,
+            key: `item-${(item as React.ReactElement)?.key ?? i}`,
+          })),
+          ...items.slice(0, visibleCount).map((item, i) => ({
+            node: item,
+            key: `clone-next-${(item as React.ReactElement)?.key ?? i}`,
+          })),
+        ]
+      : items.map((item, i) => ({
+          node: item,
+          key: `item-${(item as React.ReactElement)?.key ?? i}`,
+        }));
 
     useImperativeHandle(ref, () => ({
       next: () => move(1),
@@ -47,9 +63,9 @@ export const Carousel = forwardRef<CarouselRef, CarouselProps>(
           animate={controls}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          {displayItems.map((item, index) => (
-            <div key={index} className={s.carouselItem}>
-              {item}
+          {displayItems.map(({ node, key }) => (
+            <div key={key} className={s.carouselItem}>
+              {node}
             </div>
           ))}
         </motion.div>
