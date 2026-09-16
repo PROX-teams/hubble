@@ -3,7 +3,12 @@
 import React, { useRef, ReactNode } from 'react';
 import { Carousel, type CarouselRef } from '@/shared/ui/carousel/Carousel';
 import { CarouselButton } from '@/shared/ui/carousel/CarouselButton';
-import * as s from '@/app/page.css';
+import * as s from './RecommendCarouselSection.css';
+
+export interface RenderItemMeta {
+  index: number;
+  isPriority: boolean;
+}
 
 interface RecommendCarouselSectionProps<T> {
   title: string;
@@ -12,10 +17,20 @@ interface RecommendCarouselSectionProps<T> {
   visibleCount?: number;
   interval?: number;
   emptyMessage: string;
-  skeleton: ReactNode;
-  renderItem: (item: T, index: number) => ReactNode;
+  keyExtractor?: (item: T, index: number) => string | number;
+  renderItem: (item: T, meta: RenderItemMeta) => ReactNode;
+  renderSkeleton?: (index: number) => ReactNode;
+  skeletonCount?: number;
+  skeletonVariant?: 'normal' | 'wide';
 }
 
+/**
+ * 메인 및 추천 영역에서 캐러셀 섹션을 일관되게 구성하는 위젯 컴포넌트
+ * - FSD 아키텍처에 따라 컴포넌트 전용 스타일을 격리
+ * - LCP 최적화를 위해 visibleCount 범위 내의 아이템에 isPriority 메타데이터 제공
+ * - keyExtractor를 통한 안전한 리액트 Key 관리
+ * - skeletonCount 및 skeletonVariant를 통한 유연한 스켈레톤 렌더링
+ */
 export function RecommendCarouselSection<T>({
   title,
   isLoading,
@@ -23,13 +38,16 @@ export function RecommendCarouselSection<T>({
   visibleCount = 4,
   interval = 4000,
   emptyMessage,
-  skeleton,
+  keyExtractor,
   renderItem,
+  renderSkeleton,
+  skeletonCount,
+  skeletonVariant = 'normal',
 }: RecommendCarouselSectionProps<T>) {
   const carouselRef = useRef<CarouselRef>(null);
 
-  // 버튼 비활성화 상태를 visibleCount와 연동하여 매직 넘버 하드코딩 완전 제거
   const isButtonDisabled = isLoading || items.length <= visibleCount;
+  const count = skeletonCount ?? visibleCount;
 
   return (
     <section className={s.contentSection}>
@@ -51,12 +69,33 @@ export function RecommendCarouselSection<T>({
 
       <div className={s.carouselWrapper}>
         {isLoading ? (
-          skeleton
+          renderSkeleton && (
+            <div className={skeletonVariant === 'wide' ? s.skeletonRowWide : s.skeletonRow}>
+              {Array.from({ length: count }).map((_, index) => (
+                <React.Fragment key={`skeleton-${index}`}>
+                  {renderSkeleton(index)}
+                </React.Fragment>
+              ))}
+            </div>
+          )
         ) : items.length === 0 ? (
-          <div>{emptyMessage}</div>
+          <div className={s.emptyMessage}>{emptyMessage}</div>
         ) : (
           <Carousel ref={carouselRef} visibleCount={visibleCount} interval={interval}>
-            {items.map((item, index) => renderItem(item, index))}
+            {items.map((item, index) => {
+              const key = keyExtractor
+                ? keyExtractor(item, index)
+                : ((item as Record<string, unknown>)?.id as string | number) ?? index;
+
+              return (
+                <React.Fragment key={key}>
+                  {renderItem(item, {
+                    index,
+                    isPriority: index < visibleCount,
+                  })}
+                </React.Fragment>
+              );
+            })}
           </Carousel>
         )}
       </div>

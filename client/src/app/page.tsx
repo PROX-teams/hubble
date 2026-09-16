@@ -1,36 +1,31 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import NoteCard from '@/entities/note/ui/note-card/NoteCard';
 import { MainBanner } from '@/widgets/main-banner/MainBanner';
-import CreatorCard from '@/entities/user/ui/creator-card/CreatorCard';
 import { useMainRecommendations } from '@/entities/recommend/model/useMainRecommendations';
 import { NoteCardSkeleton } from '@/entities/note/ui/note-card/NoteCardSkeleton';
-import { CreatorCardSkeleton } from '@/entities/user/ui/creator-card/CreatorCardSkeleton';
 import StoryCard from '@/entities/story/ui/story-card/StoryCard';
 import { StoryCardSkeleton } from '@/entities/story/ui/story-card/StoryCardSkeleton';
 import { StoryCardModal } from '@/widgets/storycard-modal/StoryCardModal';
 import { RecommendCarouselSection } from '@/widgets/recommend-carousel-section/RecommendCarouselSection';
+import { TrendingCreatorsSection } from '@/widgets/trending-creators-section/TrendingCreatorsSection';
 import type { Story } from '@/entities/story/story.types';
 import * as s from './page.css';
 
 export default function MainPage() {
-  const { data, isLoading } = useMainRecommendations();
-
-  const mostLovedNotes = data?.mostLovedNotes ?? [];
-  const discoverNotes = data?.discoverNotes ?? [];
-  const creators = data?.creators ?? [];
-  const popularStories = data?.popularStories ?? [];
+  const {
+    mostLovedNotes,
+    isMostLovedLoading,
+    discoverNotes,
+    isDiscoverLoading,
+    creators,
+    isCreatorsLoading,
+    popularStories,
+    isStoriesLoading,
+  } = useMainRecommendations();
 
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
-
-  // 인기 노트와 추천 노트 간 ID 중복을 안전하게 제거하여 모달 key 충돌 방지
-  const allNotes = useMemo(() => {
-    const noteMap = new Map<number, (typeof mostLovedNotes)[number]>();
-    mostLovedNotes.forEach((note) => noteMap.set(note.id, note));
-    discoverNotes.forEach((note) => noteMap.set(note.id, note));
-    return Array.from(noteMap.values());
-  }, [mostLovedNotes, discoverNotes]);
 
   return (
     <div className={s.pageContainer}>
@@ -39,91 +34,71 @@ export default function MainPage() {
 
       {/* 2. Most Loved와 Trending Creators의 2단 레이아웃 */}
       <div className={s.middleSection}>
-        {/* Most Loved 추천 캐러셀 */}
+        {/* Most Loved 추천 캐러셀 (독립 로딩) */}
         <RecommendCarouselSection
           title="Most Loved"
-          isLoading={isLoading}
+          isLoading={isMostLovedLoading}
           items={mostLovedNotes}
           visibleCount={4}
           emptyMessage="등록된 인기 노트가 없습니다."
-          skeleton={
-            <div className={s.skeletonRow}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <NoteCardSkeleton key={i} variant="small" />
-              ))}
-            </div>
-          }
-          renderItem={(note) => (
-            <NoteCard key={note.id} data={note} variant="small" />
+          keyExtractor={(note) => note.id}
+          renderSkeleton={() => <NoteCardSkeleton variant="small" />}
+          renderItem={(note, { isPriority }) => (
+            <NoteCard
+              data={note}
+              imageUrl={note.imageUrl}
+              variant="small"
+              priority={isPriority}
+            />
           )}
         />
 
-        {/* Trending Creators 섹션 */}
-        <aside className={s.creatorsSection}>
-          <h2 className={s.sectionTitle}>Trending Creators</h2>
-          <div className={s.creatorsWrapper}>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <CreatorCardSkeleton key={i} />
-              ))
-            ) : creators.length === 0 ? (
-              <div>등록된 크리에이터가 없습니다.</div>
-            ) : (
-              creators.map((creator) => (
-                <CreatorCard
-                  key={creator.userId}
-                  userId={creator.userId}
-                  name={creator.name}
-                  imageUrl={creator.imageUrl}
-                  introduction={creator.introduction}
-                />
-              ))
-            )}
-          </div>
-        </aside>
+        {/* Trending Creators 추천 섹션 (독립 로딩 위젯) */}
+        <TrendingCreatorsSection
+          creators={creators}
+          isLoading={isCreatorsLoading}
+        />
       </div>
 
       <div className={s.divider} />
 
-      {/* 3. Discover 추천 캐러셀 */}
+      {/* 3. Discover 추천 캐러셀 (독립 로딩) */}
       <RecommendCarouselSection
         title="Discover"
-        isLoading={isLoading}
+        isLoading={isDiscoverLoading}
         items={discoverNotes}
         visibleCount={4}
         emptyMessage="등록된 추천 노트가 없습니다."
-        skeleton={
-          <div className={s.skeletonRow}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <NoteCardSkeleton key={i} variant="small" />
-            ))}
-          </div>
-        }
-        renderItem={(note) => (
-          <NoteCard key={note.id} data={note} variant="small" />
+        keyExtractor={(note) => note.id}
+        renderSkeleton={() => <NoteCardSkeleton variant="small" />}
+        renderItem={(note, { isPriority }) => (
+          <NoteCard
+            data={note}
+            imageUrl={note.imageUrl}
+            variant="small"
+            priority={isPriority}
+          />
         )}
       />
 
       <div className={s.divider} />
 
-      {/* 4. Trending Stories 추천 캐러셀 */}
+      {/* 4. Trending Stories 추천 캐러셀 (독립 로딩) */}
       <RecommendCarouselSection
         title="Trending Stories"
-        isLoading={isLoading}
+        isLoading={isStoriesLoading}
         items={popularStories}
         visibleCount={3}
         emptyMessage="등록된 추천 스토리가 없습니다."
-        skeleton={
-          <div className={s.skeletonRowWide}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className={s.skeletonItemFlex}>
-                <StoryCardSkeleton density="comfortable" />
-              </div>
-            ))}
+        skeletonVariant="wide"
+        keyExtractor={(story) => story.id}
+        renderSkeleton={() => (
+          <div className={s.skeletonItemFlex}>
+            <StoryCardSkeleton density="comfortable" />
           </div>
-        }
+        )}
         renderItem={(story) => (
-          <div key={story.id} className={s.storyItemWrapper}>
+          <div className={s.storyItemWrapper}>
             <StoryCard
               data={story}
               density="comfortable"
@@ -137,9 +112,6 @@ export default function MainPage() {
       {selectedStory && (
         <StoryCardModal
           story={selectedStory}
-          notes={allNotes.filter((n) =>
-            selectedStory.articleIds?.includes(n.id)
-          )}
           onClose={() => setSelectedStory(null)}
         />
       )}
