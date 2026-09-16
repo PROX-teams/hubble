@@ -16,10 +16,11 @@ interface CarouselProps {
   children: ReactNode[];
   visibleCount?: number;
   interval?: number;
+  gap?: number;
 }
 
 export const Carousel = forwardRef<CarouselRef, CarouselProps>(
-  ({ children, visibleCount = 4, interval = 5000 }, ref) => {
+  ({ children, visibleCount = 4, interval = 5000, gap = 16 }, ref) => {
     const items = Children.toArray(children);
     const { currentIndex, controls, isLoop, move } = useCarousel({
       total: items.length,
@@ -28,18 +29,39 @@ export const Carousel = forwardRef<CarouselRef, CarouselProps>(
     });
 
     const displayItems = isLoop
-      ? [...items.slice(-visibleCount), ...items, ...items.slice(0, visibleCount)]
-      : items;
+      ? [
+          ...items.slice(-visibleCount).map((item, i) => ({
+            node: item,
+            key: `clone-prev-${(item as React.ReactElement)?.key ?? i}`,
+          })),
+          ...items.map((item, i) => ({
+            node: item,
+            key: `item-${(item as React.ReactElement)?.key ?? i}`,
+          })),
+          ...items.slice(0, visibleCount).map((item, i) => ({
+            node: item,
+            key: `clone-next-${(item as React.ReactElement)?.key ?? i}`,
+          })),
+        ]
+      : items.map((item, i) => ({
+          node: item,
+          key: `item-${(item as React.ReactElement)?.key ?? i}`,
+        }));
 
     useImperativeHandle(ref, () => ({
       next: () => move(1),
       prev: () => move(-1),
     }), [move]);
 
+    const gutter = gap / 2;
+
     return (
       <div
         className={s.carouselContainer}
-        style={assignInlineVars({ [s.visibleCountVar]: String(visibleCount) })}
+        style={assignInlineVars({
+          [s.visibleCountVar]: String(visibleCount),
+          [s.gutterVar]: `${gutter}px`,
+        })}
       >
         <motion.div
           className={s.carouselTrack}
@@ -47,9 +69,9 @@ export const Carousel = forwardRef<CarouselRef, CarouselProps>(
           animate={controls}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          {displayItems.map((item, index) => (
-            <div key={index} className={s.carouselItem}>
-              {item}
+          {displayItems.map(({ node, key }) => (
+            <div key={key} className={s.carouselItem}>
+              {node}
             </div>
           ))}
         </motion.div>

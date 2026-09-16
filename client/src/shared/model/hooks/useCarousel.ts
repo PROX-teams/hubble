@@ -16,11 +16,10 @@ export const useCarousel = ({ total, visibleCount, interval }: UseCarouselProps)
   const isMoving = useRef(false);
 
   const handleJump = useCallback(
-    // newIndex는 버튼으로 이동된값 => 현재 인덱스 첫 시간은 4 => 아마 보여주는 끝의 수를 나타내는듯  5 6 7 8 1 2 3 4
-    // 현재 인덱스의 변화 4,5,6,7,8,9,10,11,12 ,4,5,6,7,8,9,10,11,12 반복된다. => 여기 값들중에 해당 되기 전에 배열 재배치 할듯
     async (newIndex: number) => {
       if (!isLoop) return;
-      //새로운 인덱스 값이 라는게 있고, 전체 30, 4 라고 하면 8 보다 크거나 같으면   123456781234
+      
+      // 무한 루프 경계에 도달했을 때 위치를 순간 재배치하여 끊김 없는 순환 효과 제공
       if (newIndex >= total + visibleCount) {
         controls.set({ x: `-${(visibleCount / visibleCount) * 100}%` });
         setCurrentIndex(visibleCount);
@@ -38,7 +37,6 @@ export const useCarousel = ({ total, visibleCount, interval }: UseCarouselProps)
       if (isMoving.current) return;
       isMoving.current = true;
 
-      // 누르면 현재 인덱스에서 값증가. 1씩 증가하고, 현재 인덱스관리 어떻게 하나? 
       const nextIndex = currentIndex + step;
       setCurrentIndex(nextIndex);
 

@@ -10,6 +10,8 @@ export const container = style({
     justifyContent: 'center', 
     minHeight: 'calc(100vh - 48px)',
     paddingBottom: '100px',
+    paddingRight: '250px',
+    boxSizing: 'border-box',
     width: '100%',
     margin: '0 auto',  
 });

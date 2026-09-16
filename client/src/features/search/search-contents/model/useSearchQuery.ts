@@ -18,7 +18,6 @@ export function useSearchQuery(keyword: string) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ["integratedSearch", debouncedKeyword],
     queryFn: ({ pageParam = 0 }) =>

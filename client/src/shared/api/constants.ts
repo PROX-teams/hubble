@@ -4,7 +4,13 @@ export const API_ENDPOINTS = {
   NOTE: '/note',
   STORY: '/story',
   SEARCH: '/search',
-  RECOMMEND: '/main/recommend',
+  RECOMMEND: {
+    ALL: '/main/recommend',
+    MOST_LOVED: '/main/recommend/most-loved',
+    DISCOVER: '/main/recommend/discover',
+    CREATORS: '/main/recommend/creators',
+    STORIES: '/main/recommend/stories',
+  },
   AUTH: {
     LOGIN: '/auth/login',
     REISSUE: '/auth/reissue',

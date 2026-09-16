@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { vars, lightTheme } from "@/shared/styles/theme.css";
+import { vars } from "@/shared/styles/theme.css";
 import { tx } from "@/shared/styles/textStyle.css";
 
 export const container = style({

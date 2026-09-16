@@ -9,7 +9,8 @@ export const formContainer = style({
   width: '100%',
   maxWidth: '440px',
   margin: '0 auto',
-  padding: '40px 0',
+  paddingTop: '16px',
+  paddingBottom: '40px',
 });
 
 export const titleGroup = style({

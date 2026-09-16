@@ -46,11 +46,13 @@ public record NoteSummaryResponse(
         @Schema(description = "북마크 수", example = "5")
         long bookmarkCount
 ) {
+    private static final int MAX_SUMMARY_LENGTH = 150;
+
     public static NoteSummaryResponse from(Note note) {
         return new NoteSummaryResponse(
                 note.getId(),
                 note.getTitle(),
-                note.getContent(),
+                createSnippet(note.getContent()),
                 note.getCategory(),
                 note.getImageUrl(),
                 note.getNoteTags().stream()
@@ -63,5 +65,20 @@ public record NoteSummaryResponse(
                 note.getViewCount(),
                 note.getBookmarkCount()
         );
+    }
+
+    /**
+     * 목록 카드 UI에 필요한 순수 텍스트 요약본(최대 150자)을 생성합니다.
+     * 불필요한 HTML 태그 및 공백을 제거하여 대용량 본문 전송(Over-fetching)을 방어합니다.
+     */
+    private static String createSnippet(String content) {
+        if (content == null || content.isBlank()) {
+            return "";
+        }
+        String plainText = content.replaceAll("<[^>]*>", "").replaceAll("\\s+", " ").trim();
+        if (plainText.length() <= MAX_SUMMARY_LENGTH) {
+            return plainText;
+        }
+        return plainText.substring(0, MAX_SUMMARY_LENGTH);
     }
 }
