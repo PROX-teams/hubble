@@ -55,7 +55,7 @@ export const SuggestionList = forwardRef<SuggestionListRef, SuggestionListProps>
           return false;
         },
       }),
-      [items, selectedIndex]
+      [items, selectedIndex, selectItem]
     );
 
     useEffect(() => setSelectedIndex(0), [items]);

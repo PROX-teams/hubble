@@ -104,7 +104,6 @@ export const SignupForm = () => {
     <form className={S.formContainer} onSubmit={handleSubmit}>
       <div className={S.titleGroup}>
         <h1 className={S.title}>회원가입</h1>
-        <p className={S.description}>Hubble에 오신 것을 환영합니다!</p>
       </div>
 
       <div className={S.section}>

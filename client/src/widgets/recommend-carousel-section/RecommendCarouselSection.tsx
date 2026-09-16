@@ -22,6 +22,7 @@ interface RecommendCarouselSectionProps<T> {
   renderSkeleton?: (index: number) => ReactNode;
   skeletonCount?: number;
   skeletonVariant?: 'normal' | 'wide';
+  gap?: number;
 }
 
 /**
@@ -43,11 +44,13 @@ export function RecommendCarouselSection<T>({
   renderSkeleton,
   skeletonCount,
   skeletonVariant = 'normal',
+  gap,
 }: RecommendCarouselSectionProps<T>) {
   const carouselRef = useRef<CarouselRef>(null);
 
   const isButtonDisabled = isLoading || items.length <= visibleCount;
   const count = skeletonCount ?? visibleCount;
+  const resolvedGap = gap ?? (skeletonVariant === 'wide' ? 24 : 16);
 
   return (
     <section className={s.contentSection}>
@@ -81,7 +84,12 @@ export function RecommendCarouselSection<T>({
         ) : items.length === 0 ? (
           <div className={s.emptyMessage}>{emptyMessage}</div>
         ) : (
-          <Carousel ref={carouselRef} visibleCount={visibleCount} interval={interval}>
+          <Carousel
+            ref={carouselRef}
+            visibleCount={visibleCount}
+            interval={interval}
+            gap={resolvedGap}
+          >
             {items.map((item, index) => {
               const key = keyExtractor
                 ? keyExtractor(item, index)

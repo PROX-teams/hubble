@@ -26,7 +26,7 @@ export const divider = style({
   height: '1px',
   backgroundColor: vars.color.gray_200,
   border: 'none',
-  margin: '48px 0',
+  margin: '6px 0',
 });
 
 export const skeletonItemFlex = style({
@@ -34,7 +34,6 @@ export const skeletonItemFlex = style({
 });
 
 export const storyItemWrapper = style({
-  padding: '0 12px',
   boxSizing: 'border-box',
   width: '100%',
 });
