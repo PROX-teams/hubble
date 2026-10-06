@@ -1,23 +1,40 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 /**
- * 연속적인 값의 변화(예: input typing)를 지연시켜 마지막 변화만 반영하는 훅
- * @param value 디바운싱할 값
+ * 특정 액션(콜백 함수)의 실행을 디바운싱하여 이벤트 핸들러에서 명시적으로 호출 및 제어할 수 있는 훅 (Action Debounce)
+ * @param callback 디바운싱할 콜백 함수
  * @param delay 지연 시간 (ms)
- * @returns 디바운싱된 값
+ * @returns { debounced, cancel }
  */
-export function useDebounce<T>(value: T, delay: number = 300): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+export function useDebouncedCallback<Args extends unknown[]>(
+  callback: (...args: Args) => void,
+  delay: number = 300
+) {
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const cancel = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const debounced = useCallback(
+    (...args: Args) => {
+      cancel();
+      timerRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    },
+    [cancel, delay]
+  );
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+    return cancel;
+  }, [cancel]);
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
+  return { debounced, cancel };
 }

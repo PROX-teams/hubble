@@ -5,7 +5,6 @@ import type { Story, StoryCreateRequest } from '../story.types';
 
 export interface GetStoriesParams {
   category?: CategoryType;
-  keyword?: string;
   sortType?: SortType;
   page?: number;
   size?: number;
@@ -18,7 +17,6 @@ export const getStories = async (params: GetStoriesParams): Promise<PageResponse
   const queryParams = new URLSearchParams();
   
   if (params.category) queryParams.append('category', params.category);
-  if (params.keyword) queryParams.append('keyword', params.keyword);
   if (params.page !== undefined) queryParams.append('page', params.page.toString());
   if (params.size !== undefined) queryParams.append('size', params.size.toString());
 

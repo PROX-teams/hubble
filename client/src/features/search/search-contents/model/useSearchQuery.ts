@@ -1,15 +1,23 @@
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounce } from "@/shared/model/hooks/useDebounce";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { getIntegratedSearch } from "@/entities/search/api/search.api";
 
+function uniqueById<T extends { id: number }>(items: T[]): T[] {
+  const seen = new Set<number>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
 /**
- * 통합 검색 (태그, 스토리, 노트) 무한 스크롤 및 디바운싱 조회를 담당하는 커스텀 훅
- * @param keyword 검색 키워드
+ * 통합 검색 (태그, 스토리, 노트) 무한 스크롤 조회를 담당하는 커스텀 훅
+ * 확정된 검색 키워드(appliedKeyword)를 기준으로 즉시 데이터를 조회합니다.
+ * @param keyword 확정된 검색 키워드
  * @returns 통합 검색 결과 데이터 (태그, 스토리 목록, 노트 목록) 및 무한 스크롤 상태
  */
 export function useSearchQuery(keyword: string) {
-  const queryClient = useQueryClient();
-  const debouncedKeyword = useDebounce(keyword, 300);
+  const trimmedKeyword = keyword.trim();
 
   const {
     data,
@@ -19,19 +27,23 @@ export function useSearchQuery(keyword: string) {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["integratedSearch", debouncedKeyword],
-    queryFn: ({ pageParam = 0 }) =>
+    queryKey: ["integratedSearch", trimmedKeyword],
+    queryFn: ({ pageParam }) =>
       getIntegratedSearch({
-        keyword: debouncedKeyword,
-        page: pageParam,
+        keyword: trimmedKeyword,
+        page: pageParam.page,
         size: 10,
+        includeStories: pageParam.includeStories,
+        includeNotes: pageParam.includeNotes,
       }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
-      // 노트나 스토리 둘 중 하나라도 다음 페이지가 있으면 다음 페이지 번호 반환
+    initialPageParam: { page: 0, includeStories: true, includeNotes: true },
+    getNextPageParam: (lastPage, allPages) => {
+      // 노트나 스토리 둘 중 하나라도 다음 데이터가 남아있으면 누적 페이지 수를 다음 요청 페이지 번호로 사용
       const hasMoreNotes = !lastPage.notes.last;
       const hasMoreStories = !lastPage.stories.last;
-      return hasMoreNotes || hasMoreStories ? lastPage.notes.number + 1 : undefined;
+      return hasMoreNotes || hasMoreStories
+        ? { page: allPages.length, includeStories: hasMoreStories, includeNotes: hasMoreNotes }
+        : undefined;
     },
     staleTime: 1000 * 60 * 3, // 3분 캐시
     gcTime: 1000 * 60 * 15,
@@ -42,21 +54,12 @@ export function useSearchQuery(keyword: string) {
   const tags = data?.pages[0]?.tags ?? [];
 
   // 누적된 스토리 및 노트 목록 (무한 스크롤 flatten)
-  const storyData = data?.pages.flatMap((page) => page.stories.content) ?? [];
-  const noteData = data?.pages.flatMap((page) => page.notes.content) ?? [];
+  const storyData = uniqueById(data?.pages.flatMap((page) => page.stories.content) ?? []);
+  const noteData = uniqueById(data?.pages.flatMap((page) => page.notes.content) ?? []);
 
-  // 실제 검색 모드 여부 (서버 판별 결과 우선, fallback으로 디바운스 키워드 길이 확인)
+  // 실제 검색 모드 여부 (서버 판별 결과 우선, fallback으로 키워드 길이 확인)
   const isSearching =
-    data?.pages[0]?.isSearching ?? debouncedKeyword.trim().length > 0;
-
-  /**
-   * 엔터키 입력 등으로 즉시 검색을 갱신하는 함수
-   */
-  const refetchSearch = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["integratedSearch", debouncedKeyword],
-    });
-  };
+    data?.pages[0]?.isSearching ?? trimmedKeyword.length > 0;
 
   return {
     tags,
@@ -65,11 +68,9 @@ export function useSearchQuery(keyword: string) {
     isLoading,
     isError,
     isSearching,
-    debouncedKeyword,
+    appliedKeyword: trimmedKeyword,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetchSearch,
   };
 }
-
