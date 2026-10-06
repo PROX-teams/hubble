@@ -59,4 +59,7 @@ public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositor
     // 상위 스토리 조회수 비동기 롤업을 위한 storyId 단건 스칼라 조회 (조인 없는 Zero-Join 인덱스 스캔)
     @Query("SELECT n.story.id FROM Note n WHERE n.id = :id")
     Long findStoryIdByNoteId(@Param("id") Long id);
+
+    // 카테고리별 유효 노트 총 개수 조회 (1레벨 루트 노드 가중치용)
+    long countByCategory(Category category);
 }
