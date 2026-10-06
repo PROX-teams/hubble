@@ -2,6 +2,7 @@ import { CategoryType, SortType } from '@/shared/types';
 
 interface NoteMeta {
   author?: string;
+  authorId?: number;
   date?: string;
   likeCount?: number;
 }
@@ -49,6 +50,7 @@ interface NoteHistoryItem {
 }
 
 interface GetRecentUpdatesParams {
+  userId?: number;
   page?: number;
   size?: number;
 }

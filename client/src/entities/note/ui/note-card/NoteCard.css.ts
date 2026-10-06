@@ -31,7 +31,9 @@ const compactBase = style({
   display: "flex",
   flexDirection: "row-reverse",
   gap: "0.5rem",
-  width: "14.5rem",
+  width: "100%",
+  maxWidth: "14.5rem",
+  boxSizing: "border-box",
   height: "3.4375rem",
   padding: "0.625rem 0.5rem",
   borderRadius: 0,
@@ -149,6 +151,15 @@ export const metaIconWrapper = style({
   gap: "0.125rem",
 });
 
+export const authorLink = style({
+  cursor: "pointer",
+  transition: "color 0.2s ease",
+  ":hover": {
+    color: vars.color.stroke_main_100,
+    textDecoration: "underline",
+  },
+});
+
 export const contentContainer = recipe({
   base: { display: "flex" },
 
@@ -216,14 +227,14 @@ export const contentContainer = recipe({
         variant: "compact",
         withImg: true,
       },
-      style: { width: "9.625rem" },
+      style: { flex: 1, minWidth: 0 },
     },
     {
       variants: {
         variant: "compact",
         withImg: false,
       },
-      style: { width: "13.5rem" },
+      style: { flex: 1, minWidth: 0, width: "100%" },
     },
   ],
 });

@@ -143,18 +143,22 @@ export const toggleBookmarkNote = async (id: number): Promise<void> => {
 };
 
 /**
- * 로그인 사용자의 최근 수정 노트 이력 조회 (Slice 무한스크롤)
+ * 로그인 사용자 또는 특정 사용자의 최근 수정 노트 이력 조회 (Slice 무한스크롤)
  */
 export const getRecentUpdates = async (
   params: GetRecentUpdatesParams = {}
 ): Promise<SliceResponse<NoteHistoryItem>> => {
-  const { page = 0, size = 10 } = params;
+  const { userId, page = 0, size = 10 } = params;
   const queryParams = new URLSearchParams({
     page: String(page),
     size: String(size),
   });
 
+  const baseUrl = userId
+    ? `${API_ENDPOINTS.NOTE}/user/${userId}/recent-updates`
+    : `${API_ENDPOINTS.NOTE}/me/recent-updates`;
+
   return fetcher<SliceResponse<NoteHistoryItem>>(
-    `${API_ENDPOINTS.NOTE}/me/recent-updates?${queryParams.toString()}`
+    `${baseUrl}?${queryParams.toString()}`
   );
 };

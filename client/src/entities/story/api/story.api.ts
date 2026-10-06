@@ -91,6 +91,13 @@ export const getMyStories = async (page = 0, size = 50): Promise<PageResponse<St
 };
 
 /**
+ * 특정 사용자의 스토리 목록 조회
+ */
+export const getUserStories = async (userId: number, page = 0, size = 50): Promise<PageResponse<Story>> => {
+  return fetcher<PageResponse<Story>>(`${API_ENDPOINTS.STORY}/user/${userId}?page=${page}&size=${size}`);
+};
+
+/**
  * 좋아요 많은 스토리 Top 10 조회
  */
 export const getTop10LikedStories = async (): Promise<Story[]> => {
