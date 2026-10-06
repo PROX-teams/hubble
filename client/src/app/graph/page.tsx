@@ -1,168 +1,242 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { PATHS } from '@/shared/constants/paths';
-import * as s from './page.css';
+import React, { Suspense, useState, useMemo, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { CategoryType } from '@/shared/types';
+import { AppToggleGroup } from '@/shared/ui/toggle/app-toggle-group/AppToggleGroup';
+import { Skeleton } from '@/shared/ui/skeleton/Skeleton';
+import { useGraphQuery } from '@/entities/graph/api/useGraphQuery';
+import { NodeGraphCanvas } from '@/features/graph/ui/NodeGraphCanvas';
+import { RelatedNotesPanel } from '@/features/graph/ui/RelatedNotesPanel';
+import { useGraphExploration } from '@/features/graph/model/useGraphExploration';
+import * as S from './page.css';
 
-interface NodePoint {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-}
+// 카테고리 탭 레이블 매핑 (화면설계서와 1:1 일치)
+const CATEGORY_TABS: { label: string; category: CategoryType }[] = [
+  { label: '기획', category: 'PLANNING' },
+  { label: '디자인', category: 'DESIGN' },
+  { label: '프로그래밍', category: 'DEVELOPMENT' },
+];
 
-export default function GraphPage() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+function NodeGraphContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  // 1. URL 쿼리 파라미터 파싱
+  const currentCategory: CategoryType = useMemo(() => {
+    const cat = searchParams.get('category') as CategoryType;
+    const isValid = CATEGORY_TABS.some((t) => t.category === cat);
+    return isValid ? cat : 'DEVELOPMENT';
+  }, [searchParams]);
 
-    let animationFrameId: number;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || window.innerHeight);
+  const currentTag = useMemo(() => {
+    return searchParams.get('tag')?.trim() || undefined;
+  }, [searchParams]);
 
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
-      height = canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
-    };
+  // 우측 사이드바 노트 목록 페이지네이션 상태 (0-indexed)
+  const [notePage, setNotePage] = useState(0);
+  const [pageInfo, setPageInfo] = useState({
+    totalPages: 1,
+    isFirst: true,
+    isLast: true,
+  });
 
-    window.addEventListener('resize', handleResize);
+  // 2. 백엔드 그래프 데이터 조회
+  const {
+    data: graphData,
+    isPending: isGraphPending,
+    isError: isGraphError,
+    refetch: refetchGraph,
+  } = useGraphQuery(currentCategory);
+  const {
+    graphData: explorationData,
+    expandTag,
+    expandingTagNames,
+    expandedTagNames,
+    hasMoreTagNames,
+    expansionError,
+  } = useGraphExploration(currentCategory, graphData);
 
-    // 노드 포인트 초기화 (25개의 미려한 파티클)
-    const nodeCount = 28;
-    const nodes: NodePoint[] = Array.from({ length: nodeCount }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.45,
-      vy: (Math.random() - 0.5) * 0.45,
-      radius: Math.random() * 2 + 1.5,
-    }));
+  // 3. URL 쿼리 업데이트 헬퍼 (스크롤 튐 방지)
+  const updateUrl = useCallback(
+    (cat: CategoryType, tag?: string) => {
+      const params = new URLSearchParams();
+      if (cat !== 'DEVELOPMENT') {
+        params.set('category', cat);
+      }
+      if (tag && tag.trim()) {
+        params.set('tag', tag.trim());
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [router, pathname]
+  );
 
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
+  // 카테고리 탭 변경 핸들러
+  const handleCategoryChange = useCallback(
+    (label: string) => {
+      const target = CATEGORY_TABS.find((t) => t.label === label);
+      if (target) {
+        setNotePage(0); // 페이지 리셋
+        setPageInfo({ totalPages: 1, isFirst: true, isLast: true });
+        updateUrl(target.category, undefined); // 카테고리 변경 시 이전 태그 선택 해제
+      }
+    },
+    [updateUrl]
+  );
 
-      // 노드 위치 업데이트 및 렌더링
-      for (let i = 0; i < nodes.length; i++) {
-        const node = nodes[i];
-        node.x += node.vx;
-        node.y += node.vy;
+  // 노드 클릭 핸들러
+  const handleSelectTag = useCallback(
+    (tagName: string) => {
+      setNotePage(0); // 태그 변경 시 0페이지 리셋
+      setPageInfo({ totalPages: 1, isFirst: true, isLast: true });
 
-        if (node.x < 0 || node.x > width) node.vx *= -1;
-        if (node.y < 0 || node.y > height) node.vy *= -1;
-
-        // 점 그리기 (에메랄드 글로우)
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(62, 207, 142, 0.75)';
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = 'rgba(62, 207, 142, 0.5)';
-        ctx.fill();
-
-        // 인접 노드 간 연결선 그리기
-        for (let j = i + 1; j < nodes.length; j++) {
-          const other = nodes[j];
-          const dx = node.x - other.x;
-          const dy = node.y - other.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 130) {
-            const alpha = (1 - dist / 130) * 0.35;
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(other.x, other.y);
-            ctx.strokeStyle = `rgba(62, 207, 142, ${alpha})`;
-            ctx.lineWidth = 1;
-            ctx.shadowBlur = 0;
-            ctx.stroke();
-          }
-        }
+      // 1레벨 카테고리 노드 클릭 시 태그 선택 해제
+      if (tagName === '개발' || tagName === '디자인' || tagName === '기획') {
+        updateUrl(currentCategory, undefined);
+        return;
       }
 
-      animationFrameId = requestAnimationFrame(render);
-    };
+      if (currentTag !== tagName) updateUrl(currentCategory, tagName);
+    },
+    [currentCategory, currentTag, updateUrl]
+  );
 
-    render();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
+  // 현재 활성화된 카테고리 한글 레이블
+  const activeTabLabel = useMemo(() => {
+    return CATEGORY_TABS.find((t) => t.category === currentCategory)?.label || '프로그래밍';
+  }, [currentCategory]);
 
   return (
-    <div className={s.container}>
-      {/* 우주 지식 격자 및 백그라운드 발광 오브 */}
-      <div className={s.bgGrid} />
-      <div className={s.glowOrb} />
-
-      {/* 실시간 노드 네트워크 캔버스 */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
-      {/* 중앙 프리미엄 글래스모피즘 카드 */}
-      <main className={s.glassCard}>
-        <div className={s.badge}>
-          <span className={s.pulseDot} />
-          In Development
-        </div>
-
-        <div className={s.headerGroup}>
-          <h1 className={s.title}>Knowledge Node Graph</h1>
-          <p className={s.subtitle}>
-            기록된 생각과 지식이 별자리처럼 서로 연결되는 인터랙티브 노드 그래프 기능이 곧 공개됩니다.
-          </p>
-        </div>
-
-        {/* 3대 핵심 기능 티저 */}
-        <section className={s.featureGrid} aria-label="노드 그래프 주요 기능 티저">
-          <div className={s.featureItem}>
-            <span className={s.featureIcon} role="img" aria-label="연결">
-              🪐
-            </span>
-            <strong className={s.featureTitle}>노트 간 시각적 연결</strong>
-            <p className={s.featureDesc}>태그와 상호 참조를 분석하여 지식의 연결망을 자동 생성합니다.</p>
+    <div className={S.container}>
+      {/* 1. 상단 헤더 행: 캔버스와 사이드바의 상단 컨트롤을 동일 수평 바닥선으로 정렬 */}
+      <div className={S.headerRow}>
+        {/* 캔버스 상단 (좌: 브레드크럼/타이틀, 우: 카테고리 탭) */}
+        <div className={S.mainHeaderArea}>
+          <div className={S.titleSection}>
+            <nav className={S.breadcrumb} aria-label="Breadcrumb">
+              <span>{activeTabLabel}</span>
+              {currentTag && (
+                <>
+                  <span>/</span>
+                  <span className={S.breadcrumbActive}>{currentTag}</span>
+                </>
+              )}
+            </nav>
+            <h1 className={S.title}>Node Graph</h1>
           </div>
 
-          <div className={s.featureItem}>
-            <span className={s.featureIcon} role="img" aria-label="탐색">
-              🔍
-            </span>
-            <strong className={s.featureTitle}>다차원 인사이트 탐색</strong>
-            <p className={s.featureDesc}>관련 아이디어와 새로운 크리에이터를 그래프를 통해 직관적으로 발견합니다.</p>
-          </div>
-
-          <div className={s.featureItem}>
-            <span className={s.featureIcon} role="img" aria-label="확장">
-              ⚡
-            </span>
-            <strong className={s.featureTitle}>실시간 지식 맵</strong>
-            <p className={s.featureDesc}>작성한 모든 기록이 실시간으로 전체 지식 생태계로 확장됩니다.</p>
-          </div>
-        </section>
-
-        {/* 페이지 이동 CTA */}
-        <div className={s.buttonGroup}>
-          <Link href={PATHS.HOME} className={s.primaryButton}>
-            홈 피드로 이동
-          </Link>
-          <Link href={PATHS.THREAD} className={s.secondaryButton}>
-            스레드 둘러보기
-          </Link>
+          <AppToggleGroup
+            type="page"
+            value={activeTabLabel}
+            onValueChange={(val) => val && handleCategoryChange(val as string)}
+          >
+            {CATEGORY_TABS.map((tab) => (
+              <AppToggleGroup.Item key={tab.label} value={tab.label} />
+            ))}
+          </AppToggleGroup>
         </div>
-      </main>
+
+        {/* 사이드바 상단 (우측 끝 정렬: << >> 페이지네이션) */}
+        <div className={S.sidebarHeaderArea}>
+          <div className={S.sidebarPaginationGroup}>
+            <button
+              type="button"
+              className={S.sidebarPaginationBtn}
+              onClick={() => setNotePage((prev) => Math.max(0, prev - 1))}
+              disabled={pageInfo.isFirst}
+              title="이전 노트 목록 (<<)"
+              aria-label="이전 노트 목록"
+            >
+              &lt;&lt;
+            </button>
+            <button
+              type="button"
+              className={S.sidebarPaginationBtn}
+              onClick={() => setNotePage((prev) => prev + 1)}
+              disabled={pageInfo.isLast}
+              title="다음 노트 목록 (>>)"
+              aria-label="다음 노트 목록"
+            >
+              &gt;&gt;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. 본문 행: 캔버스와 첫 번째 카드의 윗변(Top Border)이 정확히 동일한 수평선에서 시작 */}
+      <div className={S.contentRow}>
+        <div className={S.canvasWrapper}>
+          {isGraphPending ? (
+            <Skeleton width="100%" height="100%" borderRadius="16px" />
+          ) : isGraphError ? (
+            <div className={S.canvasState} role="alert">
+              <p>그래프를 불러오지 못했습니다.</p>
+              <button type="button" className={S.canvasRetryButton} onClick={() => void refetchGraph()}>다시 시도</button>
+            </div>
+          ) : (
+            <NodeGraphCanvas
+              data={explorationData ?? graphData}
+              selectedTag={currentTag}
+              onSelectTag={handleSelectTag}
+              onExpandTag={expandTag}
+              expandingTagNames={expandingTagNames}
+              expandedTagNames={expandedTagNames}
+              hasMoreTagNames={hasMoreTagNames}
+              expansionError={expansionError}
+            />
+          )}
+        </div>
+
+        <div className={S.sidebarWrapper}>
+          <RelatedNotesPanel
+            category={currentCategory}
+            selectedTag={currentTag}
+            page={notePage}
+            onPageInfoChange={setPageInfo}
+          />
+        </div>
+      </div>
     </div>
+  );
+}
+
+function NodeGraphSkeleton() {
+  return (
+    <div className={S.container}>
+      <div className={S.headerRow}>
+        <div className={S.mainHeaderArea}>
+          <div className={S.titleSection}>
+            <Skeleton width="120px" height="18px" borderRadius="4px" />
+            <Skeleton width="200px" height="36px" borderRadius="8px" />
+          </div>
+          <Skeleton width="240px" height="40px" borderRadius="10px" />
+        </div>
+        <div className={S.sidebarHeaderArea}>
+          <Skeleton width="60px" height="32px" borderRadius="6px" />
+        </div>
+      </div>
+      <div className={S.contentRow}>
+        <div className={S.canvasWrapper}>
+          <Skeleton width="100%" height="100%" borderRadius="16px" />
+        </div>
+        <div className={S.sidebarWrapper}>
+          <Skeleton width="100%" height="100%" borderRadius="16px" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Next.js 15 Suspense 경계로 감싸진 노드 그래프 메인 페이지
+ */
+export default function GraphPage() {
+  return (
+    <Suspense fallback={<NodeGraphSkeleton />}>
+      <NodeGraphContent />
+    </Suspense>
   );
 }
