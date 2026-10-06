@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import clsx from "clsx";
 import Tag from "@/shared/ui/tag/Tag";
 import NoteCard from "@/entities/note/ui/note-card/NoteCard";
+import { calculateTagCounts } from "@/entities/note/model/tagUtils";
 import type { Note } from "@/entities/note/note.types";
 import * as S from "./StoryNoteGrid.css";
 
@@ -27,22 +28,8 @@ export const StoryNoteGrid = ({
 }: StoryNoteGridProps) => {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  // 노트 데이터들로부터 태그 집계 계산
-  const tagList = useMemo(() => {
-    const tagCountMap: Record<string, number> = {};
-
-    notes.forEach((note) => {
-      if (Array.isArray(note.tag)) {
-        note.tag.forEach((t) => {
-          tagCountMap[t] = (tagCountMap[t] || 0) + 1;
-        });
-      }
-    });
-
-    return Object.entries(tagCountMap)
-      .map(([label, count]) => ({ label, count }))
-      .sort((a, b) => b.count - a.count);
-  }, [notes]);
+  // 노트 데이터들로부터 태그 집계 계산 (공통 유틸 재사용)
+  const tagList = useMemo(() => calculateTagCounts(notes), [notes]);
 
   // 선택된 태그에 따른 필터링
   const filteredNotes = useMemo(() => {

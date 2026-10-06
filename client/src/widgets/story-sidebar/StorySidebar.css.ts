@@ -62,6 +62,7 @@ export const subToolbar = style({
 export const addFolderButton = style({
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   background: "none",
   border: "none",
   color: vars.color.stroke_main_100,
@@ -72,11 +73,13 @@ export const addFolderButton = style({
 export const sortButton = style({
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   background: "none",
   border: "none",
   color: vars.color.gray_400,
   cursor: "pointer",
   padding: 0,
+  marginLeft: "auto",
   ":hover": {
     color: vars.color.white,
   },

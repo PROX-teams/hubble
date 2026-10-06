@@ -4,37 +4,40 @@ import React from "react";
 import Link from "next/link";
 import { SideBar } from "@/shared/ui/sidebar/SideBar";
 import { Accordion } from "@/shared/ui/accordion/Accordion";
+import { AccordionContext } from "@/shared/model/contexts/AccordionContextProvider";
 import CountIcon from "@/shared/assets/icons/story/count.svg";
+import FolderIcon from "@/shared/assets/icons/story/folder.svg";
+import SortListIcon from "@/shared/assets/icons/story/sort.svg";
+import AddFolderIcon from "@/shared/assets/icons/story/add-folder.svg";
 import AccordionArrow from "@/shared/assets/icons/common/accordionArrow.svg";
 import type { Story } from "@/entities/story/story.types";
 import type { Note } from "@/entities/note/note.types";
 import * as S from "./StorySidebar.css";
 
-// 폴더 추가 SVG 아이콘
-const AddFolderIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path d="M12 10V16M9 13H15M3 6V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V8C21 6.89543 20.1046 6 19 6H12L10 4H5C3.89543 4 3 4.89543 3 6Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+// 아코디언 트리 아이템 헤더 (화살표 아이콘뿐 아니라 글씨/행 전체 클릭 시 토글 지원)
+const StoryTreeItemHeader = ({ title }: { title: string }) => {
+  const { toggle } = React.useContext(AccordionContext);
 
-// 목록/정렬 SVG 아이콘
-const SortListIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// 폴더 개수 SVG 아이콘
-const FolderIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-    <path d="M3 6V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V8C21 6.89543 20.1046 6 19 6H12L10 4H5C3.89543 4 3 4.89543 3 6Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+  return (
+    <Accordion.Header className={S.treeItem} onClick={toggle}>
+      <Accordion.Trigger
+        rotatable={true}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <AccordionArrow width={12} height={12} />
+      </Accordion.Trigger>
+      <span className={S.treeItemLabel}>{title}</span>
+    </Accordion.Header>
+  );
+};
 
 interface StorySidebarProps {
   stories?: Story[];
   notes?: Note[];
   onAddStory?: () => void;
+  title?: string;
 }
 
 /**
@@ -46,6 +49,7 @@ export const StorySidebar = ({
   stories = [],
   notes = [],
   onAddStory,
+  title = "My Story",
 }: StorySidebarProps) => {
   const recentStories = stories.slice(0, 2);
   const otherStories = stories.slice(2);
@@ -55,10 +59,10 @@ export const StorySidebar = ({
       <div className={S.container}>
         {/* 상단 헤더: My Story 뱃지 + 메타 카운트 */}
         <div className={S.header}>
-          <span className={S.myStoryBadge}>My Story</span>
+          <span className={S.myStoryBadge}>{title}</span>
           <div className={S.metaBadgeGroup}>
             <span className={S.metaItem} title="스토리 개수">
-              <FolderIcon width={13} height={13} />
+              <FolderIcon width={14} height={14} />
               <span>{stories.length}</span>
             </span>
             <span className={S.metaItem} title="노트 개수">
@@ -70,14 +74,16 @@ export const StorySidebar = ({
 
         {/* 2번째 툴바: 초록색 새 폴더 아이콘 + 정렬 아이콘 */}
         <div className={S.subToolbar}>
-          <button
-            type="button"
-            className={S.addFolderButton}
-            aria-label="새 폴더 추가"
-            onClick={onAddStory}
-          >
-            <AddFolderIcon width={18} height={18} />
-          </button>
+          {onAddStory && (
+            <button
+              type="button"
+              className={S.addFolderButton}
+              aria-label="새 폴더 추가"
+              onClick={onAddStory}
+            >
+              <AddFolderIcon width={16} height={16} />
+            </button>
+          )}
           <button type="button" className={S.sortButton} aria-label="목록 정렬">
             <SortListIcon width={16} height={16} />
           </button>
@@ -97,12 +103,7 @@ export const StorySidebar = ({
 
                   return (
                     <Accordion key={story.id} defaultOpen={index === 0}>
-                      <Accordion.Header className={S.treeItem}>
-                        <Accordion.Trigger rotatable={true}>
-                          <AccordionArrow width={12} height={12} />
-                        </Accordion.Trigger>
-                        <span className={S.treeItemLabel}>{story.title}</span>
-                      </Accordion.Header>
+                      <StoryTreeItemHeader title={story.title} />
 
                       <Accordion.Content>
                         <div className={S.subNoteList}>
@@ -140,12 +141,7 @@ export const StorySidebar = ({
 
               return (
                 <Accordion key={story.id} defaultOpen={false}>
-                  <Accordion.Header className={S.treeItem}>
-                    <Accordion.Trigger rotatable={true}>
-                      <AccordionArrow width={12} height={12} />
-                    </Accordion.Trigger>
-                    <span className={S.treeItemLabel}>{story.title}</span>
-                  </Accordion.Header>
+                  <StoryTreeItemHeader title={story.title} />
 
                   <Accordion.Content>
                     <div className={S.subNoteList}>
