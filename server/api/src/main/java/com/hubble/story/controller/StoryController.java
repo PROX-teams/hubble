@@ -86,6 +86,15 @@ public class StoryController {
         return ResponseEntity.ok(storyService.getMyStories(userId, pageable));
     }
 
+    @Operation(summary = "특정 사용자의 스토리 목록 조회", description = "특정 사용자가 작성한 스토리 목록을 조회합니다.")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<StoryResponse>> getUserStories(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal Long currentUserId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(storyService.getUserStories(userId, currentUserId, pageable));
+    }
+
     @Operation(summary = "좋아요 많은 스토리 Top 10", description = "좋아요를 가장 많이 받은 스토리 10개를 조회합니다.")
     @GetMapping("/top10")
     public ResponseEntity<List<StoryResponse>> getTop10LikedStories(

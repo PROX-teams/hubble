@@ -126,6 +126,12 @@ public class StoryService {
         return convertToStoryResponses(stories, userId);
     }
 
+    public Page<StoryResponse> getUserStories(Long targetUserId, Long currentUserId, Pageable pageable) {
+        getUserEntity(targetUserId); // 타겟 유저 존재 여부 검증
+        Page<Story> stories = storyRepository.findAllByUserIdWithFetch(targetUserId, pageable);
+        return convertToStoryResponses(stories, currentUserId);
+    }
+
     public List<StoryResponse> getTop10LikedStories(Long userId) {
         List<Story> stories = storyRepository.findTop10ByOrderByLikeCountDescWithFetch(PageRequest.of(0, 10));
         return convertToStoryResponses(stories, userId);

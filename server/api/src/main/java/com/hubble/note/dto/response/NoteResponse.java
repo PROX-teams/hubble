@@ -32,6 +32,9 @@ public record NoteResponse(
         @Schema(description = "작성자 닉네임 (author)", example = "hubble-user")
         String author,
 
+        @Schema(description = "작성자 ID (authorId)", example = "1")
+        Long authorId,
+
         @Schema(description = "생성 일시 (date)", example = "2024-03-11T00:00:00")
         LocalDateTime date,
 
@@ -64,6 +67,7 @@ public record NoteResponse(
                         .map(noteTag -> noteTag.getTag().getName())
                         .collect(Collectors.toList()),
                 note.getUser().getNickname(),
+                note.getUser().getId(),
                 note.getCreatedAt(),
                 note.getLikeCount(),
                 note.getStory() != null ? note.getStory().getId() : null,

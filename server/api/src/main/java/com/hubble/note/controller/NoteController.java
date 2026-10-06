@@ -122,6 +122,14 @@ public class NoteController {
         return ResponseEntity.ok(noteService.getUserTags(userId));
     }
 
+    @Operation(summary = "특정 사용자의 최근 수정 이력 조회", description = "특정 사용자의 최근 수정된 노트 목록을 경량 DTO로 조회합니다. (Slice 무한스크롤 지원)")
+    @GetMapping("/user/{userId}/recent-updates")
+    public ResponseEntity<Slice<NoteHistoryResponse>> getUserRecentUpdates(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getRecentUpdates(userId, pageable));
+    }
+
     @Operation(summary = "좋아요 많은 노트 Top 10", description = "좋아요를 가장 많이 받은 노트 10개를 조회합니다.")
     @GetMapping("/top10/like")
     public ResponseEntity<List<NoteSummaryResponse>> getTop10LikedNotes() {
