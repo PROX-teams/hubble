@@ -1,6 +1,13 @@
 import { useAuthStore } from '@/entities/user/model/useAuthStore';
 import { API_BASE_URL } from './constants';
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 export const fetcher = async <T>(url: string, options?: RequestInit): Promise<T> => {
   // Zustand 스토어에서 메모리에 저장된 accessToken을 가져옵니다.
   const { accessToken } = useAuthStore.getState();
@@ -20,7 +27,7 @@ export const fetcher = async <T>(url: string, options?: RequestInit): Promise<T>
     const errorData = await response.json().catch(() => ({}));
     const message = errorData.message || `API Error: ${response.status} ${response.statusText}`;
     
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
 
   // 빈 응답(204 No Content, void API 등) 처리

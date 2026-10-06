@@ -53,8 +53,15 @@ export const BookmarkButton = ({
     setLocalBookmarked(nextState);
     setLocalCount((prev) => (nextState ? prev + 1 : Math.max(0, prev - 1)));
 
-    handleToggle();
+    handleToggle(undefined, {
+      onError: () => {
+        // [B-2] 서버 요청 실패 시 이전 상태로 롤백
+        setLocalBookmarked(isBookmarked);
+        setLocalCount(propCount);
+      },
+    });
   };
+
 
   return (
     <button
