@@ -7,8 +7,18 @@ export const container = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '40px',
-  paddingTop: '40px',
+  padding: '40px 180px 60px 0',
+  boxSizing: 'border-box',
   minHeight: '100vh',
+
+  '@media': {
+    'screen and (max-width: 1280px)': {
+      padding: '40px 80px 60px 0',
+    },
+    'screen and (max-width: 768px)': {
+      padding: '24px 20px 40px 0',
+    },
+  },
 });
 
 export const headerSection = style({

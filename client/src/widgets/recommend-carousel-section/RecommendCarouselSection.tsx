@@ -10,50 +10,40 @@ export interface RenderItemMeta {
   isPriority: boolean;
 }
 
-interface RecommendCarouselSectionProps<T> {
+export interface RecommendCarouselSectionProps<T extends { id?: string | number } = { id?: string | number }> {
   title: string;
   isLoading: boolean;
-  items: T[];
+  items?: T[];
   visibleCount?: number;
-  interval?: number;
-  emptyMessage: string;
-  keyExtractor?: (item: T, index: number) => string | number;
+  emptyMessage?: string;
   renderItem: (item: T, meta: RenderItemMeta) => ReactNode;
-  renderSkeleton?: (index: number) => ReactNode;
-  skeletonCount?: number;
-  skeletonVariant?: 'normal' | 'wide';
+  renderSkeleton?: () => ReactNode;
   gap?: number;
+  widthVariant?: 'compact' | 'full';
 }
 
 /**
  * 메인 및 추천 영역에서 캐러셀 섹션을 일관되게 구성하는 위젯 컴포넌트
  * - FSD 아키텍처에 따라 컴포넌트 전용 스타일을 격리
  * - LCP 최적화를 위해 visibleCount 범위 내의 아이템에 isPriority 메타데이터 제공
- * - keyExtractor를 통한 안전한 리액트 Key 관리
- * - skeletonCount 및 skeletonVariant를 통한 유연한 스켈레톤 렌더링
  */
-export function RecommendCarouselSection<T>({
+export function RecommendCarouselSection<T extends { id?: string | number }>({
   title,
   isLoading,
-  items,
-  visibleCount = 4,
-  interval = 4000,
-  emptyMessage,
-  keyExtractor,
+  items = [],
+  visibleCount = 3,
+  emptyMessage = '등록된 데이터가 없습니다.',
   renderItem,
   renderSkeleton,
-  skeletonCount,
-  skeletonVariant = 'normal',
-  gap,
+  gap = 16,
+  widthVariant = 'full',
 }: RecommendCarouselSectionProps<T>) {
   const carouselRef = useRef<CarouselRef>(null);
 
   const isButtonDisabled = isLoading || items.length <= visibleCount;
-  const count = skeletonCount ?? visibleCount;
-  const resolvedGap = gap ?? (skeletonVariant === 'wide' ? 24 : 16);
 
   return (
-    <section className={s.contentSection}>
+    <section className={s.contentSection[widthVariant]}>
       <div className={s.sectionHeader}>
         <h2 className={s.sectionTitle}>{title}</h2>
         <div className={s.buttonGroup}>
@@ -70,13 +60,13 @@ export function RecommendCarouselSection<T>({
         </div>
       </div>
 
-      <div className={s.carouselWrapper}>
+      <div className={s.carouselWrapper[widthVariant]}>
         {isLoading ? (
           renderSkeleton && (
-            <div className={skeletonVariant === 'wide' ? s.skeletonRowWide : s.skeletonRow}>
-              {Array.from({ length: count }).map((_, index) => (
+            <div className={s.skeletonRow} style={{ gap: `${gap}px` }}>
+              {Array.from({ length: visibleCount }).map((_, index) => (
                 <React.Fragment key={`skeleton-${index}`}>
-                  {renderSkeleton(index)}
+                  {renderSkeleton()}
                 </React.Fragment>
               ))}
             </div>
@@ -87,23 +77,16 @@ export function RecommendCarouselSection<T>({
           <Carousel
             ref={carouselRef}
             visibleCount={visibleCount}
-            interval={interval}
-            gap={resolvedGap}
+            gap={gap}
           >
-            {items.map((item, index) => {
-              const key = keyExtractor
-                ? keyExtractor(item, index)
-                : ((item as Record<string, unknown>)?.id as string | number) ?? index;
-
-              return (
-                <React.Fragment key={key}>
-                  {renderItem(item, {
-                    index,
-                    isPriority: index < visibleCount,
-                  })}
-                </React.Fragment>
-              );
-            })}
+            {items.map((item, index) => (
+              <React.Fragment key={item?.id ?? index}>
+                {renderItem(item, {
+                  index,
+                  isPriority: index < visibleCount,
+                })}
+              </React.Fragment>
+            ))}
           </Carousel>
         )}
       </div>
