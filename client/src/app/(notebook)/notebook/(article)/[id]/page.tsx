@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useNoteDetail } from '@/features/note/view-note/model/useNoteDetail';
 import { NoteViewer } from '@/features/note/view-note/ui/NoteViewer';
 import { NoteMeta } from '@/widgets/notebook-meta/NoteMeta';
+import { NotebookDetailSkeleton } from '@/widgets/notebook-meta/NotebookDetailSkeleton';
 import * as s from './page.css';
 
 export default function NotebookDetailPage() {
@@ -12,8 +13,9 @@ export default function NotebookDetailPage() {
   const { note, isLoading, isError } = useNoteDetail(noteId);
 
   if (isLoading) {
-    return <div className={s.loadingContainer}>노트를 불러오는 중입니다...</div>;
+    return <NotebookDetailSkeleton />;
   }
+
 
   if (isError || !note) {
     return <div className={s.loadingContainer}>노트를 찾을 수 없습니다.</div>;

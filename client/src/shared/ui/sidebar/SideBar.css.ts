@@ -8,6 +8,8 @@ export const sidebarBase = style({
   transition: "transform 0.4s ease",
   display: "flex",
   flexDirection: "column",
+  boxSizing: "border-box",
+  overflowX: "hidden",
   backgroundColor: vars.color.black,
   selectors: {
     [`.${lightTheme} &`]: {
@@ -32,8 +34,11 @@ export const rightSidebar = style([
     position: "fixed", // 👈 fixed 추가
     right: 0,         // 👈 우측 고정
     width: "30.125rem",
+    maxWidth: "100vw",
     padding: "0 1rem",
     borderLeft: `0.06rem solid ${vars.color.stroke_200}`,
+    boxSizing: "border-box",
+    overflowX: "hidden",
   },
 ]);
 
