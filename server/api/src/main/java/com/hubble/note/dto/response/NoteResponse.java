@@ -14,6 +14,9 @@ public record NoteResponse(
         @Schema(description = "노트 ID", example = "1")
         Long id,
 
+        @Schema(description = "게시 내용 버전")
+        long version,
+
         @Schema(description = "노트 제목", example = "나의 첫 번째 노트")
         String title,
 
@@ -59,6 +62,7 @@ public record NoteResponse(
     public static NoteResponse of(Note note, boolean isLiked, boolean isBookmarked) {
         return new NoteResponse(
                 note.getId(),
+                note.getContentVersion(),
                 note.getTitle(),
                 note.getContent(),
                 note.getCategory(),

@@ -14,6 +14,7 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "notes", indexes = {
@@ -46,12 +47,15 @@ public class Note extends BaseTimeEntity {
 
     private String imageUrl;
 
+    @Column(nullable = false)
+    private long contentVersion;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "story_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "story_id", nullable = false)
     private Story story;
 
     @Enumerated(EnumType.STRING)
@@ -101,14 +105,15 @@ public class Note extends BaseTimeEntity {
     }
 
     public void update(String title, String content, Category category, Story story, String imageUrl) {
+        this.contentVersion++;
         this.title = title;
         this.content = content;
         this.category = category;
-        this.story = story;
+        this.story = Objects.requireNonNull(story, "노트는 스토리에 속해야 합니다.");
         this.imageUrl = imageUrl;
     }
 
     public void setStory(Story story) {
-        this.story = story;
+        this.story = Objects.requireNonNull(story, "노트는 스토리에 속해야 합니다.");
     }
 }

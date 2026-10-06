@@ -57,5 +57,21 @@ public interface StoryRepository extends JpaRepository<Story, Long>, StoryReposi
            "ORDER BY (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, s.createdAt DESC, s.id DESC")
     Slice<Story> findPopularStoriesSlice(Pageable pageable);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Story s WHERE s.id = :id AND s.user.id = :userId")
+    Optional<Story> findOwnedForUpdate(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query(value = "INSERT INTO stories(title, description, category, user_id, is_default, created_at, updated_at, " +
+            "view_count, like_count, bookmark_count) VALUES ('기본 폴더', '기본으로 생성된 폴더입니다.', 'OTHER', :userId, TRUE, " +
+            "NOW(6), NOW(6), 0, 0, 0) ON DUPLICATE KEY UPDATE id = id", nativeQuery = true)
+    void ensureDefault(@Param("userId") Long userId);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Story s WHERE s.user.id = :userId AND s.defaultStory = true")
+    Optional<Story> findDefaultForUpdate(@Param("userId") Long userId);
+
+    Optional<Story> findByUserIdAndDefaultStoryTrue(Long userId);
+
     Optional<Story> findByTitleAndUser(String title, User user);
 }

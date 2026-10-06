@@ -44,6 +44,9 @@ public class Story extends BaseTimeEntity {
 
     private String icon;
 
+    @Column(name = "is_default", nullable = false)
+    private boolean defaultStory;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

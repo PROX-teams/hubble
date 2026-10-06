@@ -65,6 +65,14 @@ public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositor
            countQuery = "select count(nb) from NoteBookmark nb where nb.user.id = :userId")
     Page<Note> findBookmarkedNotesByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
 
+    boolean existsByStoryIdAndUserIdNot(Long storyId, Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE Note n SET n.story = :target, n.contentVersion = n.contentVersion + 1, " +
+           "n.updatedAt = CURRENT_TIMESTAMP WHERE n.story.id = :sourceId AND n.user.id = :userId AND n.deletedAt IS NULL")
+    int moveStoryNotes(@Param("sourceId") Long sourceId, @Param("target") com.hubble.story.entity.Story target,
+                       @Param("userId") Long userId);
+
     // 상위 스토리 조회수 비동기 롤업을 위한 storyId 단건 스칼라 조회 (조인 없는 Zero-Join 인덱스 스캔)
     @Query("SELECT n.story.id FROM Note n WHERE n.id = :id")
     Long findStoryIdByNoteId(@Param("id") Long id);
