@@ -1,27 +1,52 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useGroupedNotes } from '@/features/note/story-note-list/model/useGroupedNotes';
 import { Dropdown } from "@/shared/ui/dropdown/Dropdown";
-import { Accordion } from "@/shared/ui/accordion/Accordion";
 import NoteCard from "@/entities/note/ui/note-card/NoteCard";
-import AccordionArrow from "@/shared/assets/icons/common/accordionArrow.svg";
+import { NoteCardSkeleton } from "@/entities/note/ui/note-card/NoteCardSkeleton";
 import * as S from "./MyNoteList.css";
 
 const MyNoteList = () => {
   const [selectedStoryId, setSelectedStoryId] = useState<number | null>(null);
-  
-  const { 
-    isLoggedIn, 
-    stories, 
-    notes, 
-    groupedNotes, 
-    isLoading 
+
+  const {
+    isLoggedIn,
+    stories,
+    notes,
+    filteredNotes,
+    isLoading
   } = useGroupedNotes(selectedStoryId);
 
+  // 화면에 노출할 드롭다운 라벨을 상단(JSX 바깥)에서 미리 계산
+  const currentTitle = useMemo(() => {
+    if (selectedStoryId === null || selectedStoryId === undefined) {
+      return '전체 노트북';
+    }
+    if (selectedStoryId === -1) {
+      return '미분류';
+    }
+    return stories.find((s) => s.id === selectedStoryId)?.title ?? '스토리북 선택';
+  }, [selectedStoryId, stories]);
+
+  // 미분류 노트 존재 여부 사전 계산
+  const hasUncategorizedNotes = useMemo(
+    () => notes.some((n) => !n.storyId),
+    [notes]
+  );
+
   if (isLoading) {
-    return <div className={S.container}>불러오는 중...</div>;
+    return (
+      <div className={S.container}>
+        <div className={S.noteListWrapper}>
+          {Array.from({ length: 4 }).map((_, index) => (
+            <NoteCardSkeleton key={index} variant="compact" />
+          ))}
+        </div>
+      </div>
+    );
   }
+
 
   if (!isLoggedIn) {
     return (
@@ -35,36 +60,31 @@ const MyNoteList = () => {
 
   return (
     <div className={S.container}>
-      {/* 상단 드롭다운: 스토리 선택 */}
+      {/* 상단 드롭다운: 스토리북 선택 (기본값: 전체 노트북) */}
       <div className={S.dropdownWrapper}>
-        <Dropdown>
-          <Dropdown.Trigger size="2xl" variant="muted">
+        <Dropdown className={S.fullWidthWrapper}>
+          <Dropdown.Trigger variant="muted" className={S.fullWidthTrigger}>
             <Dropdown.Value>
-              {({ selectedOption }) => {
-                if (selectedOption === null || selectedOption === undefined) return "전체 스토리";
-                if (selectedStoryId === -1) return "미분류";
-                return stories.find(s => s.id === selectedStoryId)?.title || "스토리 선택";
-              }}
+              {() => currentTitle}
             </Dropdown.Value>
             <Dropdown.Icon />
           </Dropdown.Trigger>
 
-          <Dropdown.Menu size="xl">
-            <Dropdown.Option optionId={null} onClick={() => setSelectedStoryId(null)} >
-              전체 스토리
+          <Dropdown.Menu className={S.fullWidthMenu}>
+            <Dropdown.Option optionId={null} onClick={() => setSelectedStoryId(null)}>
+              전체 노트북
             </Dropdown.Option>
             {stories.map((story) => (
-              <Dropdown.Option 
-                key={story.id} 
+              <Dropdown.Option
+                key={story.id}
                 optionId={story.id}
                 onClick={() => setSelectedStoryId(story.id)}
               >
                 {story.title}
               </Dropdown.Option>
             ))}
-            {/* 미분류 노트가 있다면 메뉴에 추가 */}
-            {notes.some(n => !n.storyId) && (
-              <Dropdown.Option 
+            {hasUncategorizedNotes && (
+              <Dropdown.Option
                 optionId={-1}
                 onClick={() => setSelectedStoryId(-1)}
               >
@@ -75,34 +95,19 @@ const MyNoteList = () => {
         </Dropdown>
       </div>
 
-      {/* 하단 아코디언 리스트 */}
-      <div className={S.accordionListWrapper}>
-        {groupedNotes.length > 0 ? (
-          groupedNotes.map((group) => (
-            <Accordion key={group.id} defaultOpen={true}>
-              <Accordion.Header>
-                <Accordion.Trigger rotatable={true}>
-                  <AccordionArrow width={16} height={16} />
-                </Accordion.Trigger>
-                <span className={S.storyTitle}>{group.title}</span>
-                <span className={S.noteCount}>{group.notes.length}</span>
-              </Accordion.Header>
-              <Accordion.Content>
-                <div className={S.noteListWrapper}>
-                  {group.notes.map((note) => (
-                    <NoteCard 
-                      key={note.id} 
-                      data={note} 
-                      variant="compact"
-                      href={`/notebook/${note.id}/edit`}
-                    />
-                  ))}
-                </div>
-              </Accordion.Content>
-            </Accordion>
+      {/* 하단 선택된 스토리북/전체노트북의 노트 목록 (플랫 리스트) */}
+      <div className={S.noteListWrapper}>
+        {filteredNotes.length > 0 ? (
+          filteredNotes.map((note) => (
+            <NoteCard
+              key={note.id}
+              data={note}
+              variant="compact"
+              href={`/notebook/${note.id}/edit`}
+            />
           ))
         ) : (
-          <div style={{ padding: '20px', color: '#888', textAlign: 'center' }}>
+          <div className={S.emptyText}>
             작성한 노트가 없습니다.
           </div>
         )}

@@ -18,12 +18,18 @@ export const TagEditorSection = () => {
   );
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
+    // 한글(IME) 조합 중일 때 엔터 키 중복 트리거 방지
+    if (e.nativeEvent.isComposing) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
       const trimmed = tagInput.trim();
-      if (!tag.includes(trimmed)) {
-        setTag([...tag, trimmed]);
+      if (trimmed) {
+        if (!tag.includes(trimmed)) {
+          setTag([...tag, trimmed]);
+        }
+        setTagInput('');
       }
-      setTagInput('');
     }
   };
 
@@ -37,6 +43,8 @@ export const TagEditorSection = () => {
       <Input
         placeholder="태그를 입력하고 Enter를 누르세요"
         variant="solid"
+        size="md"
+        className={s.fullWidthInput}
         value={tagInput}
         onChange={(e) => setTagInput(e.target.value)}
         onKeyDown={handleAddTag}

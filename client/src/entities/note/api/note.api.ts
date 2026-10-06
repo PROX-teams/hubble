@@ -81,12 +81,18 @@ export const getMyNotes = getNotebookNotes;
 /**
  * 새 노트 생성
  */
-export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
+export const createNote = async (data: NoteCreateRequest, requestKey: string): Promise<Note> => {
   return fetcher<Note>(API_ENDPOINTS.NOTE, {
     method: 'POST',
+    headers: { 'Idempotency-Key': requestKey },
     body: JSON.stringify(data),
   });
 };
+
+export const resolvePublication = (requestKey: string) =>
+  fetcher<{ state: 'completed' | 'cancelled'; note: Note | null }>(
+    `${API_ENDPOINTS.NOTE}/publication/${encodeURIComponent(requestKey)}/resolve`, { method: 'POST' }
+  );
 
 /**
  * 기존 노트 수정

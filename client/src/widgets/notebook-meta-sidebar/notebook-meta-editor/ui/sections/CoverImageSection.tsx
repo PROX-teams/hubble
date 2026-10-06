@@ -36,6 +36,9 @@ export const CoverImageSection = () => {
       <div className={s.coverImageContainer}>
         <Input
           placeholder="이미지 URL을 입력하거나 파일을 선택하세요"
+          variant="solid"
+          size="md"
+          className={s.fullWidthInput}
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
         />

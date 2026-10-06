@@ -17,8 +17,12 @@ export const NotebookMetaSidebar = () => {
         <SideBar
             position="right"
             isSidebarOpen={isSidebarOpen}
-            className={s.sidebarContainer} 
+            className={s.sidebarContainer}
         >
+            <div className={s.sidebarHeader}>
+                <h2 className={s.sidebarTitle}>{isEditOrNew ? '글 설정' : '댓글'}</h2>
+            </div>
+
             {isEditOrNew ? (
                 <NotebookMetaEditor />
             ) : (

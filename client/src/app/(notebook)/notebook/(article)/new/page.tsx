@@ -3,12 +3,14 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { AuthGuard } from '@/features/auth/AuthGuard';
+import { EditorSkeleton } from '@/features/note/write-note/ui/EditorSkeleton';
 import * as s from './page.css';
 
 const Editor = dynamic(() => import('@/features/note/write-note/ui/Editor'), {
   ssr: false,
-  loading: () => <p>에디터를 불러오는 중...</p>,
+  loading: () => <EditorSkeleton />,
 });
+
 
 export default function NewNotebookPage() {
   return (

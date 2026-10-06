@@ -3,9 +3,14 @@ import { vars } from '@/shared/styles/theme.css';
 import { tx } from '@/shared/styles/textStyle.css';
 
 export const sidebarContainer = style({
-  padding: '24px',
-  gap: '32px',
-  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '24px',
+  width: '100%',
+  maxWidth: '100%',
+  overflowX: 'hidden',
+  paddingBottom: '24px',
+  boxSizing: 'border-box',
 });
 
 export const section = style({
@@ -20,6 +25,12 @@ export const sectionTitle = style([
     color: vars.color.gray_700,
   }
 ]);
+
+export const fullWidthInput = style({
+  width: '100% !important',
+  maxWidth: '100%',
+  boxSizing: 'border-box',
+});
 
 export const imageUploadBox = style({
   width: '100%',
