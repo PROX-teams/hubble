@@ -1,0 +1,26 @@
+[
+  {
+    "name": "com.hubble.search.service.SearchMigrationTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "7.105"
+  },
+  {
+    "name": "com.hubble.search.service.SearchServiceTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.59"
+  },
+  {
+    "name": "com.hubble.search.service.SearchMysqlIntegrationTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "571.724"
+  }
+]

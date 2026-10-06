@@ -1,0 +1,474 @@
+{
+  "measuredAt" : "2026-10-05T04:55:12.120440Z",
+  "mysqlVersion" : "8.0.45",
+  "notes" : 20001,
+  "stories" : 1001,
+  "tags" : 2001,
+  "bodyLengths" : {
+    "minChars" : 375,
+    "avgChars" : 1049.8490,
+    "maxChars" : 11613
+  },
+  "conditions" : "MySQL container 2 CPUs/1536 MiB; synthetic data; warm cache; one client for SQL; 20 measured pairs after 3 warmups; fulltext predicate vs literal LIKE; candidate sets compared. SQL timing includes JDBC/network; API is current production path, no old API baseline.",
+  "sql" : [ {
+    "target" : "note_text",
+    "keyword" : "트랜잭션",
+    "fulltextCandidates" : 1200,
+    "likeCandidates" : 1200,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 10.498959,
+      "samples" : 20,
+      "maxMs" : 14.345791,
+      "medianMs" : 11.257583,
+      "p95Ms" : 13.988916,
+      "p99Ms" : 14.345791
+    },
+    "like" : {
+      "minMs" : 137.849333,
+      "samples" : 20,
+      "maxMs" : 142.930125,
+      "medianMs" : 138.738542,
+      "p95Ms" : 141.050708,
+      "p99Ms" : 142.930125
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=0.35 rows=1) (actual time=3.15..3.15 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((match n.title,n.content against ('\"트랜잭션\"' in boolean mode)) > 0))  (cost=0.34 rows=0.1) (actual time=0.94..3.09 rows=1200 loops=1)\n        -> Full-text index search on n using ft_notes_title_content (title='\"트랜잭션\"')  (cost=0.34 rows=1) (actual time=0.192..2.21 rows=1200 loops=1)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=2923 rows=1) (actual time=139..139 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((n.title like '%트랜잭션%') or (n.content like '%트랜잭션%')))  (cost=2888 rows=346) (actual time=0.147..139 rows=1200 loops=1)\n        -> Table scan on n  (cost=2888 rows=16503) (actual time=0.00829..13.2 rows=20001 loops=1)\n"
+    } ]
+  }, {
+    "target" : "notes",
+    "keyword" : "트랜잭션",
+    "fulltextCandidates" : 1210,
+    "likeCandidates" : 1210,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 79.757291,
+      "samples" : 20,
+      "maxMs" : 84.915042,
+      "medianMs" : 81.626666,
+      "p95Ms" : 84.656584,
+      "p99Ms" : 84.915042
+    },
+    "like" : {
+      "minMs" : 205.265209,
+      "samples" : 20,
+      "maxMs" : 216.792833,
+      "medianMs" : 207.440958,
+      "p95Ms" : 214.73575,
+      "p99Ms" : 216.792833
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=87.5..87.5 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0174..87.5 rows=1210 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00633..0.0774 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00579..0.0647 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and (((match n.title,n.content against ('\"트랜잭션\"' in boolean mode)) > 0) or ((match u.nickname against ('\"트랜잭션\"' in boolean mode)) > 0) or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=0.836..0.864 rows=12 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.0018..0.252 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.7 rows=1) (actual time=0.0028..0.0028 rows=532e-6 loops=18801)\n                    -> Nested loop inner join  (cost=0.7 rows=1) (actual time=0.00267..0.00267 rows=532e-6 loops=18801)\n                        -> Filter: ((match t.`name` against ('\"트랜잭션\"' in boolean mode)) > 0)  (cost=0.35 rows=1) (actual time=0.00146..0.00157 rows=0.999 loops=18801)\n                            -> Full-text index search on t using ft_tags_name (name='\"트랜잭션\"')  (cost=0.35 rows=1) (actual time=0.0013..0.00135 rows=0.999 loops=18801)\n                        -> Single-row covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id, tag_id=t.id)  (cost=0.35 rows=1) (actual time=866e-6..866e-6 rows=532e-6 loops=18791)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=227..227 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0246..227 rows=1210 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0125..0.0661 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.012..0.0542 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and ((n.title like '%트랜잭션%') or (n.content like '%트랜잭션%') or (u.nickname like '%트랜잭션%') or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=2.18..2.25 rows=12 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00183..0.259 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=1.15 rows=0.221) (actual time=0.0037..0.0037 rows=532e-6 loops=18801)\n                    -> Nested loop inner join  (cost=1.15 rows=0.221) (actual time=0.00357..0.00357 rows=532e-6 loops=18801)\n                        -> Covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id)  (cost=0.45 rows=1.99) (actual time=0.00114..0.00151 rows=2 loops=18801)\n                        -> Filter: (t.`name` like '%트랜잭션%')  (cost=0.256 rows=0.111) (actual time=851e-6..851e-6 rows=266e-6 loops=37590)\n                            -> Single-row index lookup on t using PRIMARY (id=nt.tag_id)  (cost=0.256 rows=1) (actual time=586e-6..620e-6 rows=1 loops=37590)\n"
+    } ]
+  }, {
+    "target" : "stories",
+    "keyword" : "트랜잭션",
+    "fulltextCandidates" : 70,
+    "likeCandidates" : 70,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 2005.829958,
+      "samples" : 20,
+      "maxMs" : 2244.959083,
+      "medianMs" : 2050.129167,
+      "p95Ms" : 2095.679416,
+      "p99Ms" : 2244.959083
+    },
+    "like" : {
+      "minMs" : 149.756666,
+      "samples" : 20,
+      "maxMs" : 196.130708,
+      "medianMs" : 153.017583,
+      "p95Ms" : 165.423167,
+      "p99Ms" : 196.130708
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=2150..2150 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=0.0845..2150 rows=70 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0106..0.293 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00954..0.231 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and (((match s.title,s.`description` against ('\"트랜잭션\"' in boolean mode)) > 0) or ((match u.nickname against ('\"트랜잭션\"' in boolean mode)) > 0) or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=21.3..21.3 rows=0.693 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.00546..0.0248 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.353 rows=0.005) (actual time=2.16..2.16 rows=0.0605 loops=991)\n                    -> Nested loop inner join  (cost=0.353 rows=0.005) (actual time=2.16..2.16 rows=0.0605 loops=991)\n                        -> Filter: ((n.story_id = s.id) and (n.deleted_at is null) and ((match n.title,n.content against ('\"트랜잭션\"' in boolean mode)) > 0))  (cost=0.335 rows=0.05) (actual time=2.16..2.16 rows=0.0605 loops=991)\n                            -> Full-text index search on n using ft_notes_title_content (title='\"트랜잭션\"')  (cost=0.335 rows=1) (actual time=0.161..2.09 rows=1127 loops=991)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.45 rows=0.1) (actual time=0.00161..0.00161 rows=1 loops=60)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.45 rows=1) (actual time=0.00143..0.00143 rows=1 loops=60)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=168..168 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=0.0279..168 rows=70 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0156..0.087 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.015..0.0681 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and ((s.title like '%트랜잭션%') or (s.`description` like '%트랜잭션%') or (u.nickname like '%트랜잭션%') or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=1.65..1.66 rows=0.693 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.002..0.013 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=5.71 rows=0.0353) (actual time=0.167..0.167 rows=0.0605 loops=991)\n                    -> Nested loop inner join  (cost=5.71 rows=0.0353) (actual time=0.167..0.167 rows=0.0605 loops=991)\n                        -> Filter: ((n.deleted_at is null) and ((n.title like '%트랜잭션%') or (n.content like '%트랜잭션%')))  (cost=5.58 rows=0.353) (actual time=0.166..0.166 rows=0.0605 loops=991)\n                            -> Index lookup on n using FK9yx1roo78wsdvgmmecdsbh3mt (story_id=s.id)  (cost=5.58 rows=16.8) (actual time=0.00388..0.0407 rows=18.8 loops=991)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.278 rows=0.1) (actual time=0.00129..0.00129 rows=1 loops=60)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.278 rows=1) (actual time=0.00114..0.00114 rows=1 loops=60)\n"
+    } ]
+  }, {
+    "target" : "note_text",
+    "keyword" : "일반기록",
+    "fulltextCandidates" : 20000,
+    "likeCandidates" : 20000,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 161.576291,
+      "samples" : 20,
+      "maxMs" : 180.986667,
+      "medianMs" : 164.142291,
+      "p95Ms" : 175.981084,
+      "p99Ms" : 180.986667
+    },
+    "like" : {
+      "minMs" : 16.020167,
+      "samples" : 20,
+      "maxMs" : 19.124208,
+      "medianMs" : 16.950041,
+      "p95Ms" : 18.33375,
+      "p99Ms" : 19.124208
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=0.35 rows=1) (actual time=39..39 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((match n.title,n.content against ('\"일반기록\"' in boolean mode)) > 0))  (cost=0.34 rows=0.1) (actual time=4.88..38 rows=20000 loops=1)\n        -> Full-text index search on n using ft_notes_title_content (title='\"일반기록\"')  (cost=0.34 rows=1) (actual time=4.87..36.1 rows=20000 loops=1)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=2923 rows=1) (actual time=17.7..17.7 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((n.title like '%일반기록%') or (n.content like '%일반기록%')))  (cost=2888 rows=346) (actual time=0.0166..16.8 rows=20000 loops=1)\n        -> Table scan on n  (cost=2888 rows=16503) (actual time=0.0137..11.7 rows=20001 loops=1)\n"
+    } ]
+  }, {
+    "target" : "notes",
+    "keyword" : "일반기록",
+    "fulltextCandidates" : 20000,
+    "likeCandidates" : 20000,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 155.852458,
+      "samples" : 20,
+      "maxMs" : 210.756167,
+      "medianMs" : 161.655542,
+      "p95Ms" : 172.010375,
+      "p99Ms" : 210.756167
+    },
+    "like" : {
+      "minMs" : 29.64,
+      "samples" : 20,
+      "maxMs" : 34.890041,
+      "medianMs" : 31.715541,
+      "p95Ms" : 34.20975,
+      "p99Ms" : 34.890041
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=33..33 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0241..32 rows=20000 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00808..0.0892 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00754..0.076 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and (((match n.title,n.content against ('\"일반기록\"' in boolean mode)) > 0) or ((match u.nickname against ('\"일반기록\"' in boolean mode)) > 0) or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=0.00268..0.303 rows=198 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00208..0.244 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.7 rows=1) (actual time=0.00496..0.00496 rows=0 loops=1)\n                    -> Nested loop inner join  (cost=0.7 rows=1) (actual time=0.00458..0.00458 rows=0 loops=1)\n                        -> Filter: ((match t.`name` against ('\"일반기록\"' in boolean mode)) > 0)  (cost=0.35 rows=1) (actual time=0.00433..0.00433 rows=0 loops=1)\n                            -> Full-text index search on t using ft_tags_name (name='\"일반기록\"')  (cost=0.35 rows=1) (actual time=0.00387..0.00387 rows=0 loops=1)\n                        -> Single-row covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id, tag_id=t.id)  (cost=0.35 rows=1) (never executed)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=32.1..32.1 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0247..31.1 rows=20000 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0116..0.0665 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.0112..0.0525 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and ((n.title like '%일반기록%') or (n.content like '%일반기록%') or (u.nickname like '%일반기록%') or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=0.00256..0.294 rows=198 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00205..0.242 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=1.15 rows=0.221) (actual time=0.00771..0.00771 rows=0 loops=1)\n                    -> Nested loop inner join  (cost=1.15 rows=0.221) (actual time=0.00721..0.00721 rows=0 loops=1)\n                        -> Covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id)  (cost=0.45 rows=1.99) (actual time=0.00683..0.00683 rows=0 loops=1)\n                        -> Filter: (t.`name` like '%일반기록%')  (cost=0.256 rows=0.111) (never executed)\n                            -> Single-row index lookup on t using PRIMARY (id=nt.tag_id)  (cost=0.256 rows=1) (never executed)\n"
+    } ]
+  }, {
+    "target" : "stories",
+    "keyword" : "일반기록",
+    "fulltextCandidates" : 926,
+    "likeCandidates" : 1000,
+    "sameCandidates" : false,
+    "fulltext" : {
+      "minMs" : 2831.396792,
+      "samples" : 20,
+      "maxMs" : 3205.555916,
+      "medianMs" : 2888.334958,
+      "p95Ms" : 3194.71975,
+      "p99Ms" : 3205.555916
+    },
+    "like" : {
+      "minMs" : 5.288167,
+      "samples" : 20,
+      "maxMs" : 14.294958,
+      "medianMs" : 7.536833,
+      "p95Ms" : 13.594542,
+      "p99Ms" : 14.294958
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=2827..2827 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=5.09..2827 rows=926 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0131..0.216 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.0122..0.161 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and (((match s.title,s.`description` against ('\"일반기록\"' in boolean mode)) > 0) or ((match u.nickname against ('\"일반기록\"' in boolean mode)) > 0) or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=27.6..28 rows=9.17 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.0123..0.0281 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.353 rows=0.005) (actual time=2.82..2.82 rows=0.925 loops=1001)\n                    -> Nested loop inner join  (cost=0.353 rows=0.005) (actual time=2.82..2.82 rows=0.925 loops=1001)\n                        -> Filter: ((n.story_id = s.id) and (n.deleted_at is null) and ((match n.title,n.content against ('\"일반기록\"' in boolean mode)) > 0))  (cost=0.335 rows=0.05) (actual time=2.82..2.82 rows=0.925 loops=1001)\n                            -> Full-text index search on n using ft_notes_title_content (title='\"일반기록\"')  (cost=0.335 rows=1) (actual time=0.294..2.72 rows=1499 loops=1001)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.45 rows=0.1) (actual time=0.00193..0.00193 rows=1 loops=926)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.45 rows=1) (actual time=0.00175..0.00175 rows=1 loops=926)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=6.11..6.11 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=0.0487..6.04 rows=1000 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0152..0.0589 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.0146..0.0481 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and ((s.title like '%일반기록%') or (s.`description` like '%일반기록%') or (u.nickname like '%일반기록%') or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=0.00676..0.0583 rows=9.9 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.00167..0.00976 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=5.71 rows=0.0353) (actual time=0.00419..0.00422 rows=0.999 loops=1001)\n                    -> Nested loop inner join  (cost=5.71 rows=0.0353) (actual time=0.00404..0.00404 rows=0.999 loops=1001)\n                        -> Filter: ((n.deleted_at is null) and ((n.title like '%일반기록%') or (n.content like '%일반기록%')))  (cost=5.58 rows=0.353) (actual time=0.00269..0.00269 rows=0.999 loops=1001)\n                            -> Index lookup on n using FK9yx1roo78wsdvgmmecdsbh3mt (story_id=s.id)  (cost=5.58 rows=16.8) (actual time=0.00234..0.00234 rows=1 loops=1001)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.278 rows=0.1) (actual time=0.00112..0.00112 rows=1 loops=1000)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.278 rows=1) (actual time=982e-6..982e-6 rows=1 loops=1000)\n"
+    } ]
+  }, {
+    "target" : "note_text",
+    "keyword" : "희귀주제",
+    "fulltextCandidates" : 20,
+    "likeCandidates" : 20,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 0.971,
+      "samples" : 20,
+      "maxMs" : 2.24125,
+      "medianMs" : 1.322625,
+      "p95Ms" : 2.168583,
+      "p99Ms" : 2.24125
+    },
+    "like" : {
+      "minMs" : 148.186958,
+      "samples" : 20,
+      "maxMs" : 154.990375,
+      "medianMs" : 150.290916,
+      "p95Ms" : 152.799666,
+      "p99Ms" : 154.990375
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=0.35 rows=1) (actual time=0.0747..0.0747 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((match n.title,n.content against ('\"희귀주제\"' in boolean mode)) > 0))  (cost=0.34 rows=0.1) (actual time=0.0177..0.0724 rows=20 loops=1)\n        -> Full-text index search on n using ft_notes_title_content (title='\"희귀주제\"')  (cost=0.34 rows=1) (actual time=0.0164..0.0688 rows=20 loops=1)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=2923 rows=1) (actual time=150..150 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((n.title like '%희귀주제%') or (n.content like '%희귀주제%')))  (cost=2888 rows=346) (actual time=7.4..150 rows=20 loops=1)\n        -> Table scan on n  (cost=2888 rows=16503) (actual time=0.00725..13.9 rows=20001 loops=1)\n"
+    } ]
+  }, {
+    "target" : "notes",
+    "keyword" : "희귀주제",
+    "fulltextCandidates" : 40,
+    "likeCandidates" : 40,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 75.159209,
+      "samples" : 20,
+      "maxMs" : 81.407291,
+      "medianMs" : 76.678625,
+      "p95Ms" : 80.453583,
+      "p99Ms" : 81.407291
+    },
+    "like" : {
+      "minMs" : 221.156041,
+      "samples" : 20,
+      "maxMs" : 231.684833,
+      "medianMs" : 223.861125,
+      "p95Ms" : 228.084167,
+      "p99Ms" : 231.684833
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=90.9..90.9 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0995..90.9 rows=40 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0179..0.0835 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00508..0.0591 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and (((match n.title,n.content against ('\"희귀주제\"' in boolean mode)) > 0) or ((match u.nickname against ('\"희귀주제\"' in boolean mode)) > 0) or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=0.869..0.899 rows=0.396 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.0018..0.262 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.7 rows=1) (actual time=0.00285..0.00285 rows=0.001 loops=19981)\n                    -> Nested loop inner join  (cost=0.7 rows=1) (actual time=0.00271..0.00271 rows=0.001 loops=19981)\n                        -> Filter: ((match t.`name` against ('\"희귀주제\"' in boolean mode)) > 0)  (cost=0.35 rows=1) (actual time=0.00147..0.00159 rows=0.999 loops=19981)\n                            -> Full-text index search on t using ft_tags_name (name='\"희귀주제\"')  (cost=0.35 rows=1) (actual time=0.00132..0.00137 rows=0.999 loops=19981)\n                        -> Single-row covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id, tag_id=t.id)  (cost=0.35 rows=1) (actual time=870e-6..870e-6 rows=0.001 loops=19961)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=244..244 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.748..244 rows=40 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0101..0.0606 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00971..0.0486 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and ((n.title like '%희귀주제%') or (n.content like '%희귀주제%') or (u.nickname like '%희귀주제%') or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=2.25..2.42 rows=0.396 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00183..0.267 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=1.15 rows=0.221) (actual time=0.00376..0.00376 rows=0.001 loops=19981)\n                    -> Nested loop inner join  (cost=1.15 rows=0.221) (actual time=0.00362..0.00362 rows=0.001 loops=19981)\n                        -> Covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id)  (cost=0.45 rows=1.99) (actual time=0.00113..0.00152 rows=2 loops=19981)\n                        -> Filter: (t.`name` like '%희귀주제%')  (cost=0.256 rows=0.111) (actual time=868e-6..868e-6 rows=501e-6 loops=39940)\n                            -> Single-row index lookup on t using PRIMARY (id=nt.tag_id)  (cost=0.256 rows=1) (actual time=595e-6..629e-6 rows=1 loops=39940)\n"
+    } ]
+  }, {
+    "target" : "stories",
+    "keyword" : "희귀주제",
+    "fulltextCandidates" : 13,
+    "likeCandidates" : 13,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 54.832667,
+      "samples" : 20,
+      "maxMs" : 60.389791,
+      "medianMs" : 56.540375,
+      "p95Ms" : 59.832292,
+      "p99Ms" : 60.389791
+    },
+    "like" : {
+      "minMs" : 163.123084,
+      "samples" : 20,
+      "maxMs" : 174.964375,
+      "medianMs" : 165.388083,
+      "p95Ms" : 170.914583,
+      "p99Ms" : 174.964375
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=56.2..56.2 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=0.198..56.2 rows=13 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00587..0.0743 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00538..0.0608 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and (((match s.title,s.`description` against ('\"희귀주제\"' in boolean mode)) > 0) or ((match u.nickname against ('\"희귀주제\"' in boolean mode)) > 0) or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=0.534..0.555 rows=0.129 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.0017..0.0116 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.353 rows=0.005) (actual time=0.0548..0.0548 rows=0.00101 loops=989)\n                    -> Nested loop inner join  (cost=0.353 rows=0.005) (actual time=0.0547..0.0547 rows=0.00101 loops=989)\n                        -> Filter: ((n.story_id = s.id) and (n.deleted_at is null) and ((match n.title,n.content against ('\"희귀주제\"' in boolean mode)) > 0))  (cost=0.335 rows=0.05) (actual time=0.0545..0.0545 rows=0.00101 loops=989)\n                            -> Full-text index search on n using ft_notes_title_content (title='\"희귀주제\"')  (cost=0.335 rows=1) (actual time=0.00496..0.053 rows=20 loops=989)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.45 rows=0.1) (actual time=0.003..0.003 rows=1 loops=1)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.45 rows=1) (actual time=0.00262..0.00262 rows=1 loops=1)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=167..167 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=0.764..167 rows=13 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0139..0.0793 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.0134..0.065 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and ((s.title like '%희귀주제%') or (s.`description` like '%희귀주제%') or (u.nickname like '%희귀주제%') or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=1.45..1.65 rows=0.129 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.00181..0.0115 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=5.71 rows=0.0353) (actual time=0.167..0.167 rows=0.00101 loops=989)\n                    -> Nested loop inner join  (cost=5.71 rows=0.0353) (actual time=0.166..0.166 rows=0.00101 loops=989)\n                        -> Filter: ((n.deleted_at is null) and ((n.title like '%희귀주제%') or (n.content like '%희귀주제%')))  (cost=5.58 rows=0.353) (actual time=0.166..0.166 rows=0.00101 loops=989)\n                            -> Index lookup on n using FK9yx1roo78wsdvgmmecdsbh3mt (story_id=s.id)  (cost=5.58 rows=16.8) (actual time=0.0027..0.0303 rows=20 loops=989)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.278 rows=0.1) (actual time=0.00354..0.00354 rows=1 loops=1)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.278 rows=1) (actual time=0.00304..0.00304 rows=1 loops=1)\n"
+    } ]
+  }, {
+    "target" : "note_text",
+    "keyword" : "없는검색어",
+    "fulltextCandidates" : 0,
+    "likeCandidates" : 0,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 0.801375,
+      "samples" : 20,
+      "maxMs" : 1.522625,
+      "medianMs" : 1.1485,
+      "p95Ms" : 1.435125,
+      "p99Ms" : 1.522625
+    },
+    "like" : {
+      "minMs" : 143.572167,
+      "samples" : 20,
+      "maxMs" : 181.670083,
+      "medianMs" : 145.287708,
+      "p95Ms" : 147.782291,
+      "p99Ms" : 181.670083
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=0.35 rows=1) (actual time=0.00679..0.00688 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((match n.title,n.content against ('\"없는검색어\"' in boolean mode)) > 0))  (cost=0.34 rows=0.1) (actual time=0.00617..0.00617 rows=0 loops=1)\n        -> Full-text index search on n using ft_notes_title_content (title='\"없는검색어\"')  (cost=0.34 rows=1) (actual time=0.00208..0.00208 rows=0 loops=1)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=2923 rows=1) (actual time=144..144 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((n.title like '%없는검색어%') or (n.content like '%없는검색어%')))  (cost=2888 rows=346) (actual time=144..144 rows=0 loops=1)\n        -> Table scan on n  (cost=2888 rows=16503) (actual time=0.00896..13.7 rows=20001 loops=1)\n"
+    } ]
+  }, {
+    "target" : "notes",
+    "keyword" : "없는검색어",
+    "fulltextCandidates" : 0,
+    "likeCandidates" : 0,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 35.778042,
+      "samples" : 20,
+      "maxMs" : 41.0835,
+      "medianMs" : 36.551208,
+      "p95Ms" : 39.468083,
+      "p99Ms" : 41.0835
+    },
+    "like" : {
+      "minMs" : 213.673042,
+      "samples" : 20,
+      "maxMs" : 225.2365,
+      "medianMs" : 216.212917,
+      "p95Ms" : 221.486416,
+      "p99Ms" : 225.2365
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=46.7..46.7 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=46.7..46.7 rows=0 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00483..0.0789 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00425..0.0652 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and (((match n.title,n.content against ('\"없는검색어\"' in boolean mode)) > 0) or ((match u.nickname against ('\"없는검색어\"' in boolean mode)) > 0) or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=0.462..0.462 rows=0 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00207..0.256 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.7 rows=1) (actual time=726e-6..726e-6 rows=0 loops=20001)\n                    -> Nested loop inner join  (cost=0.7 rows=1) (actual time=588e-6..588e-6 rows=0 loops=20001)\n                        -> Filter: ((match t.`name` against ('\"없는검색어\"' in boolean mode)) > 0)  (cost=0.35 rows=1) (actual time=448e-6..448e-6 rows=0 loops=20001)\n                            -> Full-text index search on t using ft_tags_name (name='\"없는검색어\"')  (cost=0.35 rows=1) (actual time=315e-6..315e-6 rows=0 loops=20001)\n                        -> Single-row covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id, tag_id=t.id)  (cost=0.35 rows=1) (never executed)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=241..241 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=241..241 rows=0 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00983..0.0622 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00942..0.05 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and ((n.title like '%없는검색어%') or (n.content like '%없는검색어%') or (u.nickname like '%없는검색어%') or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=2.38..2.38 rows=0 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00187..0.27 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=1.15 rows=0.221) (actual time=0.00385..0.00385 rows=0 loops=20001)\n                    -> Nested loop inner join  (cost=1.15 rows=0.221) (actual time=0.00371..0.00371 rows=0 loops=20001)\n                        -> Covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id)  (cost=0.45 rows=1.99) (actual time=0.00122..0.00161 rows=2 loops=20001)\n                        -> Filter: (t.`name` like '%없는검색어%')  (cost=0.256 rows=0.111) (actual time=869e-6..869e-6 rows=0 loops=40000)\n                            -> Single-row index lookup on t using PRIMARY (id=nt.tag_id)  (cost=0.256 rows=1) (actual time=597e-6..632e-6 rows=1 loops=40000)\n"
+    } ]
+  }, {
+    "target" : "stories",
+    "keyword" : "없는검색어",
+    "fulltextCandidates" : 0,
+    "likeCandidates" : 0,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 2.886625,
+      "samples" : 20,
+      "maxMs" : 4.692542,
+      "medianMs" : 3.212209,
+      "p95Ms" : 4.402084,
+      "p99Ms" : 4.692542
+    },
+    "like" : {
+      "minMs" : 160.36425,
+      "samples" : 20,
+      "maxMs" : 195.547875,
+      "medianMs" : 161.166916,
+      "p95Ms" : 195.379708,
+      "p99Ms" : 195.547875
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=2.48..2.48 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=2.47..2.47 rows=0 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00446..0.0668 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00392..0.058 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and (((match s.title,s.`description` against ('\"없는검색어\"' in boolean mode)) > 0) or ((match u.nickname against ('\"없는검색어\"' in boolean mode)) > 0) or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=0.0235..0.0235 rows=0 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.0012..0.00884 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.353 rows=0.005) (actual time=0.00113..0.00113 rows=0 loops=1001)\n                    -> Nested loop inner join  (cost=0.353 rows=0.005) (actual time=997e-6..997e-6 rows=0 loops=1001)\n                        -> Filter: ((n.story_id = s.id) and (n.deleted_at is null) and ((match n.title,n.content against ('\"없는검색어\"' in boolean mode)) > 0))  (cost=0.335 rows=0.05) (actual time=859e-6..859e-6 rows=0 loops=1001)\n                            -> Full-text index search on n using ft_notes_title_content (title='\"없는검색어\"')  (cost=0.335 rows=1) (actual time=728e-6..728e-6 rows=0 loops=1001)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.45 rows=0.1) (never executed)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.45 rows=1) (never executed)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=168..168 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=168..168 rows=0 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0112..0.0754 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.0108..0.0601 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and ((s.title like '%없는검색어%') or (s.`description` like '%없는검색어%') or (u.nickname like '%없는검색어%') or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=1.67..1.67 rows=0 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.00197..0.0127 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=5.71 rows=0.0353) (actual time=0.166..0.166 rows=0 loops=1001)\n                    -> Nested loop inner join  (cost=5.71 rows=0.0353) (actual time=0.166..0.166 rows=0 loops=1001)\n                        -> Filter: ((n.deleted_at is null) and ((n.title like '%없는검색어%') or (n.content like '%없는검색어%')))  (cost=5.58 rows=0.353) (actual time=0.166..0.166 rows=0 loops=1001)\n                            -> Index lookup on n using FK9yx1roo78wsdvgmmecdsbh3mt (story_id=s.id)  (cost=5.58 rows=16.8) (actual time=0.00279..0.0348 rows=20 loops=1001)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.278 rows=0.1) (never executed)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.278 rows=1) (never executed)\n"
+    } ]
+  }, {
+    "target" : "note_text",
+    "keyword" : "자바 트랜잭션",
+    "fulltextCandidates" : 200,
+    "likeCandidates" : 200,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 3.860542,
+      "samples" : 20,
+      "maxMs" : 7.248375,
+      "medianMs" : 4.641375,
+      "p95Ms" : 5.878625,
+      "p99Ms" : 7.248375
+    },
+    "like" : {
+      "minMs" : 130.6535,
+      "samples" : 20,
+      "maxMs" : 137.54525,
+      "medianMs" : 132.079042,
+      "p95Ms" : 136.367416,
+      "p99Ms" : 137.54525
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=0.35 rows=1) (actual time=0.617..0.617 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((match n.title,n.content against ('\"자바 트랜잭션\"' in boolean mode)) > 0))  (cost=0.34 rows=0.1) (actual time=0.0866..0.607 rows=200 loops=1)\n        -> Full-text index search on n using ft_notes_title_content (title='\"자바 트랜잭션\"')  (cost=0.34 rows=1) (actual time=0.0857..0.585 rows=200 loops=1)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=2923 rows=1) (actual time=132..132 rows=1 loops=1)\n    -> Filter: ((n.deleted_at is null) and ((n.title like '%자바 트랜잭션%') or (n.content like '%자바 트랜잭션%')))  (cost=2888 rows=346) (actual time=0.652..132 rows=200 loops=1)\n        -> Table scan on n  (cost=2888 rows=16503) (actual time=0.00867..14.1 rows=20001 loops=1)\n"
+    } ]
+  }, {
+    "target" : "notes",
+    "keyword" : "자바 트랜잭션",
+    "fulltextCandidates" : 200,
+    "likeCandidates" : 200,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 39.856375,
+      "samples" : 20,
+      "maxMs" : 48.612667,
+      "medianMs" : 40.72625,
+      "p95Ms" : 46.111916,
+      "p99Ms" : 48.612667
+    },
+    "like" : {
+      "minMs" : 201.881667,
+      "samples" : 20,
+      "maxMs" : 240.089459,
+      "medianMs" : 204.078167,
+      "p95Ms" : 212.794417,
+      "p99Ms" : 240.089459
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=49.3..49.3 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0225..49.3 rows=200 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00842..0.101 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00763..0.0865 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and (((match n.title,n.content against ('\"자바 트랜잭션\"' in boolean mode)) > 0) or ((match u.nickname against ('\"자바 트랜잭션\"' in boolean mode)) > 0) or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=0.481..0.487 rows=1.98 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00229..0.267 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.7 rows=1) (actual time=740e-6..740e-6 rows=0 loops=19801)\n                    -> Nested loop inner join  (cost=0.7 rows=1) (actual time=600e-6..600e-6 rows=0 loops=19801)\n                        -> Filter: ((match t.`name` against ('\"자바 트랜잭션\"' in boolean mode)) > 0)  (cost=0.35 rows=1) (actual time=459e-6..459e-6 rows=0 loops=19801)\n                            -> Full-text index search on t using ft_tags_name (name='\"자바 트랜잭션\"')  (cost=0.35 rows=1) (actual time=324e-6..324e-6 rows=0 loops=19801)\n                        -> Single-row covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id, tag_id=t.id)  (cost=0.35 rows=1) (never executed)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=737 rows=1) (actual time=229..229 rows=1 loops=1)\n    -> Nested loop inner join  (cost=720 rows=165) (actual time=0.0382..228 rows=200 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0115..0.068 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.011..0.0556 rows=101 loops=1)\n        -> Filter: ((n.deleted_at is null) and ((n.title like '%자바 트랜잭션%') or (n.content like '%자바 트랜잭션%') or (u.nickname like '%자바 트랜잭션%') or exists(select #2)))  (cost=54.1 rows=16.3) (actual time=2.25..2.26 rows=1.98 loops=101)\n            -> Index lookup on n using FKechaouoa6kus6k1dpix1u91c (user_id=u.id)  (cost=54.1 rows=163) (actual time=0.00223..0.276 rows=198 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=1.15 rows=0.221) (actual time=0.00385..0.00385 rows=0 loops=19801)\n                    -> Nested loop inner join  (cost=1.15 rows=0.221) (actual time=0.00372..0.00372 rows=0 loops=19801)\n                        -> Covering index lookup on nt using uk_note_tags_note_tag (note_id=n.id)  (cost=0.45 rows=1.99) (actual time=0.00122..0.00161 rows=2 loops=19801)\n                        -> Filter: (t.`name` like '%자바 트랜잭션%')  (cost=0.256 rows=0.111) (actual time=871e-6..871e-6 rows=0 loops=39600)\n                            -> Single-row index lookup on t using PRIMARY (id=nt.tag_id)  (cost=0.256 rows=1) (actual time=601e-6..635e-6 rows=1 loops=39600)\n"
+    } ]
+  }, {
+    "target" : "stories",
+    "keyword" : "자바 트랜잭션",
+    "fulltextCandidates" : 10,
+    "likeCandidates" : 10,
+    "sameCandidates" : true,
+    "fulltext" : {
+      "minMs" : 507.176666,
+      "samples" : 20,
+      "maxMs" : 545.140833,
+      "medianMs" : 532.892625,
+      "p95Ms" : 544.381833,
+      "p99Ms" : 545.140833
+    },
+    "like" : {
+      "minMs" : 146.89975,
+      "samples" : 20,
+      "maxMs" : 157.561875,
+      "medianMs" : 150.641334,
+      "p95Ms" : 157.003667,
+      "p99Ms" : 157.561875
+    },
+    "fulltextPlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=535..535 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=5.55..535 rows=10 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.00504..0.0873 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.00454..0.0715 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and (((match s.title,s.`description` against ('\"자바 트랜잭션\"' in boolean mode)) > 0) or ((match u.nickname against ('\"자바 트랜잭션\"' in boolean mode)) > 0) or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=5.29..5.29 rows=0.099 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.00241..0.0134 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=0.353 rows=0.005) (actual time=0.532..0.532 rows=0.00999 loops=1001)\n                    -> Nested loop inner join  (cost=0.353 rows=0.005) (actual time=0.532..0.532 rows=0.00999 loops=1001)\n                        -> Filter: ((n.story_id = s.id) and (n.deleted_at is null) and ((match n.title,n.content against ('\"자바 트랜잭션\"' in boolean mode)) > 0))  (cost=0.335 rows=0.05) (actual time=0.532..0.532 rows=0.00999 loops=1001)\n                            -> Full-text index search on n using ft_notes_title_content (title='\"자바 트랜잭션\"')  (cost=0.335 rows=1) (actual time=0.0238..0.518 rows=198 loops=1001)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.45 rows=0.1) (actual time=0.00138..0.00138 rows=1 loops=10)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.45 rows=1) (actual time=0.00121..0.00121 rows=1 loops=10)\n"
+    } ],
+    "likePlan" : [ {
+      "EXPLAIN" : "-> Aggregate: count(0)  (cost=46.4 rows=1) (actual time=151..151 rows=1 loops=1)\n    -> Nested loop inner join  (cost=45.4 rows=10) (actual time=2.22..151 rows=10 loops=1)\n        -> Filter: (u.deleted_at is null)  (cost=10.3 rows=10.1) (actual time=0.0136..0.0694 rows=101 loops=1)\n            -> Table scan on u  (cost=10.3 rows=101) (actual time=0.013..0.0546 rows=101 loops=1)\n        -> Filter: ((s.deleted_at is null) and ((s.title like '%자바 트랜잭션%') or (s.`description` like '%자바 트랜잭션%') or (u.nickname like '%자바 트랜잭션%') or exists(select #2)))  (cost=2.49 rows=0.991) (actual time=1.5..1.5 rows=0.099 loops=101)\n            -> Index lookup on s using FKshv2ytgbsn9w9mpu43mc6ln6j (user_id=u.id)  (cost=2.49 rows=9.91) (actual time=0.00173..0.0114 rows=9.91 loops=101)\n            -> Select #2 (subquery in condition; dependent)\n                -> Limit: 1 row(s)  (cost=5.71 rows=0.0353) (actual time=0.149..0.149 rows=0.00999 loops=1001)\n                    -> Nested loop inner join  (cost=5.71 rows=0.0353) (actual time=0.149..0.149 rows=0.00999 loops=1001)\n                        -> Filter: ((n.deleted_at is null) and ((n.title like '%자바 트랜잭션%') or (n.content like '%자바 트랜잭션%')))  (cost=5.58 rows=0.353) (actual time=0.149..0.149 rows=0.00999 loops=1001)\n                            -> Index lookup on n using FK9yx1roo78wsdvgmmecdsbh3mt (story_id=s.id)  (cost=5.58 rows=16.8) (actual time=0.00249..0.0312 rows=19.8 loops=1001)\n                        -> Filter: (nu.deleted_at is null)  (cost=0.278 rows=0.1) (actual time=0.0014..0.0014 rows=1 loops=10)\n                            -> Single-row index lookup on nu using PRIMARY (id=n.user_id)  (cost=0.278 rows=1) (actual time=0.00121..0.00121 rows=1 loops=10)\n"
+    } ]
+  } ],
+  "currentApi" : [ {
+    "concurrency" : 1,
+    "requests" : 60,
+    "latency" : {
+      "minMs" : 113.845917,
+      "samples" : 60,
+      "maxMs" : 2421.810375,
+      "medianMs" : 581.965375,
+      "p95Ms" : 2342.087458,
+      "p99Ms" : 2421.810375
+    },
+    "requestsPerSecond" : 1.2729070383718841,
+    "errors" : 0
+  }, {
+    "concurrency" : 5,
+    "requests" : 60,
+    "latency" : {
+      "minMs" : 316.180208,
+      "samples" : 60,
+      "maxMs" : 10189.435333,
+      "medianMs" : 1443.819708,
+      "p95Ms" : 9950.4935,
+      "p99Ms" : 10189.435333
+    },
+    "requestsPerSecond" : 1.7653357437619874,
+    "errors" : 0
+  }, {
+    "concurrency" : 10,
+    "requests" : 60,
+    "latency" : {
+      "minMs" : 1032.446,
+      "samples" : 60,
+      "maxMs" : 34784.862917,
+      "medianMs" : 5314.595542,
+      "p95Ms" : 30461.97425,
+      "p99Ms" : 34784.862917
+    },
+    "requestsPerSecond" : 1.164157749190449,
+    "errors" : 0
+  } ]
+}

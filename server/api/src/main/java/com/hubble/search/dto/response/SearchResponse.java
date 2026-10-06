@@ -1,7 +1,6 @@
 package com.hubble.search.dto.response;
 
 import com.hubble.note.dto.response.NoteSummaryResponse;
-import com.hubble.story.dto.response.StoryResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Slice;
 
@@ -12,11 +11,11 @@ public record SearchResponse(
         @Schema(description = "검색어 입력 여부 (true: 검색 결과, false: 추천/인기 콘텐츠)", example = "true")
         boolean isSearching,
 
-        @Schema(description = "태그 목록 (검색 연관 태그 또는 추천 인기 태그)", example = "[\"Next.js\", \"React\", \"TypeScript\"]")
+        @Schema(description = "첫 페이지의 검색 연관 태그 또는 추천 인기 태그. 추가 페이지에서는 빈 목록", example = "[\"Next.js\", \"React\", \"TypeScript\"]")
         List<String> tags,
 
         @Schema(description = "스토리 무한 스크롤 Slice 응답")
-        Slice<StoryResponse> stories,
+        Slice<SearchStoryResponse> stories,
 
         @Schema(description = "노트 무한 스크롤 Slice 응답")
         Slice<NoteSummaryResponse> notes
@@ -24,7 +23,7 @@ public record SearchResponse(
     public static SearchResponse of(
             boolean isSearching,
             List<String> tags,
-            Slice<StoryResponse> stories,
+            Slice<SearchStoryResponse> stories,
             Slice<NoteSummaryResponse> notes
     ) {
         return new SearchResponse(isSearching, tags, stories, notes);

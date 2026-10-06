@@ -1,6 +1,7 @@
 package com.hubble.note.repository;
 
 import com.hubble.common.entity.Category;
+import com.hubble.note.dto.StoryNoteCountDto;
 import com.hubble.note.entity.Note;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositoryCustom {
+
+    @Query("SELECT new com.hubble.note.dto.StoryNoteCountDto(n.story.id, COUNT(n.id)) " +
+           "FROM Note n WHERE n.story.id IN :storyIds GROUP BY n.story.id")
+    List<StoryNoteCountDto> countNotesByStoryIds(@Param("storyIds") List<Long> storyIds);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT n FROM Note n WHERE n.id = :id")
+    java.util.Optional<Note> findByIdForUpdate(@Param("id") Long id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.viewCount = n.viewCount + 1, " +

@@ -90,12 +90,10 @@ public class StoryService {
         return StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story));
     }
 
-    public Page<StoryResponse> getStories(Category category, String keyword, Pageable pageable, Long userId) {
+    public Page<StoryResponse> getStories(Category category, Pageable pageable, Long userId) {
         Page<Story> stories;
         if (category != null) {
             stories = storyRepository.findAllByCategoryWithFetch(category, pageable);
-        } else if (keyword != null && !keyword.isBlank()) {
-            stories = storyRepository.findByKeywordWithFetch(keyword, pageable);
         } else {
             stories = storyRepository.findAllWithFetch(pageable);
         }

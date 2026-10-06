@@ -60,14 +60,13 @@ public class StoryController {
         return ResponseEntity.ok(storyService.getStory(storyId, userId));
     }
 
-    @Operation(summary = "스토리 목록 조회", description = "필터링 및 검색 기능을 포함한 스토리 목록을 조회합니다. (무한 스크롤)")
+    @Operation(summary = "스토리 목록 조회", description = "카테고리 필터를 적용해 스토리 목록을 조회합니다. (무한 스크롤)")
     @GetMapping
     public ResponseEntity<Page<StoryResponse>> getStories(
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) Category category,
-            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(storyService.getStories(category, keyword, pageable, userId));
+        return ResponseEntity.ok(storyService.getStories(category, pageable, userId));
     }
 
     @Operation(summary = "북마크한 스토리 목록 조회", description = "로그인한 사용자가 북마크한 스토리 목록을 조회합니다.")

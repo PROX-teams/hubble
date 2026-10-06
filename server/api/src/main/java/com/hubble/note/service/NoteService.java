@@ -122,7 +122,7 @@ public class NoteService {
     }
 
     public Page<NoteSummaryResponse> getNotes(Category category, String keyword, String tagName, Pageable pageable) {
-        NoteSearchCondition condition = NoteSearchCondition.forFeed(category, keyword, tagName);
+        NoteSearchCondition condition = NoteSearchCondition.of(null, null, category, tagName, keyword);
         Page<Note> notes = noteRepository.searchNotes(condition, pageable);
         return convertToNoteSummaryResponses(notes);
     }
