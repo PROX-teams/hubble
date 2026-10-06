@@ -1,6 +1,7 @@
 package com.hubble.note.repository;
 
 import com.hubble.common.entity.Category;
+import com.hubble.note.dto.StoryNoteCountDto;
 import com.hubble.note.entity.Note;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,14 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositoryCustom {
+
+    @Query("SELECT new com.hubble.note.dto.StoryNoteCountDto(n.story.id, COUNT(n.id)) " +
+           "FROM Note n WHERE n.story.id IN :storyIds GROUP BY n.story.id")
+    List<StoryNoteCountDto> countNotesByStoryIds(@Param("storyIds") List<Long> storyIds);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT n FROM Note n WHERE n.id = :id")
+    java.util.Optional<Note> findByIdForUpdate(@Param("id") Long id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Note n SET n.viewCount = n.viewCount + 1, " +
@@ -56,7 +65,18 @@ public interface NoteRepository extends JpaRepository<Note, Long>, NoteRepositor
            countQuery = "select count(nb) from NoteBookmark nb where nb.user.id = :userId")
     Page<Note> findBookmarkedNotesByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
 
+    boolean existsByStoryIdAndUserIdNot(Long storyId, Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query("UPDATE Note n SET n.story = :target, n.contentVersion = n.contentVersion + 1, " +
+           "n.updatedAt = CURRENT_TIMESTAMP WHERE n.story.id = :sourceId AND n.user.id = :userId AND n.deletedAt IS NULL")
+    int moveStoryNotes(@Param("sourceId") Long sourceId, @Param("target") com.hubble.story.entity.Story target,
+                       @Param("userId") Long userId);
+
     // 상위 스토리 조회수 비동기 롤업을 위한 storyId 단건 스칼라 조회 (조인 없는 Zero-Join 인덱스 스캔)
     @Query("SELECT n.story.id FROM Note n WHERE n.id = :id")
     Long findStoryIdByNoteId(@Param("id") Long id);
+
+    // 카테고리별 유효 노트 총 개수 조회 (1레벨 루트 노드 가중치용)
+    long countByCategory(Category category);
 }

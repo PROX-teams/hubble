@@ -27,7 +27,21 @@ public record NoteCreateRequest(
         @Schema(description = "태그 리스트", example = "[\"Java\", \"Spring\"]")
         List<String> tag,
 
-        @Schema(description = "포함할 스토리 ID (포함하지 않을 경우 기본 폴더에 저장)", example = "1")
-        Long storyId
+        @Schema(description = "소속 스토리 ID. 생성 시 생략하면 기본 폴더에 저장하며, 수정 시 생략하면 기존 소속을 유지합니다.", example = "1")
+        Long storyId,
+
+        @Schema(description = "발행할 초안 ID (초안 없이 직접 게시할 때 생략)")
+        Long draftId,
+        Long draftVersion,
+        Long noteVersion
 ) {
+    public NoteCreateRequest(String title, String content, Category category, String imageUrl,
+                             List<String> tag, Long storyId, Long draftId) {
+        this(title, content, category, imageUrl, tag, storyId, draftId, 0L, 0L);
+    }
+
+    public NoteCreateRequest(String title, String content, Category category, String imageUrl,
+                             List<String> tag, Long storyId) {
+        this(title, content, category, imageUrl, tag, storyId, null, null, 0L);
+    }
 }

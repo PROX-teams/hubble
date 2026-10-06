@@ -1,12 +1,13 @@
-import { getBookmarkedNotes } from '../api/note.api';
 import { useAuthStore } from '@/entities/user/model/useAuthStore';
 import { useQuery } from '@tanstack/react-query';
+import { noteQueries } from './noteQueries';
 
-export const useBookmarkList = () => {
-    const { isLoggedIn } = useAuthStore()
-    const { data, isLoading, isError, error  } = useQuery({
-        queryKey: ['bookmarkedNotes'],
-        queryFn: () => getBookmarkedNotes(0, 50), // 일단 상위 50개만 가져옴
+export const useBookmarkList = (page = 0, size = 50) => {
+    const { isLoggedIn } = useAuthStore();
+    const queryOption = noteQueries.bookmarkList(page, size);
+
+    const { data, isLoading, isError, error } = useQuery({
+        ...queryOption,
         enabled: isLoggedIn,
     });
 
@@ -16,6 +17,6 @@ export const useBookmarkList = () => {
         isLoading,
         isError,
         error,
-        isLoggedIn
-    }
-}
+        isLoggedIn,
+    };
+};

@@ -23,18 +23,20 @@ export const title = style([
   },
 ]);
 
-// 사진 1 하단의 거대한 라운드 박스 컨테이너
 export const listContainer = style({
   display: "flex",
   flexDirection: "column",
   width: "100%",
-  maxHeight: "420px",
+  minHeight: "275px",
+  maxHeight: "275px",
   overflowY: "auto",
   backgroundColor: vars.color.gray_100,
   border: `1px solid ${vars.color.stroke_200}`,
   borderRadius: "0.5rem",
-  padding: "1rem",
-  gap: "0.25rem",
+  padding: "14px 16px",
+  gap: "0.5rem",
+  boxSizing: "border-box",
+  height: "100%",
 });
 
 // 데이터가 없을 때의 빈 상태 안내 텍스트

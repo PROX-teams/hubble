@@ -63,6 +63,7 @@ export default function NoteCard({
         {variant === "large" && (
           <Meta
             author={data.author}
+            authorId={data.authorId}
             date={formatDate(data.date)}
             likeCount={data.likeCount}
           />

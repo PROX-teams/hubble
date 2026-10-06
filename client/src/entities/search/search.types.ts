@@ -1,6 +1,12 @@
 import type { SliceResponse } from '@/shared/types';
-import type { Story } from '@/entities/story/story.types';
 import type { Note } from '@/entities/note/note.types';
+
+export interface SearchStory {
+  id: number;
+  title: string;
+  author: string;
+  noteCount: number;
+}
 
 /**
  * 통합 검색 API 응답 인터페이스 (태그 리스트, 스토리 Slice, 노트 Slice)
@@ -8,7 +14,7 @@ import type { Note } from '@/entities/note/note.types';
 export interface SearchResponse {
   isSearching: boolean;
   tags: string[];
-  stories: SliceResponse<Story>;
+  stories: SliceResponse<SearchStory>;
   notes: SliceResponse<Note>;
 }
 
@@ -16,4 +22,6 @@ export interface GetSearchParams {
   keyword?: string;
   page?: number;
   size?: number;
+  includeStories?: boolean;
+  includeNotes?: boolean;
 }

@@ -2,11 +2,13 @@ import { CategoryType, SortType } from '@/shared/types';
 
 interface NoteMeta {
   author?: string;
+  authorId?: number;
   date?: string;
   likeCount?: number;
 }
 
 interface Note extends NoteMeta {
+  version: number;
   id: number;
   title: string;
   description?: string; // 백엔드의 content 필드 (Tiptap HTML)
@@ -23,6 +25,9 @@ interface Note extends NoteMeta {
 }
 
 interface NoteCreateRequest {
+  draftId?: number;
+  draftVersion?: number | null;
+  noteVersion?: number | null;
   title: string;
   content: string; // Tiptap HTML content
   category: CategoryType;
@@ -49,6 +54,7 @@ interface NoteHistoryItem {
 }
 
 interface GetRecentUpdatesParams {
+  userId?: number;
   page?: number;
   size?: number;
 }

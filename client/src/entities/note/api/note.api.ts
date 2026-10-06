@@ -81,12 +81,18 @@ export const getMyNotes = getNotebookNotes;
 /**
  * 새 노트 생성
  */
-export const createNote = async (data: NoteCreateRequest): Promise<Note> => {
+export const createNote = async (data: NoteCreateRequest, requestKey: string): Promise<Note> => {
   return fetcher<Note>(API_ENDPOINTS.NOTE, {
     method: 'POST',
+    headers: { 'Idempotency-Key': requestKey },
     body: JSON.stringify(data),
   });
 };
+
+export const resolvePublication = (requestKey: string) =>
+  fetcher<{ state: 'completed' | 'cancelled'; note: Note | null }>(
+    `${API_ENDPOINTS.NOTE}/publication/${encodeURIComponent(requestKey)}/resolve`, { method: 'POST' }
+  );
 
 /**
  * 기존 노트 수정
@@ -143,18 +149,22 @@ export const toggleBookmarkNote = async (id: number): Promise<void> => {
 };
 
 /**
- * 로그인 사용자의 최근 수정 노트 이력 조회 (Slice 무한스크롤)
+ * 로그인 사용자 또는 특정 사용자의 최근 수정 노트 이력 조회 (Slice 무한스크롤)
  */
 export const getRecentUpdates = async (
   params: GetRecentUpdatesParams = {}
 ): Promise<SliceResponse<NoteHistoryItem>> => {
-  const { page = 0, size = 10 } = params;
+  const { userId, page = 0, size = 10 } = params;
   const queryParams = new URLSearchParams({
     page: String(page),
     size: String(size),
   });
 
+  const baseUrl = userId
+    ? `${API_ENDPOINTS.NOTE}/user/${userId}/recent-updates`
+    : `${API_ENDPOINTS.NOTE}/me/recent-updates`;
+
   return fetcher<SliceResponse<NoteHistoryItem>>(
-    `${API_ENDPOINTS.NOTE}/me/recent-updates?${queryParams.toString()}`
+    `${baseUrl}?${queryParams.toString()}`
   );
 };

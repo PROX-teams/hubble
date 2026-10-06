@@ -1,12 +1,22 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 import { tx } from '@/shared/styles/textStyle.css';
 import { vars } from '@/shared/styles/theme.css';
 
-export const contentSection = style({
+const baseContentSection = {
   display: 'flex',
   flexDirection: 'column',
   gap: '24px',
-  width: '856px',
+} as const;
+
+export const contentSection = styleVariants({
+  compact: {
+    ...baseContentSection,
+    width: '638px',
+  },
+  full: {
+    ...baseContentSection,
+    width: '1030px',
+  },
 });
 
 export const sectionHeader = style({
@@ -28,19 +38,20 @@ export const buttonGroup = style({
   gap: '8px',
 });
 
-export const carouselWrapper = style({
-  width: '856px',
-  flexShrink: 0,
+export const carouselWrapper = styleVariants({
+  compact: {
+    width: '638px',
+    flexShrink: 0,
+  },
+  full: {
+    width: '1030px',
+    flexShrink: 0,
+  },
 });
 
 export const skeletonRow = style({
   display: 'flex',
-  gap: '16px',
-});
-
-export const skeletonRowWide = style({
-  display: 'flex',
-  gap: '24px',
+  width: '100%',
 });
 
 export const emptyMessage = style([

@@ -20,6 +20,13 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       })
   );
 
+  const [hasRefreshError, setHasRefreshError] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  useEffect(() => queryClient.getQueryCache().subscribe(() => {
+    setHasRefreshError(queryClient.getQueryCache().getAll().some(query =>
+      query.getObserversCount() > 0 && query.state.status === 'error' && query.state.data !== undefined));
+  }), [queryClient]);
+
   // Silent Refresh 로직
   useEffect(() => {
     const initAuth = async () => {
@@ -41,5 +48,19 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
     initAuth();
   }, [isLoggedIn, refreshToken, setAccessToken, clearAuth]);
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      {hasRefreshError && (
+        <div role="alert" style={{ position: 'fixed', bottom: 16, left: 16, zIndex: 10000, background: '#fff', color: '#222', padding: 16, border: '1px solid #ccc', borderRadius: 8 }}>
+          최신 내용을 불러오지 못했습니다. 이전 내용이 표시될 수 있습니다.
+          <button disabled={retrying} onClick={async () => {
+            setRetrying(true);
+            try { await queryClient.refetchQueries({ type: 'active', predicate: query => query.state.status === 'error' }); }
+            finally { setRetrying(false); }
+          }}>{retrying ? '확인 중…' : '다시 불러오기'}</button>
+        </div>
+      )}
+      {children}
+    </QueryClientProvider>
+  );
 }

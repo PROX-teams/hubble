@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getNotebookNotes } from '../api/note.api';
 import { useAuthStore } from '@/entities/user/model/useAuthStore';
+import { noteQueries } from './noteQueries';
 import type { GetNotebookNotesParams } from '../note.types';
 
 /**
@@ -10,10 +10,10 @@ export const useNotebookNotes = (params: GetNotebookNotesParams = {}) => {
   const { isLoggedIn } = useAuthStore();
   const { userId, tagName, sortType, page = 0, size = 100 } = params;
 
+  const queryOption = noteQueries.list({ userId, tagName, sortType, page, size });
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['notebookNotes', { userId: userId ?? 'me', tagName, sortType, page, size }],
-    queryFn: () => getNotebookNotes({ userId, tagName, sortType, page, size }),
-    // 특정 유저 조회는 비로그인도 열람 가능, 본인 조회는 로그인 상태 필요
+    ...queryOption,
     enabled: userId !== undefined ? true : isLoggedIn,
   });
 

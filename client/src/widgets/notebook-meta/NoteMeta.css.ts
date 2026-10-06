@@ -42,6 +42,17 @@ export const author = style({
   color: vars.color.gray_600,
 });
 
+export const authorLink = style({
+  fontWeight: '600',
+  color: vars.color.gray_600,
+  textDecoration: 'none',
+  transition: 'color 0.2s ease',
+  ':hover': {
+    color: vars.color.stroke_main_100,
+    textDecoration: 'underline',
+  },
+});
+
 export const tagList = style({
   display: 'flex',
   flexWrap: 'wrap',

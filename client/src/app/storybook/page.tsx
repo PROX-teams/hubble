@@ -1,70 +1,160 @@
 "use client";
 
-import React, { useState } from "react";
-import { StorySidebar } from "@/widgets/story-sidebar/StorySidebar";
+import React, { useState, useMemo, Suspense } from "react";
+import clsx from "clsx";
+import Button from "@/shared/ui/button/button/Button";
+import Tag from "@/shared/ui/tag/Tag";
+import { CreatorProfileCard } from "@/widgets/creator-profile/ui/CreatorProfileCard";
 import StoryCard from "@/entities/story/ui/story-card/StoryCard";
-import type { Story } from "@/entities/story/story.types";
-import { UpdateHistory } from "@/widgets/update-history/UpdateHistory";
 import { StoryCardModal } from "@/widgets/storycard-modal/StoryCardModal";
 import { CreateStoryModal } from "@/features/story/create-story/ui/CreateStoryModal";
-import { useMyStories } from "@/entities/story/model/useMyStories";
+import { useInfiniteMyStories } from "@/entities/story/model/useMyStories";
 import { useMyNotes } from "@/entities/note/model/useMyNotes";
+import { useAuthStore } from "@/entities/user/model/useAuthStore";
+import { useUserProfile } from "@/entities/user/model/useUserProfile";
+import { calculateTagCounts, filterStoriesByTag } from "@/entities/note/model/tagUtils";
 import { AuthGuard } from "@/features/auth/AuthGuard";
+import { InfiniteScrollTrigger } from "@/features/infinite-scroll/ui/InfiniteScrollTrigger";
+import { useStorybookFilters } from "@/features/story/view-story/model/useStorybookFilters";
 import * as S from "./page.css";
 
 function StorybookContent() {
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const { selectedTag, storyId, setSelectedTag, setStoryId, resetFilters } =
+    useStorybookFilters();
   const [isCreateStoryModalOpen, setIsCreateStoryModalOpen] = useState(false);
 
-  // 1. 실제 백엔드 API 연동
-  const { stories, isLoading: isStoriesLoading } = useMyStories();
+  // 1. 로그인 유저 정보 및 최신 프로필 훅
+  const { user: authUser } = useAuthStore();
+  const { userProfile } = useUserProfile(authUser?.id);
+  const currentUser = userProfile || authUser;
+
+  // 2. 실제 백엔드 API 연동 (본인 스토리 무한스크롤 및 노트)
+  const {
+    stories,
+    isLoading: isStoriesLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteMyStories(12);
   const { notes, isLoading: isNotesLoading } = useMyNotes({ size: 100 });
+
+  // 3. 본인 노트들로부터 태그 집계 (공통 유틸 재사용)
+  const tagList = useMemo(() => calculateTagCounts(notes), [notes]);
+
+  // 4. 선택된 태그에 따른 스토리 필터링
+  const filteredStories = useMemo(
+    () => filterStoriesByTag(stories, notes, selectedTag),
+    [stories, notes, selectedTag]
+  );
 
   const isLoading = isStoriesLoading || isNotesLoading;
 
+  const handleTagClick = (tagLabel: string) => {
+    setSelectedTag(selectedTag === tagLabel ? null : tagLabel);
+  };
+
+  const handleResetFilter = () => {
+    resetFilters();
+  };
+
   return (
     <>
-      {/* 좌측 고정 스토리 사이드바 (폴더 버튼 클릭 시 모달 열기) */}
-      <StorySidebar
-        stories={stories}
-        notes={notes}
-        onAddStory={() => setIsCreateStoryModalOpen(true)}
-      />
-
-      {/* 메인 콘텐츠 영역 */}
+      {/* 메인 콘텐츠 영역 (왼쪽 패딩 0 유지, 오른쪽 패딩 180px 확장) */}
       <div className={S.container}>
-        {/* 상단 페이지 타이틀 영역 */}
-        <div className={S.headerSection}>
-          <h1 className={S.pageTitle}>Story Book</h1>
-          <p className={S.pageSubtitle}>당신만의 스토리를 만들어 보세요.</p>
-        </div>
+        {/* 본인 프로필 헤더 및 2단 그리드 (About + Contribution Log 카드) */}
+        {currentUser && (
+          <CreatorProfileCard
+            userId={currentUser.id}
+            creator={currentUser}
+            notes={notes}
+          />
+        )}
 
-        {/* 스토리 카드 그리드 */}
-        <section className={S.storyGrid}>
-          {isLoading && <div>스토리를 불러오는 중입니다...</div>}
-          {!isLoading && stories.length === 0 && (
-            <div className={S.emptyStoryText}>아직 생성된 스토리가 없습니다.</div>
-          )}
-          {!isLoading &&
-            stories.map((story) => (
-              <StoryCard
-                key={story.id}
-                data={story}
-                density="comfortable"
-                onClick={() => setSelectedStory(story)}
-              />
-            ))}
+        {/* Story Book 섹션 (타이틀 + 새 스토리 버튼 + 태그 목록 + 스토리 그리드) */}
+        <section className={S.storySection}>
+          <div className={S.headerSection}>
+            <div className={S.titleRow}>
+              <div className={S.titleLeftGroup}>
+                <h2 className={S.pageTitle}>Story Book</h2>
+                {selectedTag && (
+                  <div className={S.filterBadge}>
+                    <span>#{selectedTag} 필터 적용 중</span>
+                    <button
+                      type="button"
+                      className={S.clearFilterBtn}
+                      onClick={handleResetFilter}
+                      aria-label="태그 필터 해제"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 스토리 생성 버튼 */}
+              <Button
+                variants="colored"
+                size="sm"
+                onClick={() => setIsCreateStoryModalOpen(true)}
+              >
+                New
+              </Button>
+            </div>
+
+            {/* 스토리북 서브 타이틀 아래 태그 목록 (모달 내부 태그 나열 스타일) */}
+            {tagList.length > 0 && (
+              <div className={S.tagListWrapper}>
+                {tagList.map(({ label, count }) => {
+                  const isSelected = selectedTag === label;
+                  return (
+                    <Tag
+                      key={label}
+                      label={label}
+                      count={count}
+                      className={clsx(S.tagItem, isSelected && S.activeTagItem)}
+                      onClick={() => handleTagClick(label)}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 스토리 카드 그리드 (태그 필터링 적용) */}
+          <div className={S.storyGrid}>
+            {isLoading && <div>스토리를 불러오는 중입니다...</div>}
+            {!isLoading && filteredStories.length === 0 && (
+              <div className={S.emptyStoryText}>
+                {selectedTag
+                  ? `"${selectedTag}" 태그에 해당하는 스토리가 없습니다.`
+                  : "아직 생성된 스토리가 없습니다."}
+              </div>
+            )}
+            {!isLoading &&
+              filteredStories.map((story) => (
+                <StoryCard
+                  key={story.id}
+                  data={story}
+                  density="compact"
+                  onClick={() => setStoryId(story.id)}
+                />
+              ))}
+          </div>
+
+          {/* 무한 스크롤 트리거 */}
+          <InfiniteScrollTrigger
+            hasNextPage={!!hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetching={isFetchingNextPage}
+          />
         </section>
 
-        {/* 하단 최근 노트 업데이트 이력 섹션 (Slice 무한 스크롤 지원) */}
-        <UpdateHistory />
-
-        {/* 메인 스토리 카드 클릭 시 열리는 상세 모달 */}
-        {selectedStory && (
+        {/* 메인 스토리 카드 클릭 시 열리는 상세 모달 (URL storyId 기반) */}
+        {storyId && (
           <StoryCardModal
-            story={selectedStory}
-            notes={notes.filter((n) => selectedStory.articleIds?.includes(n.id))}
-            onClose={() => setSelectedStory(null)}
+            storyId={storyId}
+            story={stories.find((s) => s.id === storyId)}
+            onClose={() => setStoryId(null)}
           />
         )}
 
@@ -81,7 +171,9 @@ function StorybookContent() {
 export default function StorybookPage() {
   return (
     <AuthGuard>
-      <StorybookContent />
+      <Suspense fallback={<div style={{ padding: "40px", color: "var(--color-gray-400)" }}>Loading Storybook...</div>}>
+        <StorybookContent />
+      </Suspense>
     </AuthGuard>
   );
 }

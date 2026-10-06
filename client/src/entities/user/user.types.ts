@@ -32,6 +32,9 @@ export interface UserInfo {
   email: string;
   nickname: string;
   profileImageUrl?: string;
+  role?: string;
+  bio?: string;
+  githubUrl?: string;
 }
 
 // 공통 응답 및 단순 요청 타입

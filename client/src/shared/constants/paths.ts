@@ -20,9 +20,6 @@ export const PATHS = {
   /* --- 노트편집 --- */
   NOTEBOOK_EDIT: (id: string | number): Route => `/notebook/${id}/edit`,
 
-  /* --- 대시보드 --- */
-  DASHBOARD: route("/dashboard"),
-
   /* --- 그래프 --- */
   GRAPH: route("/graph"),
 

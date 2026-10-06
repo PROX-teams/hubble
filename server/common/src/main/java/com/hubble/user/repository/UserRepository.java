@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+
+
     @Query("SELECT new com.hubble.user.dto.TrendingCreatorDto(" +
            "u.id, u.nickname, COUNT(n.id), COALESCE(SUM(n.likeCount), 0L), COALESCE(SUM(n.bookmarkCount), 0L)) " +
            "FROM User u " +

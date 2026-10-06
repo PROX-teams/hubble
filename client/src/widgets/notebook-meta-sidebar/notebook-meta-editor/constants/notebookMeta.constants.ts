@@ -8,9 +8,3 @@ export const CATEGORIES: { id: CategoryType; label: string }[] = [
   { id: 'LIFE', label: '일상' },
   { id: 'OTHER', label: '기타' },
 ];
-
-export const MOCK_STORIES = [
-  { id: 1, title: '프론트엔드 공부집' },
-  { id: 2, title: '리액트 마스터' },
-  { id: 3, title: 'CS 기초 지식' },
-];

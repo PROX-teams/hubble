@@ -1,6 +1,7 @@
 package com.hubble.note.service;
 
 import com.hubble.common.entity.Category;
+import com.hubble.graph.service.GraphChangeRecorder;
 import com.hubble.note.dto.NoteSearchCondition;
 import com.hubble.note.dto.request.NoteCreateRequest;
 import com.hubble.note.dto.response.NoteHistoryResponse;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class NoteService {
 
+    private final com.hubble.note.repository.DraftRepository draftRepository;
     private final NoteRepository noteRepository;
     private final NoteLikeRepository noteLikeRepository;
     private final NoteBookmarkRepository noteBookmarkRepository;
@@ -53,17 +55,22 @@ public class NoteService {
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final EntityManager entityManager;
+    private final GraphChangeRecorder graphChangeRecorder;
 
     @Transactional
     public NoteResponse createNote(Long userId, NoteCreateRequest request) {
         User user = getUserEntity(userId);
         Story story;
         if (request.storyId() != null) {
-            story = storyRepository.findById(request.storyId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 스토리입니다."));
+            story = storyService.getOwnedStoryForUpdate(userId, request.storyId());
         } else {
             story = storyService.getOrCreateDefaultStory(user);
         }
+
+        var draft = lockDraft(userId, request.draftId(), null);
+        if (draft != null && draft.isPublished()) return publishedResponse(userId, draft);
+        validateDraftVersion(draft, request.draftVersion());
+
 
         Note note = Note.builder()
                 .title(request.title())
@@ -75,38 +82,118 @@ public class NoteService {
                 .build();
 
         Note savedNote = noteRepository.save(note);
-        saveTags(savedNote, request.tag());
+        List<Long> newTagIds = saveTags(savedNote, request.tag());
+        graphChangeRecorder.record(savedNote.getId(), null, List.of(), savedNote.getCategory(), newTagIds);
 
+        if (draft != null) {
+            draft.markPublished(savedNote.getId());
+            draftRepository.save(draft);
+        }
         return NoteResponse.of(savedNote, false, false);
     }
 
     @Transactional
     public NoteResponse updateNote(Long userId, Long noteId, NoteCreateRequest request) {
-        User user = getUserEntity(userId);
-        Note note = getNoteEntity(noteId);
-        validateOwner(user, note);
+        Note snapshot = getNoteEntity(noteId);
+        User actor = getUserEntity(userId);
+        validateOwner(actor, snapshot);
+        Long originalStoryId = snapshot.getStory().getId();
+        java.util.stream.Stream.of(originalStoryId, request.storyId()).filter(Objects::nonNull)
+                .distinct().sorted().forEach(id -> storyService.getOwnedStoryForUpdate(userId, id));
+        entityManager.detach(snapshot);
+        var draft = lockDraft(userId, request.draftId(), noteId);
+        if (draft != null && draft.isPublished()) return publishedResponse(userId, draft);
+        validateDraftVersion(draft, request.draftVersion());
 
-        Story story = null;
+        User user = getUserEntity(userId);
+        Note note = noteRepository.findByIdForUpdate(noteId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 노트입니다."));
+        validateOwner(user, note);
+        if (!note.getStory().getId().equals(originalStoryId)) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "노트 소속이 변경되었습니다.");
+        }
+        Long expectedVersion = draft != null ? draft.getBaseNoteVersion() : request.noteVersion();
+        if (expectedVersion == null || expectedVersion != note.getContentVersion()
+                || request.noteVersion() == null || !expectedVersion.equals(request.noteVersion())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "다른 탭에서 게시글을 수정했습니다. 최신 글을 확인해 주세요.");
+        }
+        Category oldCategory = note.getCategory();
+        List<Long> oldTagIds = noteTagRepository.findTagIdsByNoteId(noteId);
+
+        Story story = note.getStory();
         if (request.storyId() != null) {
-            story = storyRepository.findById(request.storyId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 스토리입니다."));
+            story = storyService.getOwnedStoryForUpdate(userId, request.storyId());
+        } else if (story == null) {
+            story = storyService.getOrCreateDefaultStory(user);
+        } else {
+            story = storyService.getOwnedStoryForUpdate(userId, story.getId());
         }
 
         note.update(request.title(), request.content(), request.category(), story, request.imageUrl());
 
         // 기존 태그 매핑 벌크 삭제 후 재등록
         noteTagRepository.deleteAllByNote(note);
-        saveTags(note, request.tag());
+        List<Long> newTagIds = saveTags(note, request.tag());
+        graphChangeRecorder.record(noteId, oldCategory, oldTagIds, note.getCategory(), newTagIds);
 
+        if (draft != null) {
+            // Tag replacement clears the persistence context; explicitly merge the draft.
+            draft.markPublished(noteId);
+            draftRepository.save(draft);
+        }
+
+        // The bulk delete clears the persistence context. Reload so the response reflects
+        // the newly saved tag links instead of the detached note's stale collection.
+        entityManager.flush();
+        entityManager.clear();
+        Note refreshed = noteRepository.findById(noteId)
+                .orElseThrow(() -> new IllegalStateException("수정한 노트를 다시 조회할 수 없습니다."));
+        return NoteResponse.of(refreshed, isLiked(user, refreshed), isBookmarked(user, refreshed));
+    }
+
+    private void validateDraftVersion(com.hubble.note.entity.Draft draft, Long expectedVersion) {
+        if (draft != null && (expectedVersion == null || !expectedVersion.equals(draft.getVersion()))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "다른 탭에서 초안을 수정했습니다. 최신 초안을 확인해 주세요.");
+        }
+    }
+
+    private com.hubble.note.entity.Draft lockDraft(Long userId, Long draftId, Long noteId) {
+        if (draftId == null) return null;
+        var draft = draftRepository.findOwnedForUpdate(draftId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("임시저장 노트를 찾을 수 없습니다."));
+        if (!java.util.Objects.equals(draft.getNoteId(), noteId)
+                && !(noteId == null && draft.isPublished())) {
+            throw new IllegalArgumentException("초안과 게시글이 일치하지 않습니다.");
+        }
+        return draft;
+    }
+
+    private NoteResponse publishedResponse(Long userId, com.hubble.note.entity.Draft draft) {
+        var note = getNoteEntity(draft.getNoteId());
+        var user = getUserEntity(userId);
+        validateOwner(user, note);
         return NoteResponse.of(note, isLiked(user, note), isBookmarked(user, note));
     }
 
     @Transactional
     public void deleteNote(Long userId, Long noteId) {
+        Note snapshot = getNoteEntity(noteId);
+        validateOwner(getUserEntity(userId), snapshot);
+        Long originalStoryId = snapshot.getStory().getId();
+        storyService.getOwnedStoryForUpdate(userId, originalStoryId);
+        entityManager.detach(snapshot);
         User user = getUserEntity(userId);
-        Note note = getNoteEntity(noteId);
+        Note note = noteRepository.findByIdForUpdate(noteId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 노트입니다."));
         validateOwner(user, note);
+        if (!note.getStory().getId().equals(originalStoryId)) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "노트 소속이 변경되었습니다.");
+        }
+        graphChangeRecorder.record(noteId, note.getCategory(), noteTagRepository.findTagIdsByNoteId(noteId), null, List.of());
 
+        draftRepository.preserveDeletedNoteDrafts(noteId, userId);
         noteRepository.delete(note);
         eventPublisher.publishEvent(new NoteDeletedEvent(noteId));
     }
@@ -122,7 +209,7 @@ public class NoteService {
     }
 
     public Page<NoteSummaryResponse> getNotes(Category category, String keyword, String tagName, Pageable pageable) {
-        NoteSearchCondition condition = NoteSearchCondition.forFeed(category, keyword, tagName);
+        NoteSearchCondition condition = NoteSearchCondition.of(null, null, category, tagName, keyword);
         Page<Note> notes = noteRepository.searchNotes(condition, pageable);
         return convertToNoteSummaryResponses(notes);
     }
@@ -211,39 +298,31 @@ public class NoteService {
     }
 
     // 🚀 [최적화 5] 태그 중복 방어(distinct) 및 벌크 배치 저장
-    private void saveTags(Note note, List<String> tagNames) {
-        if (tagNames == null || tagNames.isEmpty()) return;
+    private List<Long> saveTags(Note note, List<String> tagNames) {
+        if (tagNames == null || tagNames.isEmpty()) return List.of();
 
-        // 중복 태그 및 공백 안전 필터링
         List<String> cleanTagNames = tagNames.stream()
                 .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .distinct()
-                .toList();
-
-        if (cleanTagNames.isEmpty()) return;
-
-        // 1. 기존 태그들을 IN 쿼리 1회로 일괄 조회
-        List<Tag> existingTags = tagRepository.findAllByNameIn(cleanTagNames);
-        Map<String, Tag> tagMap = existingTags.stream()
-                .collect(Collectors.toMap(Tag::getName, tag -> tag));
-
-        // 2. 미등록 신규 태그들만 모아서 saveAll 일괄 삽입
-        List<Tag> newTags = cleanTagNames.stream()
-                .filter(name -> !tagMap.containsKey(name))
-                .map(Tag::new)
-                .toList();
-        if (!newTags.isEmpty()) {
-            List<Tag> savedNewTags = tagRepository.saveAll(newTags);
-            savedNewTags.forEach(tag -> tagMap.put(tag.getName(), tag));
+                .map(name -> java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFKC)
+                        .strip().replaceAll("\\s+", " ").toLowerCase(java.util.Locale.ROOT))
+                .filter(name -> !name.isBlank()).distinct().sorted().toList();
+        if (cleanTagNames.size() > 20 || cleanTagNames.stream().anyMatch(name -> name.codePointCount(0, name.length()) > 30)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "태그는 최대 20개, 각 30자까지 입력할 수 있습니다.");
         }
-
-        // 3. 매핑 엔티티 일괄 삽입
-        List<NoteTag> noteTags = cleanTagNames.stream()
-                .map(name -> NoteTag.builder().note(note).tag(tagMap.get(name)).build())
-                .toList();
-        noteTagRepository.saveAll(noteTags);
+        // Resolve tags in a stable order to reduce deadlock risk across publications.
+        List<Tag> resolved = new java.util.ArrayList<>();
+        for (String name : cleanTagNames) {
+            tagRepository.insertIfAbsent(name);
+            resolved.add(tagRepository.findResolvedForUpdate(name)
+                    .orElseThrow(() -> new IllegalStateException("태그 생성 결과를 조회할 수 없습니다.")));
+        }
+        // DB collation can treat different input spellings as the same tag; deduplicate by ID too.
+        Map<Long, Tag> tagsById = new java.util.LinkedHashMap<>();
+        resolved.forEach(tag -> tagsById.putIfAbsent(tag.getId(), tag));
+        noteTagRepository.saveAll(tagsById.values().stream()
+                .map(tag -> NoteTag.builder().note(note).tag(tag).build()).toList());
+        return List.copyOf(tagsById.keySet());
     }
 
     private User getUserEntity(Long userId) {

@@ -4,20 +4,26 @@ import React from "react";
 import HistoryCard from "@/entities/note/ui/history-card/HistoryCard";
 import { useInfiniteRecentUpdates } from "@/entities/note/model/useInfiniteRecentUpdates";
 import { InfiniteScrollTrigger } from "@/features/infinite-scroll/ui/InfiniteScrollTrigger";
+import clsx from "clsx";
 import * as S from "./UpdateHistory.css";
+
+interface UpdateHistoryProps {
+  userId?: number;
+  className?: string;
+}
 
 /**
  * 최근 노트 업데이트 이력 섹션 위젯 (무한 스크롤 지원)
  */
-export const UpdateHistory = () => {
+export const UpdateHistory = ({ userId, className }: UpdateHistoryProps = {}) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteRecentUpdates(10);
+    useInfiniteRecentUpdates(10, userId);
 
   const items = data?.pages.flatMap((page) => page.content) || [];
 
   return (
-    <section className={S.container}>
-      <h2 className={S.title}>Update History</h2>
+    <section className={clsx(S.container, className)}>
+      <h2 className={S.title}>Update</h2>
 
       <div className={S.listContainer}>
         {isLoading && <p className={S.emptyText}>히스토리를 불러오는 중입니다...</p>}

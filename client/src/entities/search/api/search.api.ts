@@ -8,12 +8,14 @@ import type { SearchResponse, GetSearchParams } from '../search.types';
 export const getIntegratedSearch = async (
   params: GetSearchParams = {}
 ): Promise<SearchResponse> => {
-  const { keyword, page = 0, size = 10 } = params;
+  const { keyword, page = 0, size = 10, includeStories = true, includeNotes = true } = params;
 
   const queryParams = new URLSearchParams({
     page: String(page),
     size: String(size),
     ...(keyword && keyword.trim().length > 0 && { keyword: keyword.trim() }),
+    ...(!includeStories && { includeStories: 'false' }),
+    ...(!includeNotes && { includeNotes: 'false' }),
   });
 
   return fetcher<SearchResponse>(`${API_ENDPOINTS.SEARCH}?${queryParams.toString()}`);

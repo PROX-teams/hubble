@@ -3,7 +3,6 @@
 import React, { useEffect } from 'react';
 import { ArticleHeader } from '@/widgets/article-header/ArticleHeader';
 import { NotebookMetaSidebar } from '@/widgets/notebook-meta-sidebar/NotebookMetaSidebar';
-import { SidebarButton } from '@/features/sidebar/SidebarButton';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
 
 export default function ArticleLayout({
@@ -25,7 +24,6 @@ export default function ArticleLayout({
       <ArticleHeader />
       {children}
       <NotebookMetaSidebar />
-      <SidebarButton />
     </>
   );
 }

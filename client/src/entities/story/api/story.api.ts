@@ -5,7 +5,6 @@ import type { Story, StoryCreateRequest } from '../story.types';
 
 export interface GetStoriesParams {
   category?: CategoryType;
-  keyword?: string;
   sortType?: SortType;
   page?: number;
   size?: number;
@@ -18,7 +17,6 @@ export const getStories = async (params: GetStoriesParams): Promise<PageResponse
   const queryParams = new URLSearchParams();
   
   if (params.category) queryParams.append('category', params.category);
-  if (params.keyword) queryParams.append('keyword', params.keyword);
   if (params.page !== undefined) queryParams.append('page', params.page.toString());
   if (params.size !== undefined) queryParams.append('size', params.size.toString());
 
@@ -88,6 +86,13 @@ export const getStoryDetail = async (id: number): Promise<Story> => {
  */
 export const getMyStories = async (page = 0, size = 50): Promise<PageResponse<Story>> => {
   return fetcher<PageResponse<Story>>(`${API_ENDPOINTS.STORY}/me?page=${page}&size=${size}`);
+};
+
+/**
+ * 특정 사용자의 스토리 목록 조회
+ */
+export const getUserStories = async (userId: number, page = 0, size = 50): Promise<PageResponse<Story>> => {
+  return fetcher<PageResponse<Story>>(`${API_ENDPOINTS.STORY}/user/${userId}?page=${page}&size=${size}`);
 };
 
 /**

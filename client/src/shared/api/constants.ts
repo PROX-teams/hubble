@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
   NOTE: '/note',
   STORY: '/story',
   SEARCH: '/search',
+  GRAPH: '/graph',
   RECOMMEND: {
     ALL: '/main/recommend',
     MOST_LOVED: '/main/recommend/most-loved',

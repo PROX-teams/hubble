@@ -11,7 +11,7 @@ export const bannerContainer = style({
   justifyContent: 'center',
   borderRadius: '12px',
   overflow: 'hidden',
-  
+
   '@media': {
     'screen and (max-width: 768px)': {
       height: '250px',
@@ -42,11 +42,11 @@ export const title = style([
     display: 'inline-block',
     width: 'fit-content',
     transformOrigin: 'left center', // 왼쪽 끝을 축으로 설정   
-    transition: 'transform 0.3s ease-in-out', 
+    transition: 'transform 0.3s ease-in-out',
     selectors: {
       "&:hover": {
         transform: 'scale(1.05)'
       },
     },
 
-}]);
+  }]);

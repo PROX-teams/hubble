@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-09-19T20:00:29.477Z",
+  "results": {
+    "editor": {
+      "renderDurationMs": 107.7,
+      "slashINPMs": 19.7,
+      "retainedHeapMB": 71.13
+    },
+    "memoryLeak": {
+      "baselineMB": 51.16,
+      "finalRetainedMB": 282.47,
+      "deltaMB": 231.31,
+      "isLeak": true
+    },
+    "infiniteScroll": {
+      "totalRenderedCards": 672,
+      "postGCRetainedHeapMB": 57.19
+    }
+  },
+  "summary": [
+    {
+      "측정_항목": "1. 에디터 파싱 & Paint 시간",
+      "측정값": "107.7 ms",
+      "합격_기준": "< 500 ms",
+      "판정": "✅ PASS"
+    },
+    {
+      "측정_항목": "2. 슬래시 키 ➔ Next Paint 지연 (INP)",
+      "측정값": "19.7 ms",
+      "합격_기준": "< 150 ms",
+      "판정": "✅ PASS"
+    },
+    {
+      "측정_항목": "3. 15회 전환 후 순수 누수량 (GC 수거 후)",
+      "측정값": "+231.31 MB",
+      "합격_기준": "< +30.0 MB",
+      "판정": "❌ FAIL (누수)"
+    },
+    {
+      "측정_항목": "4. 무한 스크롤 누적 카드 수",
+      "측정값": "672 개",
+      "합격_기준": ">= 48 개",
+      "판정": "✅ PASS"
+    }
+  ]
+}

@@ -43,6 +43,15 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ProviderType providerType;
 
+    @Column(length = 50)
+    private String role;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(length = 255)
+    private String githubUrl;
+
     private LocalDateTime deletedAt;
 
     public User(String email, String password, String nickname, ProviderType providerType) {
@@ -104,6 +113,12 @@ public class User extends BaseTimeEntity {
     public void updateNickname(String newNickname) {
         validateNickname(newNickname);
         this.nickname = newNickname;
+    }
+
+    public void updateProfile(String role, String bio, String githubUrl) {
+        this.role = role;
+        this.bio = bio;
+        this.githubUrl = githubUrl;
     }
 
     public boolean checkProviderType(ProviderType providerType) {

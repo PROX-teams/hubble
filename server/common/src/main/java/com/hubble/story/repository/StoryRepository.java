@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface StoryRepository extends JpaRepository<Story, Long> {
+public interface StoryRepository extends JpaRepository<Story, Long>, StoryRepositoryCustom {
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Story s SET s.viewCount = s.viewCount + 1 WHERE s.id = :id")
@@ -46,10 +46,6 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
            countQuery = "select count(s) from Story s where s.category = :category")
     Page<Story> findAllByCategoryWithFetch(@Param("category") Category category, Pageable pageable);
 
-    @Query(value = "select s from Story s join fetch s.user where s.title like %:keyword% or s.description like %:keyword%",
-           countQuery = "select count(s) from Story s where s.title like %:keyword% or s.description like %:keyword%")
-    Page<Story> findByKeywordWithFetch(@Param("keyword") String keyword, Pageable pageable);
-
     @Query(value = "select s from Story s join fetch s.user where s.user.id = :userId",
            countQuery = "select count(s) from Story s where s.user.id = :userId")
     Page<Story> findAllByUserIdWithFetch(@Param("userId") Long userId, Pageable pageable);
@@ -58,15 +54,24 @@ public interface StoryRepository extends JpaRepository<Story, Long> {
     List<Story> findTop10ByOrderByLikeCountDescWithFetch(Pageable pageable);
 
     @Query("SELECT s FROM Story s JOIN FETCH s.user " +
-           "WHERE LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "   OR LOWER(s.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "   OR LOWER(s.user.nickname) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "ORDER BY (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, s.createdAt DESC")
-    Slice<Story> searchStoriesSlice(@Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT s FROM Story s JOIN FETCH s.user " +
-           "ORDER BY (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, s.createdAt DESC")
+           "ORDER BY (s.bookmarkCount * 5 + s.likeCount * 3 + s.viewCount / 10) DESC, s.createdAt DESC, s.id DESC")
     Slice<Story> findPopularStoriesSlice(Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Story s WHERE s.id = :id AND s.user.id = :userId")
+    Optional<Story> findOwnedForUpdate(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true)
+    @Query(value = "INSERT INTO stories(title, description, category, user_id, is_default, created_at, updated_at, " +
+            "view_count, like_count, bookmark_count) VALUES ('기본 폴더', '기본으로 생성된 폴더입니다.', 'OTHER', :userId, TRUE, " +
+            "NOW(6), NOW(6), 0, 0, 0) ON DUPLICATE KEY UPDATE id = id", nativeQuery = true)
+    void ensureDefault(@Param("userId") Long userId);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Story s WHERE s.user.id = :userId AND s.defaultStory = true")
+    Optional<Story> findDefaultForUpdate(@Param("userId") Long userId);
+
+    Optional<Story> findByUserIdAndDefaultStoryTrue(Long userId);
 
     Optional<Story> findByTitleAndUser(String title, User user);
 }

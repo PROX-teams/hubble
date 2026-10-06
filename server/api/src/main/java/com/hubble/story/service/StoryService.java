@@ -34,6 +34,8 @@ public class StoryService {
     private final StoryBookmarkRepository storyBookmarkRepository;
     private final UserRepository userRepository;
     private final EntityManager entityManager;
+    private final com.hubble.note.repository.NoteRepository noteRepository;
+    private final com.hubble.note.repository.DraftRepository draftRepository;
 
     private static final String DEFAULT_STORY_TITLE = "기본 폴더";
 
@@ -57,21 +59,19 @@ public class StoryService {
 
     @Transactional
     public Story getOrCreateDefaultStory(User user) {
-        return storyRepository.findByTitleAndUser(DEFAULT_STORY_TITLE, user)
-                .orElseGet(() -> storyRepository.save(Story.builder()
-                        .title(DEFAULT_STORY_TITLE)
-                        .description("기본으로 생성된 폴더입니다.")
-                        .category(Category.OTHER)
-                        .user(user)
-                        .build()));
+        storyRepository.ensureDefault(user.getId());
+        return storyRepository.findDefaultForUpdate(user.getId()).orElseThrow();
     }
 
     @Transactional
     public StoryResponse updateStory(Long userId, Long storyId, StoryCreateRequest request) {
         User user = getUserEntity(userId);
-        Story story = getStoryEntity(storyId);
-        validateOwner(user, story);
+        Story story = getOwnedStoryForUpdate(userId, storyId);
 
+        if (story.isDefaultStory() && !DEFAULT_STORY_TITLE.equals(request.title())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "기본 스토리의 이름은 변경할 수 없습니다.");
+        }
         story.update(request.title(), request.description(), request.category(), request.icon());
         return StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story));
     }
@@ -79,8 +79,18 @@ public class StoryService {
     @Transactional
     public void deleteStory(Long userId, Long storyId) {
         User user = getUserEntity(userId);
-        Story story = getStoryEntity(storyId);
-        validateOwner(user, story);
+        Story story = getOwnedStoryForUpdate(userId, storyId);
+        if (story.isDefaultStory()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "기본 스토리는 삭제할 수 없습니다.");
+        }
+        if (noteRepository.existsByStoryIdAndUserIdNot(storyId, userId)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "다른 사용자의 노트가 연결되어 있어 정리가 필요합니다.");
+        }
+        Story defaultStory = getOrCreateDefaultStory(user);
+        noteRepository.moveStoryNotes(storyId, defaultStory, userId);
+        draftRepository.moveStoryDrafts(storyId, defaultStory.getId(), userId);
         storyRepository.delete(story);
     }
 
@@ -90,12 +100,10 @@ public class StoryService {
         return StoryResponse.of(story, isLiked(user, story), isBookmarked(user, story));
     }
 
-    public Page<StoryResponse> getStories(Category category, String keyword, Pageable pageable, Long userId) {
+    public Page<StoryResponse> getStories(Category category, Pageable pageable, Long userId) {
         Page<Story> stories;
         if (category != null) {
             stories = storyRepository.findAllByCategoryWithFetch(category, pageable);
-        } else if (keyword != null && !keyword.isBlank()) {
-            stories = storyRepository.findByKeywordWithFetch(keyword, pageable);
         } else {
             stories = storyRepository.findAllWithFetch(pageable);
         }
@@ -124,6 +132,12 @@ public class StoryService {
         getUserEntity(userId); // 유저 검증
         Page<Story> stories = storyRepository.findAllByUserIdWithFetch(userId, pageable);
         return convertToStoryResponses(stories, userId);
+    }
+
+    public Page<StoryResponse> getUserStories(Long targetUserId, Long currentUserId, Pageable pageable) {
+        getUserEntity(targetUserId); // 타겟 유저 존재 여부 검증
+        Page<Story> stories = storyRepository.findAllByUserIdWithFetch(targetUserId, pageable);
+        return convertToStoryResponses(stories, currentUserId);
     }
 
     public List<StoryResponse> getTop10LikedStories(Long userId) {
@@ -190,6 +204,13 @@ public class StoryService {
                         bookmarkedStoryIds.contains(story.getId())
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public Story getOwnedStoryForUpdate(Long userId, Long storyId) {
+        return storyRepository.findOwnedForUpdate(storyId, userId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "존재하지 않거나 사용할 수 없는 스토리입니다."));
     }
 
     private User getUserEntity(Long userId) {

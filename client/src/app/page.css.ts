@@ -6,34 +6,34 @@ export const pageContainer = style({
   flexDirection: 'column',
   gap: '48px',
   width: '100%',
-  paddingRight: '40px',
-  paddingBottom: '80px',
+  padding: '40px 180px 60px 0',
   boxSizing: 'border-box',
   overflowX: 'hidden',
+
+  '@media': {
+    'screen and (max-width: 1280px)': {
+      padding: '40px 80px 60px 0',
+    },
+    'screen and (max-width: 768px)': {
+      padding: '24px 20px 40px 0',
+    },
+  },
 });
 
 export const middleSection = style({
   display: 'flex',
   flexDirection: 'row',
-  gap: '32px',
+  gap: '64px',
   alignItems: 'flex-start',
   width: '100%',
-  maxWidth: '1264px',
+  maxWidth: '1030px',
 });
 
 export const divider = style({
   width: '100%',
+  maxWidth: '1030px',
   height: '1px',
   backgroundColor: vars.color.gray_200,
   border: 'none',
   margin: '6px 0',
-});
-
-export const skeletonItemFlex = style({
-  flex: 1,
-});
-
-export const storyItemWrapper = style({
-  boxSizing: 'border-box',
-  width: '100%',
 });

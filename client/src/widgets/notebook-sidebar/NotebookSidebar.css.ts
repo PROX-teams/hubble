@@ -43,15 +43,18 @@ export const activeTab = style({
 
 export const tabPanels = style({
   flex: 1,
-  overflowY: "auto",
-  padding: "8px 0",
+  display: "flex",
+  flexDirection: "column",
+  minHeight: 0,
+  overflow: "visible",
+  position: "relative",
+});
 
-  // 스크롤바 스타일링
-  "::-webkit-scrollbar": {
-    width: "4px",
-  },
-  "::-webkit-scrollbar-thumb": {
-    backgroundColor: vars.color.stroke_300,
-    borderRadius: "2px",
-  },
+export const tabPanel = style({
+  flex: 1,
+  display: "flex",
+  flexDirection: "column",
+  minHeight: 0,
+  height: "100%",
+  width: "100%",
 });

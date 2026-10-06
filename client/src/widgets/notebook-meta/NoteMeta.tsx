@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import Tag from '@/shared/ui/tag/Tag';
 import { CATEGORY_MAP } from '@/features/note/view-note/constants/note.constants';
 import type { Note } from '@/entities/note/note.types';
@@ -18,7 +19,13 @@ export const NoteMeta = ({ note }: NoteHeaderProps) => {
       )}
       <h1 className={s.title}>{note.title}</h1>
       <div className={s.meta}>
-        <span className={s.author}>{note.author || '익명'}</span>
+        {note.authorId ? (
+          <Link href={`/storybook/${note.authorId}`} className={s.authorLink}>
+            {note.author || '익명'}
+          </Link>
+        ) : (
+          <span className={s.author}>{note.author || '익명'}</span>
+        )}
       </div>
       {note.tag && note.tag.length > 0 && (
         <div className={s.tagList}>

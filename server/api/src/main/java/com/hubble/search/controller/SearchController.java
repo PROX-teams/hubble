@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,14 +23,15 @@ public class SearchController {
 
     @Operation(
             summary = "통합 검색 (태그, 스토리, 노트)",
-            description = "태그, 스토리, 노트를 한 번에 조회하는 통합 검색 API입니다. 키워드가 없으면 인기 콘텐츠를 반환하며, Slice 기반 무한 스크롤을 지원합니다."
+            description = "태그, 스토리, 노트를 조회합니다. 키워드가 없으면 인기 콘텐츠를 반환합니다. 태그는 첫 페이지에만 포함되며, includeStories/includeNotes로 끝난 목록의 추가 조회를 생략할 수 있습니다."
     )
     @GetMapping
     public ResponseEntity<SearchResponse> search(
-            @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "true") boolean includeStories,
+            @RequestParam(defaultValue = "true") boolean includeNotes,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        return ResponseEntity.ok(searchService.search(keyword, pageable, userId));
+        return ResponseEntity.ok(searchService.search(keyword, pageable, includeStories, includeNotes));
     }
 }

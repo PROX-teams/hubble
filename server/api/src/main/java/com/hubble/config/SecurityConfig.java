@@ -68,7 +68,7 @@ public class SecurityConfig {
                     "/webjars/**"
                 ).permitAll() // Swagger 관련 모든 정적 리소스 및 API 문서 경로 허용
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/note/bookmarks", "/api/story/bookmarks", "/api/note/me", "/api/note/me/**", "/api/story/me", "/api/story/me/**").authenticated()
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/note", "/api/note/**", "/api/story", "/api/story/**", "/api/search", "/api/search/**", "/api/main", "/api/main/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/note", "/api/note/**", "/api/story", "/api/story/**", "/api/search", "/api/search/**", "/api/main", "/api/main/**", "/api/graph", "/api/graph/**").permitAll()
                 .anyRequest().authenticated() 
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
@@ -81,7 +81,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control", "Idempotency-Key"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

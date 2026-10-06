@@ -4,10 +4,13 @@ import { style } from "@vanilla-extract/css";
 
 export const buttonStyle = style([
   {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
+    justifyContent: "center",
     gap: 5,
-    width: "fit-content",
+    width: "fit-content !important",
+    flexShrink: 0,
+    whiteSpace: "nowrap",
     height: 24,
     padding: "3.5px 9px 3.5px 7px",
     color: vars.color.gray_500,

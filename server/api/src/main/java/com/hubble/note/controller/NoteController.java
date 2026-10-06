@@ -29,13 +29,21 @@ import java.util.List;
 public class NoteController {
 
     private final NoteService noteService;
+    private final com.hubble.note.service.PublicationService publicationService;
 
     @Operation(summary = "노트 생성", description = "새로운 노트를 생성합니다.")
     @PostMapping
     public ResponseEntity<NoteResponse> createNote(
             @AuthenticationPrincipal Long userId,
+            @RequestHeader("Idempotency-Key") String requestKey,
             @Valid @RequestBody NoteCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(noteService.createNote(userId, request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(publicationService.publish(userId, requestKey, request));
+    }
+
+    @PostMapping("/publication/{requestKey}/resolve")
+    public ResponseEntity<com.hubble.note.service.PublicationService.Resolution> resolvePublication(
+            @AuthenticationPrincipal Long userId, @PathVariable String requestKey) {
+        return ResponseEntity.ok(publicationService.resolve(userId, requestKey));
     }
 
     @Operation(summary = "노트 수정", description = "기존 노트를 수정합니다.")
@@ -120,6 +128,14 @@ public class NoteController {
     public ResponseEntity<List<TagCountResponse>> getUserTags(
             @PathVariable Long userId) {
         return ResponseEntity.ok(noteService.getUserTags(userId));
+    }
+
+    @Operation(summary = "특정 사용자의 최근 수정 이력 조회", description = "특정 사용자의 최근 수정된 노트 목록을 경량 DTO로 조회합니다. (Slice 무한스크롤 지원)")
+    @GetMapping("/user/{userId}/recent-updates")
+    public ResponseEntity<Slice<NoteHistoryResponse>> getUserRecentUpdates(
+            @PathVariable Long userId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(noteService.getRecentUpdates(userId, pageable));
     }
 
     @Operation(summary = "좋아요 많은 노트 Top 10", description = "좋아요를 가장 많이 받은 노트 10개를 조회합니다.")

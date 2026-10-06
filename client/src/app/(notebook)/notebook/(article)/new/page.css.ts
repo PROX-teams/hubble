@@ -11,5 +11,8 @@ export const editorWrapper = style({
   maxWidth: '800px',
   margin: '0 auto',
   width: '100%',
-  padding: '40px 20px',
+  paddingTop: '80px',
+  paddingBottom: '40px',
+  paddingLeft: '20px',
+  paddingRight: '20px',
 });

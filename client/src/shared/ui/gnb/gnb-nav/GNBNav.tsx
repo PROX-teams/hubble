@@ -63,7 +63,11 @@ export function GNBNav({ onSearchClick }: GNBNavProps) {
         })}
         <div className={S.separator} role="separator" />
         {NAV_ITEMS_SECONDARY.map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href || pathname?.startsWith(href + "/");
+          // Story Book은 내 스토리북(/storybook)일 때만 활성화하고, 상대 스토리북(/storybook/[userId])에서는 노트 상세처럼 비활성화
+          const isActive =
+            href === PATHS.STORYBOOK
+              ? pathname === PATHS.STORYBOOK
+              : pathname === href || pathname?.startsWith(href + "/");
           return (
             <Link
               key={href}

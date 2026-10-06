@@ -14,6 +14,7 @@ interface UseNoteEditorProps {
 }
 
 export const useNoteEditor = ({ className, initialContent }: UseNoteEditorProps) => {
+  const isPublishing = useNoteEditorStore((state) => state.isPublishing);
   const { content, setEditor } = useNoteEditorStore();
 
   const editor = useEditor({
@@ -46,6 +47,10 @@ export const useNoteEditor = ({ className, initialContent }: UseNoteEditorProps)
       },
     },
   });
+
+  useEffect(() => {
+    editor?.setEditable(!isPublishing);
+  }, [editor, isPublishing]);
 
   // Zustand 스토어에 에디터 인스턴스 등록 및 언마운트 시 클린업
   useEffect(() => {
