@@ -6,6 +6,7 @@ import { useAuthStore } from '@/entities/user/model/useAuthStore';
 import { draftApi, DraftResponseDto, DraftSaveRequestDto } from '../api/draftApi';
 import { useNoteEditorStore } from './useNoteEditorStore';
 import { readPendingPublication } from './publicationRecovery';
+import { setDraftUrl } from './useDraftRecovery';
 import { ApiError } from '@/shared/api/base';
 import type { CategoryType } from '@/shared/types';
 
@@ -40,6 +41,7 @@ export const useNoteDraft = () => {
     onSuccess: (savedDraft: DraftResponseDto) => {
       useNoteEditorStore.getState().setActiveDraftId(String(savedDraft.id));
       useNoteEditorStore.getState().setDraftVersion(savedDraft.version);
+      setDraftUrl(String(savedDraft.id));
       queryClient.invalidateQueries({ queryKey: ['drafts'] });
     },
   });
@@ -57,7 +59,7 @@ export const useNoteDraft = () => {
 
       const actorId = useAuthStore.getState().user?.id;
       if (actorId && readPendingPublication(actorId)) return false;
-      if (useNoteEditorStore.getState().isPublishing || useNoteEditorStore.getState().draftConflict) return false;
+      if (useNoteEditorStore.getState().isRestoringDraft || useNoteEditorStore.getState().isPublishing || useNoteEditorStore.getState().draftConflict) return false;
       // Share the in-flight save across manual and automatic save hooks.
       if (pendingDraftSave) {
         try { await pendingDraftSave; } catch { /* Allow a fresh save after failure. */ }
@@ -117,6 +119,7 @@ export const useNoteDraft = () => {
 
   const clearDraft = useCallback((_draftId?: string) => {
     useNoteEditorStore.getState().setActiveDraftId(null);
+    setDraftUrl(null);
   }, []);
 
   return {

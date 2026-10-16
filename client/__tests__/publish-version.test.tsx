@@ -4,11 +4,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePublishNote } from '@/widgets/notebook-meta-sidebar/notebook-meta-editor/model/usePublishNote';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
 import { useAuthStore } from '@/entities/user/model/useAuthStore';
-import { createNote, updateNote } from '@/entities/note/api/note.api';
+import { createNote, updateNote, resolvePublication } from '@/entities/note/api/note.api';
 import { ApiError } from '@/shared/api/base';
 
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
-jest.mock('@/entities/note/api/note.api', () => ({ createNote: jest.fn(), updateNote: jest.fn() }));
+jest.mock('@/entities/note/api/note.api', () => ({ createNote: jest.fn(), updateNote: jest.fn(), resolvePublication: jest.fn() }));
 function wrapper({ children }: { children: React.ReactNode }) {
   const [client] = React.useState(() => new QueryClient());
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
@@ -17,6 +17,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   useAuthStore.setState({ isLoggedIn: true, user: { id: 1 } as never });
   useNoteEditorStore.getState().reset();
+  useNoteEditorStore.getState().setIsRestoringDraft(false);
   jest.spyOn(window, 'alert').mockImplementation(() => {});
 });
 afterEach(() => jest.restoreAllMocks());
@@ -40,16 +41,20 @@ test('reopened editing draft uses its original published version', async () => {
 });
 
 
-test('lost response retries the exact same publication with the same key', async () => {
+test('lost responses retry the same key and reconcile completion without another publication', async () => {
   useNoteEditorStore.getState().setTitle('my title');
   useNoteEditorStore.getState().setContent('<p>my content</p>');
-  jest.mocked(createNote).mockRejectedValueOnce(new TypeError('Network failure'))
-    .mockResolvedValueOnce({ id: 123 } as never);
+  jest.mocked(createNote).mockRejectedValue(new TypeError('Network failure'));
+  jest.mocked(resolvePublication).mockResolvedValue({ state: 'completed', note: { id: 123 } } as never);
   jest.spyOn(console, 'error').mockImplementation(() => {});
   const { result } = renderHook(() => usePublishNote(), { wrapper });
   await act(async () => { await result.current.handlePublish(); });
   const first = jest.mocked(createNote).mock.calls[0];
+  expect(createNote).toHaveBeenCalledTimes(3);
+  expect(jest.mocked(createNote).mock.calls).toEqual([first, first, first]);
   expect(useNoteEditorStore.getState().title).toBe('my title');
   await act(async () => { await result.current.handlePublish(); });
-  expect(jest.mocked(createNote).mock.calls[1]).toEqual(first);
+  expect(resolvePublication).toHaveBeenCalledWith(first[1]);
+  expect(createNote).toHaveBeenCalledTimes(3);
+  expect(useNoteEditorStore.getState().title).toBe('');
 });

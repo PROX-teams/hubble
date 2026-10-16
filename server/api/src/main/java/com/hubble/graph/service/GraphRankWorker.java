@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = {"graph.async.enabled", "graph.worker.enabled"}, havingValue = "true")
+@ConditionalOnProperty(name = "graph.worker.enabled", havingValue = "true")
 public class GraphRankWorker {
     private final JdbcTemplate jdbc;
 

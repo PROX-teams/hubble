@@ -29,7 +29,6 @@ export SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/hubble?serverTimezone=
 export SPRING_DATASOURCE_USERNAME='hubble'
 export SPRING_DATASOURCE_PASSWORD="$graph_db_password"
 export SPRING_KAFKA_BOOTSTRAP_SERVERS='127.0.0.1:9092'
-export GRAPH_ASYNC_ENABLED='true'
 unset graph_db_password
 
 graph_run_dir=$(mktemp -d /private/tmp/hubble-graph-runtime.XXXXXX)

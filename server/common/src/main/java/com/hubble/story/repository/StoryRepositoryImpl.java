@@ -33,25 +33,31 @@ public class StoryRepositoryImpl implements StoryRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final EntityManager entityManager;
 
+    // Build each full-text candidate set once; UNION also removes duplicate parent stories.
     private static final String FULLTEXT_SEARCH_IDS_SQL = """
             SELECT s.id
-            FROM stories s
+            FROM (
+                SELECT matched_story.id
+                FROM stories matched_story
+                WHERE MATCH(matched_story.title, matched_story.description)
+                      AGAINST (:fullTextQuery IN BOOLEAN MODE) > 0
+                UNION
+                SELECT authored_story.id
+                FROM users matched_author
+                JOIN stories authored_story ON authored_story.user_id = matched_author.id
+                WHERE MATCH(matched_author.nickname) AGAINST (:fullTextQuery IN BOOLEAN MODE) > 0
+                UNION
+                SELECT n.story_id AS id
+                FROM notes n
+                JOIN users nu ON nu.id = n.user_id
+                WHERE n.deleted_at IS NULL
+                  AND nu.deleted_at IS NULL
+                  AND MATCH(n.title, n.content) AGAINST (:fullTextQuery IN BOOLEAN MODE) > 0
+            ) candidates
+            JOIN stories s ON s.id = candidates.id
             JOIN users u ON u.id = s.user_id
             WHERE s.deleted_at IS NULL
               AND u.deleted_at IS NULL
-              AND (
-                    MATCH(s.title, s.description) AGAINST (:fullTextQuery IN BOOLEAN MODE) > 0
-                    OR MATCH(u.nickname) AGAINST (:fullTextQuery IN BOOLEAN MODE) > 0
-                    OR EXISTS (
-                        SELECT 1
-                        FROM notes n
-                        JOIN users nu ON nu.id = n.user_id
-                        WHERE n.story_id = s.id
-                          AND n.deleted_at IS NULL
-                          AND nu.deleted_at IS NULL
-                          AND MATCH(n.title, n.content) AGAINST (:fullTextQuery IN BOOLEAN MODE) > 0
-                    )
-              )
             ORDER BY
               CASE
                 WHEN LOWER(s.title) = LOWER(:keyword) THEN 0

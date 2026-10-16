@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
-@ConditionalOnProperty(name = {"graph.async.enabled", "graph.worker.enabled"}, havingValue = "true")
+@ConditionalOnProperty(name = "graph.worker.enabled", havingValue = "true")
 public class GraphKafkaConfig {
     @Bean
     NewTopic graphNoteChangesTopic(@Value("${graph.kafka.partitions:12}") int partitions,

@@ -20,6 +20,11 @@ public interface NoteTagRepository extends JpaRepository<NoteTag, Long> {
     @Query("DELETE FROM NoteTag nt WHERE nt.note = :note")
     void deleteAllByNote(@Param("note") Note note);
 
+    // Both columns identify one existing UNIQUE key; avoid range deletion locks on adjacent notes.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM NoteTag nt WHERE nt.note.id = :noteId AND nt.tag.id = :tagId")
+    int deleteLink(@Param("noteId") Long noteId, @Param("tagId") Long tagId);
+
     @Query("SELECT new com.hubble.note.dto.TagCountDto(t.name, COUNT(nt)) " +
            "FROM NoteTag nt " +
            "JOIN nt.tag t " +

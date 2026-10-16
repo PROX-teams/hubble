@@ -14,7 +14,7 @@ import java.util.StringJoiner;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = {"graph.async.enabled", "graph.worker.enabled"}, havingValue = "true")
+@ConditionalOnProperty(name = "graph.worker.enabled", havingValue = "true")
 public class GraphEventProcessor {
     private final JdbcTemplate jdbc;
     private final GraphStatsStore stats;

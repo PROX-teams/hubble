@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -20,11 +19,7 @@ public class GraphStatsStore {
     private static final int WRITE_CHUNK_SIZE = 500;
     private final JdbcTemplate jdbc;
 
-    public record Center(long tagId, long usageCount) {}
-    public record Neighbor(long tagId, String name, long coCount, long usageCount) {}
     public record RankedNeighbor(String name, long coCount, long usageCount, double score) {}
-    public record Cursor(long coCount, long tagId) {}
-    public enum Side { TAG_A, TAG_B }
 
     public List<TagCountDto> topTags(Category category, int limit) {
         return jdbc.query("""
@@ -35,43 +30,6 @@ public class GraphStatsStore {
                 LIMIT ?
                 """, (rs, row) -> new TagCountDto(rs.getString(1), rs.getLong(2)),
                 category.name(), limit);
-    }
-
-    public Optional<Center> center(Category category, String name) {
-        return jdbc.query("""
-                SELECT t.id, u.note_count FROM tags t
-                JOIN graph_tag_usage_stats u ON u.tag_id = t.id AND u.category = ?
-                WHERE t.name = ? AND u.note_count > 0
-                """, (rs, row) -> new Center(rs.getLong(1), rs.getLong(2)),
-                category.name(), name).stream().findFirst();
-    }
-
-    public List<Neighbor> neighborPage(Category category, long centerId, Side side,
-                                        Cursor cursor, long minCoCount, int limit) {
-        String centerColumn = side == Side.TAG_A ? "tag_a_id" : "tag_b_id";
-        String neighborColumn = side == Side.TAG_A ? "tag_b_id" : "tag_a_id";
-        String after = cursor == null ? "" : """
-                AND (p.co_count < ? OR (p.co_count = ? AND p.%s > ?))
-                """.formatted(neighborColumn);
-        String sql = """
-                SELECT t.id, t.name, p.co_count, u.note_count
-                FROM graph_tag_pair_stats p
-                JOIN graph_tag_usage_stats u ON u.category = p.category AND u.tag_id = p.%s
-                JOIN tags t ON t.id = p.%s
-                WHERE p.category = ? AND p.%s = ? AND p.co_count >= ?
-                %s
-                ORDER BY p.co_count DESC, p.%s ASC
-                LIMIT ?
-                """.formatted(neighborColumn, neighborColumn, centerColumn, after, neighborColumn);
-        List<Object> args = new ArrayList<>(List.of(category.name(), centerId, minCoCount));
-        if (cursor != null) {
-            args.add(cursor.coCount());
-            args.add(cursor.coCount());
-            args.add(cursor.tagId());
-        }
-        args.add(limit);
-        return jdbc.query(sql, (rs, row) -> new Neighbor(
-                rs.getLong(1), rs.getString(2), rs.getLong(3), rs.getLong(4)), args.toArray());
     }
 
     public List<RankedNeighbor> rankedNeighbors(Category category, String sourceName,

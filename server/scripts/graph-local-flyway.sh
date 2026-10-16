@@ -11,7 +11,6 @@ export SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/hubble?serverTimezone=
 export SPRING_DATASOURCE_USERNAME='hubble'
 export SPRING_DATASOURCE_PASSWORD="$graph_db_password"
 export SERVER_PORT='18080'
-export GRAPH_ASYNC_ENABLED='false'
 export GRAPH_WORKER_ENABLED='false'
 unset graph_db_password
 

@@ -2,6 +2,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+if [[ "${SEARCH_STORY_ANALYSIS:-false}" == true && "${SEARCH_BENCHMARK:-true}" == true ]]; then
+    echo 'For story analysis, set SEARCH_BENCHMARK=false to avoid seeding twice.' >&2
+    exit 1
+fi
+
 # This script owns one disposable container and never targets the application DB.
 search_test_container='hubble-search-benchmark'
 if docker inspect "$search_test_container" >/dev/null 2>&1; then
@@ -31,12 +36,23 @@ if [[ "$search_db_ready" != true ]]; then
     exit 1
 fi
 
-SEARCH_MYSQL_TESTS=true SEARCH_BENCHMARK=true \
+search_gradle_args=(--no-daemon)
+if [[ "${SEARCH_OFFLINE:-false}" == true ]]; then search_gradle_args+=(--offline); fi
+if [[ -n "${JAVA_HOME:-}" ]]; then
+    search_gradle_args+=(-Porg.gradle.java.installations.auto-detect=false
+                        "-Porg.gradle.java.installations.paths=$JAVA_HOME")
+fi
+
+SEARCH_MYSQL_TESTS=true SEARCH_BENCHMARK="${SEARCH_BENCHMARK:-true}" \
 SEARCH_BENCHMARK_NOTES="${SEARCH_BENCHMARK_NOTES:-20000}" \
-./gradlew --no-daemon :api:test --rerun-tasks \
+./gradlew "${search_gradle_args[@]}" :api:test --rerun-tasks \
     --tests com.hubble.search.service.SearchMysqlIntegrationTest \
     --tests com.hubble.search.service.SearchServiceTest \
     --tests com.hubble.search.service.SearchMigrationTest
 
-echo 'Raw measurements: server/api/build/reports/search-benchmark/results.json'
+if [[ "${SEARCH_STORY_ANALYSIS:-false}" == true ]]; then
+    echo "Raw measurements: server/api/build/reports/search-benchmark/story-${SEARCH_ANALYSIS_LABEL:-analysis}.json"
+else
+    echo 'Raw measurements: server/api/build/reports/search-benchmark/results.json'
+fi
 echo 'Test report: server/api/build/reports/tests/test/index.html'

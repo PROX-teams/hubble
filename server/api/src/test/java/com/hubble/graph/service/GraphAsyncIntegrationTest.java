@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /** Run only against a disposable MySQL database and Kafka broker. */
 @EnabledIfEnvironmentVariable(named = "GRAPH_INTEGRATION_ENABLED", matches = "true")
-@SpringBootTest(properties = {"graph.async.enabled=true", "graph.worker.enabled=true"})
+@SpringBootTest(properties = {"graph.worker.enabled=true"})
 class GraphAsyncIntegrationTest {
     @Autowired NoteService notes;
     @Autowired JdbcTemplate jdbc;

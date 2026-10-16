@@ -82,7 +82,7 @@ class NoteServiceTest {
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(storyService.getOrCreateDefaultStory(user)).willReturn(defaultStory);
         given(noteRepository.save(any(Note.class))).willAnswer(invocation -> invocation.getArgument(0));
-        given(tagRepository.saveAll(anyList())).willReturn(List.of(Tag.builder().id(1L).name("Tag1").build()));
+        given(tagRepository.findByName("tag1")).willReturn(Optional.of(Tag.builder().id(1L).name("tag1").build()));
 
         // when
         NoteResponse response = noteService.createNote(userId, request);
@@ -105,18 +105,17 @@ class NoteServiceTest {
         NoteCreateRequest request = new NoteCreateRequest("제목", "내용", Category.DEVELOPMENT, "imgUrl", tags, 1L);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(storyRepository.findById(1L)).willReturn(Optional.of(story));
+        given(storyService.getOwnedStoryForReference(1L, 1L)).willReturn(story);
         given(noteRepository.save(any(Note.class))).willAnswer(invocation -> invocation.getArgument(0));
-        given(tagRepository.findAllByNameIn(anyList())).willReturn(List.of());
-        given(tagRepository.saveAll(anyList())).willReturn(List.of(
-                Tag.builder().id(1L).name("Java").build(),
-                Tag.builder().id(2L).name("Spring").build()));
+        given(tagRepository.findByName("java")).willReturn(Optional.of(Tag.builder().id(1L).name("java").build()));
+        given(tagRepository.findByName("spring")).willReturn(Optional.of(Tag.builder().id(2L).name("spring").build()));
 
         // when
         noteService.createNote(userId, request);
 
         // then
-        verify(tagRepository, times(1)).saveAll(anyList());
+        verify(tagRepository).findByName("java");
+        verify(tagRepository).findByName("spring");
         verify(noteTagRepository, times(1)).saveAll(anyList());
     }
 
@@ -130,31 +129,23 @@ class NoteServiceTest {
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(noteRepository.findByIdForUpdate(100L)).willReturn(Optional.of(note));
         given(noteRepository.findById(100L)).willReturn(Optional.of(note));
+        given(storyService.getOwnedStoryForReference(1L, 10L)).willReturn(story);
 
         NoteResponse response = noteService.updateNote(1L, 100L,
-                new NoteCreateRequest("수정", "수정 내용", Category.DEVELOPMENT, null, List.of(), null));
+                new NoteCreateRequest("수정", "수정 내용", Category.DEVELOPMENT, null, List.of(), null, null, null, 0L));
 
         assertThat(note.getStory()).isSameAs(story);
         assertThat(response.storyId()).isEqualTo(10L);
     }
 
     @Test
-    @DisplayName("소속이 없는 기존 노트는 수정 시 기본 폴더에 배치된다.")
-    void updateLegacyNoteAssignsDefaultStory() {
-        User user = User.builder().id(1L).nickname("작성자").build();
-        Story story = Story.builder().id(10L).title("기본 폴더").user(user).build();
-        Note note = Note.builder().id(100L).title("제목").content("내용")
-                .category(Category.DEVELOPMENT).user(user).build();
-        given(userRepository.findById(1L)).willReturn(Optional.of(user));
-        given(noteRepository.findByIdForUpdate(100L)).willReturn(Optional.of(note));
-        given(noteRepository.findById(100L)).willReturn(Optional.of(note));
-        given(storyService.getOrCreateDefaultStory(user)).willReturn(story);
-
-        NoteResponse response = noteService.updateNote(1L, 100L,
-                new NoteCreateRequest("수정", "수정 내용", Category.DEVELOPMENT, null, List.of(), null));
-
-        assertThat(note.getStory()).isSameAs(story);
-        assertThat(response.storyId()).isEqualTo(10L);
+    @DisplayName("존재하지 않는 노트는 수정할 수 없다.")
+    void missingNoteCannotBeUpdated() {
+        given(noteRepository.findById(100L)).willReturn(Optional.empty());
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> noteService.updateNote(1L, 100L,
+                new NoteCreateRequest("수정", "수정 내용", Category.DEVELOPMENT, null, List.of(), null)))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(noteRepository, org.mockito.Mockito.never()).findByIdForUpdate(anyLong());
     }
 
     @Test
@@ -186,9 +177,10 @@ class NoteServiceTest {
         Long userId = 1L;
         Long noteId = 100L;
         User user = User.builder().id(userId).email("test@test.com").build();
-        Note note = Note.builder().id(noteId).title("제목").user(user).category(Category.DEVELOPMENT).build();
+        Note note = Note.builder().id(noteId).title("제목").user(user).story(Story.builder().id(10L).user(user).build()).category(Category.DEVELOPMENT).build();
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(noteRepository.findById(noteId)).willReturn(Optional.of(note));
         given(noteRepository.findByIdForUpdate(noteId)).willReturn(Optional.of(note));
 
         // when
@@ -239,6 +231,7 @@ class NoteServiceTest {
 
     @Test
     void editingDraftCannotCreateAnotherNote() {
+        given(userRepository.findById(1L)).willReturn(Optional.of(User.builder().id(1L).build()));
         var draft = com.hubble.note.entity.Draft.builder().id(5L).noteId(100L).baseNoteVersion(0L).build();
         given(draftRepository.findOwnedForUpdate(5L, 1L)).willReturn(Optional.of(draft));
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> noteService.createNote(1L,
@@ -258,6 +251,7 @@ class NoteServiceTest {
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(noteRepository.findByIdForUpdate(100L)).willReturn(Optional.of(note));
         given(noteRepository.findById(100L)).willReturn(Optional.of(note));
+        given(storyService.getOwnedStoryForReference(1L, 10L)).willReturn(story);
         var result = noteService.updateNote(1L, 100L,
                 new NoteCreateRequest("edited", "edited body", Category.DEVELOPMENT, null, List.of(), null, 5L));
         assertThat(result.id()).isEqualTo(100L);
@@ -269,6 +263,7 @@ class NoteServiceTest {
 
     @Test
     void inaccessibleDraftCannotBePublished() {
+        given(userRepository.findById(1L)).willReturn(Optional.of(User.builder().id(1L).build()));
         given(draftRepository.findOwnedForUpdate(5L, 1L)).willReturn(Optional.empty());
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> noteService.createNote(1L,
                 new NoteCreateRequest("title", "body", Category.DEVELOPMENT, null, List.of(), null, 5L)))
@@ -278,6 +273,7 @@ class NoteServiceTest {
 
     @Test
     void staleDraftCannotPublish() {
+        given(userRepository.findById(1L)).willReturn(Optional.of(User.builder().id(1L).build()));
         var draft = com.hubble.note.entity.Draft.builder().id(5L).version(4L).build();
         given(draftRepository.findOwnedForUpdate(5L, 1L)).willReturn(Optional.of(draft));
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> noteService.createNote(1L,
@@ -290,8 +286,9 @@ class NoteServiceTest {
     @Test
     void stalePublishedVersionCannotBeOverwrittenWithoutDraft() {
         User user = User.builder().id(1L).build();
-        Note note = Note.builder().id(100L).user(user).contentVersion(4L).content("latest").build();
+        Note note = Note.builder().id(100L).user(user).story(Story.builder().id(10L).user(user).build()).contentVersion(4L).content("latest").build();
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(noteRepository.findById(100L)).willReturn(Optional.of(note));
         given(noteRepository.findByIdForUpdate(100L)).willReturn(Optional.of(note));
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> noteService.updateNote(1L, 100L,
                 new NoteCreateRequest("title", "old", Category.DEVELOPMENT, null, List.of(), null, null, null, 3L)))
@@ -303,11 +300,12 @@ class NoteServiceTest {
     @Test
     void editingDraftRetainsOriginalPublishedBaseline() {
         User user = User.builder().id(1L).build();
-        Note note = Note.builder().id(100L).user(user).contentVersion(4L).content("latest").build();
+        Note note = Note.builder().id(100L).user(user).story(Story.builder().id(10L).user(user).build()).contentVersion(4L).content("latest").build();
         var draft = com.hubble.note.entity.Draft.builder().id(5L).version(2L).noteId(100L)
                 .baseNoteVersion(3L).build();
         given(draftRepository.findOwnedForUpdate(5L, 1L)).willReturn(Optional.of(draft));
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(noteRepository.findById(100L)).willReturn(Optional.of(note));
         given(noteRepository.findByIdForUpdate(100L)).willReturn(Optional.of(note));
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> noteService.updateNote(1L, 100L,
                 new NoteCreateRequest("title", "old", Category.DEVELOPMENT, null, List.of(), null, 5L, 2L, 4L)))

@@ -26,57 +26,69 @@ public class DraftService {
 
     @Transactional
     public DraftResponse saveDraft(Long userId, DraftSaveRequest request) {
-        if (request.storyId() != null) storyService.getOwnedStoryForUpdate(userId, request.storyId());
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        if (request.storyId() != null) DraftSaveTiming.measure("1.story-check-lock",
+                () -> storyService.getOwnedStoryForReference(userId, request.storyId()));
+        User user = DraftSaveTiming.measure("2.user-query", () -> userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다.")));
 
         if (request.noteId() != null) {
-            var note = noteRepository.findById(request.noteId())
-                    .orElseThrow(() -> new IllegalArgumentException("수정 대상 노트를 찾을 수 없습니다."));
-            if (!note.getUser().getId().equals(userId)) {
-                throw new IllegalArgumentException("수정 권한이 없습니다.");
-            }
+            DraftSaveTiming.measure("3.note-query-owner-check", () -> {
+                var note = noteRepository.findById(request.noteId())
+                        .orElseThrow(() -> new IllegalArgumentException("수정 대상 노트를 찾을 수 없습니다."));
+                if (!note.getUser().getId().equals(userId)) {
+                    throw new IllegalArgumentException("수정 권한이 없습니다.");
+                }
+                return null;
+            });
         }
 
-        String tagsStr = (request.tags() != null && !request.tags().isEmpty())
-                ? String.join(",", request.tags())
-                : null;
+        String tagsStr = DraftSaveTiming.measure("4.tags-convert", () ->
+                (request.tags() != null && !request.tags().isEmpty())
+                ? String.join(",", request.tags()) : null);
 
         Draft draft;
-        if (request.id() != null) {
-            draft = draftRepository.findByIdAndUserId(request.id(), userId)
-                    .orElseThrow(() -> new IllegalArgumentException("임시저장 노트를 찾을 수 없습니다."));
-            if (draft.isPublished()) {
-                throw new IllegalArgumentException("이미 발행된 초안입니다.");
+        long draftStepStarted = DraftSaveTiming.start();
+        try {
+            if (request.id() != null) {
+                draft = draftRepository.findByIdAndUserId(request.id(), userId)
+                        .orElseThrow(() -> new IllegalArgumentException("임시저장 노트를 찾을 수 없습니다."));
+                if (draft.isPublished()) {
+                    throw new IllegalArgumentException("이미 발행된 초안입니다.");
+                }
+                if (!java.util.Objects.equals(draft.getNoteId(), request.noteId())) {
+                    throw new IllegalArgumentException("초안의 수정 대상은 변경할 수 없습니다.");
+                }
+                if (request.version() == null || !request.version().equals(draft.getVersion())) {
+                    throw new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.CONFLICT, "다른 곳에서 수정된 임시저장 글입니다.");
+                }
+                if (!java.util.Objects.equals(draft.getBaseNoteVersion(), request.baseNoteVersion())) {
+                    throw new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.CONFLICT, "수정 대상 버전이 일치하지 않습니다.");
+                }
+                draft.update(request.title(), request.content(), request.category(), request.storyId(), tagsStr, request.imageUrl());
+            } else {
+                draft = Draft.builder()
+                        .user(user)
+                        .noteId(request.noteId())
+                        .baseNoteVersion(request.baseNoteVersion())
+                        .title(request.title())
+                        .content(request.content())
+                        .category(request.category())
+                        .storyId(request.storyId())
+                        .tags(tagsStr)
+                        .imageUrl(request.imageUrl())
+                        .build();
             }
-            if (!java.util.Objects.equals(draft.getNoteId(), request.noteId())) {
-                throw new IllegalArgumentException("초안의 수정 대상은 변경할 수 없습니다.");
-            }
-            if (request.version() == null || !request.version().equals(draft.getVersion())) {
-                throw new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.CONFLICT, "다른 곳에서 수정된 임시저장 글입니다.");
-            }
-            if (!java.util.Objects.equals(draft.getBaseNoteVersion(), request.baseNoteVersion())) {
-                throw new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.CONFLICT, "수정 대상 버전이 일치하지 않습니다.");
-            }
-            draft.update(request.title(), request.content(), request.category(), request.storyId(), tagsStr, request.imageUrl());
-        } else {
-            draft = Draft.builder()
-                    .user(user)
-                    .noteId(request.noteId())
-                    .baseNoteVersion(request.baseNoteVersion())
-                    .title(request.title())
-                    .content(request.content())
-                    .category(request.category())
-                    .storyId(request.storyId())
-                    .tags(tagsStr)
-                    .imageUrl(request.imageUrl())
-                    .build();
+
+        } finally {
+            DraftSaveTiming.finish("5.draft-create-or-update", draftStepStarted);
         }
 
-        Draft saved = draftRepository.saveAndFlush(draft);
-        return DraftResponse.from(saved);
+        Draft prepared = draft;
+        Draft saved = DraftSaveTiming.measure("6.save-and-flush",
+                () -> draftRepository.saveAndFlush(prepared));
+        return DraftSaveTiming.measure("7.response-build", () -> DraftResponse.from(saved));
     }
 
     public List<DraftResponse> getDrafts(Long userId) {
