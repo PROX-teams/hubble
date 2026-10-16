@@ -59,6 +59,9 @@ public class StoryService {
 
     @Transactional
     public Story getOrCreateDefaultStory(User user) {
+        // The default story cannot be deleted through the API. Avoid an upsert/WRITE lock on every reuse.
+        var existing = storyRepository.findByUserIdAndDefaultStoryTrue(user.getId());
+        if (existing.isPresent()) return getOwnedStoryForReference(user.getId(), existing.get().getId());
         storyRepository.ensureDefault(user.getId());
         return storyRepository.findDefaultForUpdate(user.getId()).orElseThrow();
     }
@@ -209,6 +212,13 @@ public class StoryService {
     @Transactional
     public Story getOwnedStoryForUpdate(Long userId, Long storyId) {
         return storyRepository.findOwnedForUpdate(storyId, userId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "존재하지 않거나 사용할 수 없는 스토리입니다."));
+    }
+
+    @Transactional
+    public Story getOwnedStoryForReference(Long userId, Long storyId) {
+        return storyRepository.findOwnedForReference(storyId, userId)
                 .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
                         org.springframework.http.HttpStatus.NOT_FOUND, "존재하지 않거나 사용할 수 없는 스토리입니다."));
     }

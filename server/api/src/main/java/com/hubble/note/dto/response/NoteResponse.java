@@ -60,6 +60,11 @@ public record NoteResponse(
         boolean isBookmarked
 ) {
     public static NoteResponse of(Note note, boolean isLiked, boolean isBookmarked) {
+        return of(note, isLiked, isBookmarked, note.getNoteTags().stream()
+                .map(noteTag -> noteTag.getTag().getName()).collect(Collectors.toList()));
+    }
+
+    public static NoteResponse of(Note note, boolean isLiked, boolean isBookmarked, List<String> tags) {
         return new NoteResponse(
                 note.getId(),
                 note.getContentVersion(),
@@ -67,9 +72,7 @@ public record NoteResponse(
                 note.getContent(),
                 note.getCategory(),
                 note.getImageUrl(),
-                note.getNoteTags().stream()
-                        .map(noteTag -> noteTag.getTag().getName())
-                        .collect(Collectors.toList()),
+                List.copyOf(tags),
                 note.getUser().getNickname(),
                 note.getUser().getId(),
                 note.getCreatedAt(),

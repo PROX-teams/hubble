@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.datasource.url=jdbc:mysql://127.0.0.1:13316/hubble_search_benchmark?serverTimezone=UTC&characterEncoding=UTF-8",
         "spring.datasource.username=root", "spring.datasource.password=search-local-test",
         "spring.jpa.show-sql=false", "spring.jpa.properties.hibernate.format_sql=false",
-        "spring.kafka.listener.auto-startup=false", "graph.async.enabled=false", "graph.worker.enabled=false"
+        "spring.kafka.listener.auto-startup=false", "graph.worker.enabled=false"
 })
 class SearchMysqlIntegrationTest {
     private static final long USER = 9_000_001L, STORY = 9_100_001L;
@@ -169,6 +169,23 @@ class SearchMysqlIntegrationTest {
         assertThat(next.stories().getContent()).isEmpty();
     }
 
+    @Test @Order(11)
+    void storyTitleTiersAndMultipleMatchingChildrenRemainStable() {
+        story(9_100_010L, "검색주제", "내용", USER);
+        story(9_100_011L, "검색주제 모음", "내용", USER);
+        story(9_100_012L, "DB 검색주제", "내용", USER);
+        note(9_200_010L, "일반 기록", "검색주제 내용", STORY, USER);
+        note(9_200_011L, "일반 기록", "검색주제 내용", STORY, USER);
+        assertThat(storyIds("검색주제")).containsExactly(9_100_010L, 9_100_011L, 9_100_012L, STORY);
+        jdbc.update("UPDATE stories SET deleted_at=NOW() WHERE id=?", STORY);
+        assertThat(storyIds("검색주제")).containsExactly(9_100_010L, 9_100_011L, 9_100_012L);
+        user(9_000_002L, "별도필자");
+        story(9_100_020L, "별도 모음", "내용", USER);
+        note(9_200_020L, "일반 기록", "검색주제 내용", 9_100_020L, 9_000_002L);
+        jdbc.update("UPDATE users SET deleted_at=NOW() WHERE id=9000002");
+        assertThat(storyIds("검색주제")).containsExactly(9_100_010L, 9_100_011L, 9_100_012L);
+    }
+
     @Test @Order(100)
     @EnabledIfEnvironmentVariable(named = "SEARCH_BENCHMARK", matches = "true")
     void benchmarkRealMysqlAndCurrentHttpApi() throws Exception {
@@ -237,6 +254,83 @@ class SearchMysqlIntegrationTest {
         }
         report.put("currentApi",apiRows);
         writeReport(report);
+    }
+
+    @Test @Order(101)
+    @EnabledIfEnvironmentVariable(named = "SEARCH_STORY_ANALYSIS", matches = "true")
+    void analyzeStoryCandidatesAndActualFirstPage() throws Exception {
+        seedBenchmark(20000);
+        String label = System.getenv().getOrDefault("SEARCH_ANALYSIS_LABEL", "analysis");
+        var field = com.hubble.story.repository.StoryRepositoryImpl.class
+                .getDeclaredField("FULLTEXT_SEARCH_IDS_SQL");
+        field.setAccessible(true);
+        String pageSql = ((String) field.get(null))
+                .replace(":fullTextQuery", "?").replace(":keyword", "?")
+                .replace(":prefixPattern", "?").replace(":containsPattern", "?")
+                .replace(":limit", "11").replace(":offset", "0");
+        if (label.equals("before")) assertThat(pageSql).contains("OR EXISTS");
+        if (label.equals("after")) assertThat(pageSql).contains("UNION");
+        // Parameters occur in this order in both the correlated and candidate-union query.
+        var report = new LinkedHashMap<String,Object>();
+        report.put("measuredAt", Instant.now().toString());
+        report.put("label", label);
+        report.put("measuredPageSql", pageSql);
+        report.put("mysqlVersion", jdbc.queryForObject("SELECT VERSION()", String.class));
+        report.put("notes", jdbc.queryForObject("SELECT COUNT(*) FROM notes", Long.class));
+        report.put("stories", jdbc.queryForObject("SELECT COUNT(*) FROM stories", Long.class));
+        report.put("conditions", "20000 seeded notes plus fixture; 1000 seeded stories plus fixture; " +
+                "2 CPUs/1536MiB; serial client; page0/size10; SQL LIMIT11; 3 warmups/20 samples; " +
+                "HTTP includes tags,stories,notes; no arrival-rate or capacity test");
+        var rows = new ArrayList<Map<String,Object>>();
+        report.put("cases", rows);
+        for (String keyword : List.of("트랜잭션", "일반기록", "희귀주제", "없는검색어", "자바 트랜잭션")) {
+            String phrase = "\"" + keyword + "\"";
+            Object[] parameters = {phrase, phrase, phrase, keyword, keyword+"%", "%"+keyword+"%", phrase};
+            var expected = new HashSet<Long>();
+            expected.addAll(jdbc.queryForList("SELECT s.id FROM stories s JOIN users u ON u.id=s.user_id " +
+                    "WHERE s.deleted_at IS NULL AND u.deleted_at IS NULL " +
+                    "AND MATCH(s.title,s.description) AGAINST (? IN BOOLEAN MODE)>0", Long.class, phrase));
+            expected.addAll(jdbc.queryForList("SELECT s.id FROM users u JOIN stories s ON s.user_id=u.id " +
+                    "WHERE s.deleted_at IS NULL AND u.deleted_at IS NULL " +
+                    "AND MATCH(u.nickname) AGAINST (? IN BOOLEAN MODE)>0", Long.class, phrase));
+            expected.addAll(jdbc.queryForList("SELECT DISTINCT n.story_id FROM notes n JOIN users nu ON nu.id=n.user_id " +
+                    "JOIN stories s ON s.id=n.story_id JOIN users su ON su.id=s.user_id " +
+                    "WHERE n.deleted_at IS NULL AND nu.deleted_at IS NULL AND s.deleted_at IS NULL " +
+                    "AND su.deleted_at IS NULL AND MATCH(n.title,n.content) AGAINST (? IN BOOLEAN MODE)>0", Long.class, phrase));
+            // Remove ORDER/LIMIT to check every candidate, rather than just the visible first page.
+            String allSql = pageSql.substring(0, pageSql.indexOf("ORDER BY"));
+            var actual = new HashSet<>(jdbc.queryForList(allSql, Long.class, phrase, phrase, phrase));
+            var missing = new TreeSet<>(expected); missing.removeAll(actual);
+            var extra = new TreeSet<>(actual); extra.removeAll(expected);
+            if (label.equals("after")) {
+                assertThat(actual).as("all candidates for %s", keyword).isEqualTo(expected);
+                var pagedIds = new ArrayList<Long>();
+                for (int page=0;;page++) {
+                    var slice = stories.searchStoriesSlice(keyword, PageRequest.of(page,100));
+                    pagedIds.addAll(slice.getContent().stream().map(Story::getId).toList());
+                    if (!slice.hasNext()) break;
+                }
+                assertThat(pagedIds).doesNotHaveDuplicates().containsExactlyInAnyOrderElementsOf(expected);
+            }
+            for (int i=0;i<3;i++) { jdbc.queryForList(pageSql, parameters); request(keyword,0); }
+            var sqlTimes = new ArrayList<Double>();
+            var httpTimes = new ArrayList<Double>();
+            for (int i=0;i<20;i++) {
+                long start = System.nanoTime(); jdbc.queryForList(pageSql, parameters);
+                sqlTimes.add((System.nanoTime()-start)/1e6);
+                httpTimes.add(request(keyword,0));
+            }
+            var row = new LinkedHashMap<String,Object>();
+            row.put("keyword", keyword); row.put("expectedCandidates", expected.size());
+            row.put("actualCandidates", actual.size()); row.put("missingIds", missing); row.put("extraIds", extra);
+            row.put("pageSql", stats(sqlTimes)); row.put("http", stats(httpTimes));
+            row.put("firstPageIds", jdbc.queryForList(pageSql, Long.class, parameters));
+            row.put("plan", explain(pageSql, parameters));
+            rows.add(row);
+            Path output = Path.of("build/reports/search-benchmark/story-"+label+".json");
+            Files.createDirectories(output.getParent());
+            json.writerWithDefaultPrettyPrinter().writeValue(output.toFile(),report);
+        }
     }
 
     private List<Long> noteIds(String keyword) {

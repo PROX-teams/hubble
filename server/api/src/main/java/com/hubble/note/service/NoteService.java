@@ -8,6 +8,7 @@ import com.hubble.note.dto.response.NoteHistoryResponse;
 import com.hubble.note.dto.response.NoteResponse;
 import com.hubble.note.dto.response.NoteSummaryResponse;
 import com.hubble.note.dto.response.TagCountResponse;
+import com.hubble.note.entity.Draft;
 import com.hubble.note.entity.Note;
 import com.hubble.note.entity.NoteBookmark;
 import com.hubble.note.entity.NoteLike;
@@ -59,55 +60,65 @@ public class NoteService {
 
     @Transactional
     public NoteResponse createNote(Long userId, NoteCreateRequest request) {
-        User user = getUserEntity(userId);
-        Story story;
-        if (request.storyId() != null) {
-            story = storyService.getOwnedStoryForUpdate(userId, request.storyId());
-        } else {
-            story = storyService.getOrCreateDefaultStory(user);
-        }
-
-        var draft = lockDraft(userId, request.draftId(), null);
+        User user = DraftSaveTiming.measure("create.user-query", () -> getUserEntity(userId));
+        Story story = DraftSaveTiming.measure("create.story-check-lock", () ->
+                request.storyId() != null
+                        ? storyService.getOwnedStoryForReference(userId, request.storyId())
+                        : storyService.getOrCreateDefaultStory(user));
+        Draft draft = DraftSaveTiming.measure("create.draft-check-lock", () -> {
+            Draft selected = lockDraft(userId, request.draftId(), null);
+            if (selected != null && !selected.isPublished()) validateDraftVersion(selected, request.draftVersion());
+            return selected;
+        });
         if (draft != null && draft.isPublished()) return publishedResponse(userId, draft);
-        validateDraftVersion(draft, request.draftVersion());
 
-
-        Note note = Note.builder()
-                .title(request.title())
-                .content(request.content())
-                .category(request.category())
-                .imageUrl(request.imageUrl())
-                .user(user)
-                .story(story)
-                .build();
-
-        Note savedNote = noteRepository.save(note);
-        List<Long> newTagIds = saveTags(savedNote, request.tag());
-        graphChangeRecorder.record(savedNote.getId(), null, List.of(), savedNote.getCategory(), newTagIds);
-
+        Note note = DraftSaveTiming.measure("create.note-build", () -> Note.builder()
+                .title(request.title()).content(request.content()).category(request.category())
+                .imageUrl(request.imageUrl()).user(user).story(story).build());
+        Note savedNote = DraftSaveTiming.measure("create.note-insert", () -> noteRepository.save(note));
+        TagWriteResult writtenTags = DraftSaveTiming.measure("create.tags", () -> linkTags(savedNote, resolveTags(request.tag())));
+        DraftSaveTiming.measure("create.outbox", () -> {
+            graphChangeRecorder.record(savedNote.getId(), null, List.of(), savedNote.getCategory(), writtenTags.ids());
+            return null;
+        });
         if (draft != null) {
-            draft.markPublished(savedNote.getId());
-            draftRepository.save(draft);
+            DraftSaveTiming.measure("create.draft-complete", () -> {
+                draft.markPublished(savedNote.getId());
+                return draftRepository.save(draft);
+            });
         }
-        return NoteResponse.of(savedNote, false, false);
+        return DraftSaveTiming.measure("create.response", () -> NoteResponse.of(savedNote, false, false, writtenTags.names()));
     }
 
     @Transactional
     public NoteResponse updateNote(Long userId, Long noteId, NoteCreateRequest request) {
-        Note snapshot = getNoteEntity(noteId);
-        User actor = getUserEntity(userId);
+        UpdateContext context = prepareUpdate(userId, noteId, request);
+        if (context.draft() != null && context.draft().isPublished()) {
+            return publishedResponse(userId, context.draft());
+        }
+        applyChanges(context, request);
+        DraftSaveTiming.measure("update.draft-complete", () -> { completeDraft(context); return null; });
+        return reloadResponse(context);
+    }
+
+    private UpdateContext prepareUpdate(Long userId, Long noteId, NoteCreateRequest request) {
+        Note snapshot = DraftSaveTiming.measure("update.snapshot-query", () -> getNoteEntity(noteId));
+        User actor = DraftSaveTiming.measure("update.user-query", () -> getUserEntity(userId));
         validateOwner(actor, snapshot);
         Long originalStoryId = snapshot.getStory().getId();
-        java.util.stream.Stream.of(originalStoryId, request.storyId()).filter(Objects::nonNull)
-                .distinct().sorted().forEach(id -> storyService.getOwnedStoryForUpdate(userId, id));
+        DraftSaveTiming.measure("update.story-check-lock", () -> {
+            java.util.stream.Stream.of(originalStoryId, request.storyId()).filter(Objects::nonNull)
+                    .distinct().sorted().forEach(id -> storyService.getOwnedStoryForReference(userId, id));
+            return null;
+        });
         entityManager.detach(snapshot);
-        var draft = lockDraft(userId, request.draftId(), noteId);
-        if (draft != null && draft.isPublished()) return publishedResponse(userId, draft);
+        var draft = DraftSaveTiming.measure("update.draft-lock", () -> lockDraft(userId, request.draftId(), noteId));
+        if (draft != null && draft.isPublished()) return new UpdateContext(actor, null, draft);
         validateDraftVersion(draft, request.draftVersion());
 
         User user = getUserEntity(userId);
-        Note note = noteRepository.findByIdForUpdate(noteId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 노트입니다."));
+        Note note = DraftSaveTiming.measure("update.note-lock", () -> noteRepository.findByIdForUpdate(noteId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 노트입니다.")));
         validateOwner(user, note);
         if (!note.getStory().getId().equals(originalStoryId)) {
             throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT, "노트 소속이 변경되었습니다.");
@@ -118,39 +129,72 @@ public class NoteService {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.CONFLICT, "다른 탭에서 게시글을 수정했습니다. 최신 글을 확인해 주세요.");
         }
-        Category oldCategory = note.getCategory();
-        List<Long> oldTagIds = noteTagRepository.findTagIdsByNoteId(noteId);
+        return new UpdateContext(user, note, draft);
+    }
 
+    private void applyChanges(UpdateContext context, NoteCreateRequest request) {
+        Note note = context.note();
+        Category oldCategory = note.getCategory();
+        List<Long> oldTagIds = DraftSaveTiming.measure("update.tags-before-query", () -> noteTagRepository.findTagIdsByNoteId(note.getId()));
+        Story story = DraftSaveTiming.measure("update.story-recheck", () -> resolveUpdateStory(context, request));
+        note.update(request.title(), request.content(), request.category(), story, request.imageUrl());
+        List<Tag> resolvedTags = DraftSaveTiming.measure("update.tags-resolve", () -> resolveTags(request.tag()));
+        List<Long> newTagIds = resolvedTags.stream().map(Tag::getId).toList();
+        boolean tagsChanged = !new java.util.HashSet<>(oldTagIds).equals(new java.util.HashSet<>(newTagIds));
+        if (tagsChanged) {
+            DraftSaveTiming.measure("update.tags-replace", () -> {
+                java.util.Set<Long> wanted = new java.util.HashSet<>(newTagIds);
+                java.util.Set<Long> previous = new java.util.HashSet<>(oldTagIds);
+                oldTagIds.stream().filter(id -> !wanted.contains(id)).sorted()
+                        .forEach(id -> noteTagRepository.deleteLink(note.getId(), id));
+                return linkTags(note, resolvedTags.stream().filter(tag -> !previous.contains(tag.getId())).toList());
+            });
+        }
+        // This event describes category/tag changes only; title/body/story changes do not alter graph counts.
+        if (oldCategory != note.getCategory() || tagsChanged) {
+            DraftSaveTiming.measure("update.outbox", () -> {
+                graphChangeRecorder.record(note.getId(), oldCategory, oldTagIds, note.getCategory(), newTagIds);
+                return null;
+            });
+        }
+    }
+
+    private Story resolveUpdateStory(UpdateContext context, NoteCreateRequest request) {
+        Note note = context.note();
+        User user = context.user();
+        Long userId = user.getId();
         Story story = note.getStory();
         if (request.storyId() != null) {
-            story = storyService.getOwnedStoryForUpdate(userId, request.storyId());
+            story = storyService.getOwnedStoryForReference(userId, request.storyId());
         } else if (story == null) {
             story = storyService.getOrCreateDefaultStory(user);
         } else {
-            story = storyService.getOwnedStoryForUpdate(userId, story.getId());
+            story = storyService.getOwnedStoryForReference(userId, story.getId());
         }
 
-        note.update(request.title(), request.content(), request.category(), story, request.imageUrl());
-
-        // 기존 태그 매핑 벌크 삭제 후 재등록
-        noteTagRepository.deleteAllByNote(note);
-        List<Long> newTagIds = saveTags(note, request.tag());
-        graphChangeRecorder.record(noteId, oldCategory, oldTagIds, note.getCategory(), newTagIds);
-
-        if (draft != null) {
-            // Tag replacement clears the persistence context; explicitly merge the draft.
-            draft.markPublished(noteId);
-            draftRepository.save(draft);
-        }
-
-        // The bulk delete clears the persistence context. Reload so the response reflects
-        // the newly saved tag links instead of the detached note's stale collection.
-        entityManager.flush();
-        entityManager.clear();
-        Note refreshed = noteRepository.findById(noteId)
-                .orElseThrow(() -> new IllegalStateException("수정한 노트를 다시 조회할 수 없습니다."));
-        return NoteResponse.of(refreshed, isLiked(user, refreshed), isBookmarked(user, refreshed));
+        return story;
     }
+
+    private void completeDraft(UpdateContext context) {
+        Draft draft = context.draft();
+        if (draft == null) return;
+        // A removed-link bulk delete may detach the draft; save explicitly in both paths.
+        draft.markPublished(context.note().getId());
+        draftRepository.save(draft);
+    }
+
+    private NoteResponse reloadResponse(UpdateContext context) {
+        // Flush pending writes before clearing; reload to avoid the old tag collection.
+        DraftSaveTiming.measure("update.flush", () -> { entityManager.flush(); return null; });
+        entityManager.clear();
+        return DraftSaveTiming.measure("update.response-reload", () -> {
+            Note refreshed = noteRepository.findById(context.note().getId())
+                    .orElseThrow(() -> new IllegalStateException("수정한 노트를 다시 조회할 수 없습니다."));
+            return NoteResponse.of(refreshed, isLiked(context.user(), refreshed), isBookmarked(context.user(), refreshed));
+        });
+    }
+
+    private record UpdateContext(User user, Note note, Draft draft) {}
 
     private void validateDraftVersion(com.hubble.note.entity.Draft draft, Long expectedVersion) {
         if (draft != null && (expectedVersion == null || !expectedVersion.equals(draft.getVersion()))) {
@@ -297,10 +341,8 @@ public class NoteService {
                 .toList();
     }
 
-    // 🚀 [최적화 5] 태그 중복 방어(distinct) 및 벌크 배치 저장
-    private List<Long> saveTags(Note note, List<String> tagNames) {
+    private List<Tag> resolveTags(List<String> tagNames) {
         if (tagNames == null || tagNames.isEmpty()) return List.of();
-
         List<String> cleanTagNames = tagNames.stream()
                 .filter(Objects::nonNull)
                 .map(name -> java.text.Normalizer.normalize(name, java.text.Normalizer.Form.NFKC)
@@ -310,20 +352,27 @@ public class NoteService {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST, "태그는 최대 20개, 각 30자까지 입력할 수 있습니다.");
         }
-        // Resolve tags in a stable order to reduce deadlock risk across publications.
-        List<Tag> resolved = new java.util.ArrayList<>();
-        for (String name : cleanTagNames) {
-            tagRepository.insertIfAbsent(name);
-            resolved.add(tagRepository.findResolvedForUpdate(name)
-                    .orElseThrow(() -> new IllegalStateException("태그 생성 결과를 조회할 수 없습니다.")));
-        }
-        // DB collation can treat different input spellings as the same tag; deduplicate by ID too.
         Map<Long, Tag> tagsById = new java.util.LinkedHashMap<>();
-        resolved.forEach(tag -> tagsById.putIfAbsent(tag.getId(), tag));
-        noteTagRepository.saveAll(tagsById.values().stream()
-                .map(tag -> NoteTag.builder().note(note).tag(tag).build()).toList());
-        return List.copyOf(tagsById.keySet());
+        for (String name : cleanTagNames) {
+            // Tags have no mutation/deletion API. Existing tags require no upsert/WRITE lock;
+            // link foreign keys still enforce validity. Concurrent first creation uses UNIQUE + a current read.
+            Tag tag = tagRepository.findByName(name).orElseGet(() -> {
+                tagRepository.insertIfAbsent(name);
+                return tagRepository.findResolvedForUpdate(name)
+                        .orElseThrow(() -> new IllegalStateException("태그 생성 결과를 조회할 수 없습니다."));
+            });
+            tagsById.putIfAbsent(tag.getId(), tag);
+        }
+        return List.copyOf(tagsById.values());
     }
+
+    private TagWriteResult linkTags(Note note, List<Tag> tags) {
+        noteTagRepository.saveAll(tags.stream()
+                .map(tag -> NoteTag.builder().note(note).tag(tag).build()).toList());
+        return new TagWriteResult(tags.stream().map(Tag::getId).toList(), tags.stream().map(Tag::getName).toList());
+    }
+
+    private record TagWriteResult(List<Long> ids, List<String> names) {}
 
     private User getUserEntity(Long userId) {
         return userRepository.findById(userId)

@@ -7,6 +7,8 @@ interface NoteEditorState {
   noteId: number | null;
   noteVersion: number | null;
   isPublishing: boolean;
+  isRestoringDraft: boolean;
+  setIsRestoringDraft: (value: boolean) => void;
   setIsPublishing: (value: boolean) => void;
   activeDraftId: string | null;
   draftVersion: number | null;
@@ -56,6 +58,7 @@ const initialState = {
   noteId: null,
   noteVersion: null,
   isPublishing: false,
+  isRestoringDraft: true,
   activeDraftId: null,
   draftVersion: null,
   draftConflict: false,
@@ -72,6 +75,7 @@ const initialState = {
 export const useNoteEditorStore = create<NoteEditorState>((set, get) => ({
   ...initialState,
 
+  setIsRestoringDraft: (isRestoringDraft) => set({ isRestoringDraft }),
   setIsPublishing: (isPublishing) => set({ isPublishing }),
   setDraftConflict: (draftConflict) => set({ draftConflict }),
   setDraftVersion: (draftVersion) => set({ draftVersion }),

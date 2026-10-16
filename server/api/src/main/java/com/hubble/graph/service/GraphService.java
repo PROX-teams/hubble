@@ -10,7 +10,6 @@ import com.hubble.note.repository.NoteRepository;
 import com.hubble.note.repository.NoteTagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +28,6 @@ public class GraphService {
     private final NoteTagRepository noteTagRepository;
     private final GraphStatsStore graphStatsStore;
 
-    @Value("${graph.async.enabled:false}")
-    private boolean asyncEnabled;
-
     private static final int SEED_COUNT = 12;
     private static final int POPULAR_SEED_COUNT = 4;
     private static final int RECENT_SEED_COUNT = 4;
@@ -39,13 +35,6 @@ public class GraphService {
     private static final int SEED_CANDIDATE_COUNT = 60;
     private static final int EXPANSION_LIMIT_DEFAULT = 6;
     private static final int EXPANSION_LIMIT_MAX = 12;
-    private static final long MIN_CO_OCCURRENCE_COUNT = 2;
-    private static final int NEIGHBOR_PAGE_SIZE = 128;
-    private static final Comparator<RelationCandidate> RELATION_RANKING =
-            Comparator.comparingDouble(RelationCandidate::jaccardScore).reversed()
-                    .thenComparing(Comparator.comparingLong(RelationCandidate::coCount).reversed())
-                    .thenComparing(RelationCandidate::tagName);
-
     /**
      * 카테고리별 탐색 시작점과 대표 태그를 생성합니다.
      */
@@ -146,60 +135,7 @@ public class GraphService {
                 .collect(Collectors.toSet());
         excluded.add(tagName);
 
-        if (asyncEnabled) return expandFromRankedData(targetCategory, tagName, excluded, limit);
-
-        Optional<GraphStatsStore.Center> center = graphStatsStore.center(targetCategory, tagName);
-        if (center.isEmpty()) return new GraphExpansionResponse(targetCategory, tagName, List.of(), List.of(), false);
-
-        long centerUsage = center.get().usageCount();
-        int targetCount = limit + 1; // one extra candidate determines hasMore
-        PriorityQueue<RelationCandidate> best = new PriorityQueue<>(targetCount, RELATION_RANKING.reversed());
-        GraphStatsStore.Cursor cursorA = null;
-        GraphStatsStore.Cursor cursorB = null;
-        boolean fetchA = true;
-        boolean fetchB = true;
-
-        while (fetchA || fetchB) {
-            List<GraphStatsStore.Neighbor> sideA = fetchA
-                    ? graphStatsStore.neighborPage(targetCategory, center.get().tagId(), GraphStatsStore.Side.TAG_A,
-                    cursorA, MIN_CO_OCCURRENCE_COUNT, NEIGHBOR_PAGE_SIZE) : List.of();
-            List<GraphStatsStore.Neighbor> sideB = fetchB
-                    ? graphStatsStore.neighborPage(targetCategory, center.get().tagId(), GraphStatsStore.Side.TAG_B,
-                    cursorB, MIN_CO_OCCURRENCE_COUNT, NEIGHBOR_PAGE_SIZE) : List.of();
-
-            for (GraphStatsStore.Neighbor neighbor : sideA) addCandidate(best, neighbor, centerUsage, excluded, targetCount);
-            for (GraphStatsStore.Neighbor neighbor : sideB) addCandidate(best, neighbor, centerUsage, excluded, targetCount);
-
-            fetchA = sideA.size() == NEIGHBOR_PAGE_SIZE;
-            fetchB = sideB.size() == NEIGHBOR_PAGE_SIZE;
-            if (fetchA) {
-                GraphStatsStore.Neighbor last = sideA.get(sideA.size() - 1);
-                cursorA = new GraphStatsStore.Cursor(last.coCount(), last.tagId());
-            }
-            if (fetchB) {
-                GraphStatsStore.Neighbor last = sideB.get(sideB.size() - 1);
-                cursorB = new GraphStatsStore.Cursor(last.coCount(), last.tagId());
-            }
-
-            // Jaccard = co / (centerUsage + neighborUsage - co) <= co / centerUsage.
-            // Unseen rows have co <= the last row of their side. A strict bound
-            // preserves score/co-count/name tie ordering as well as exact hasMore.
-            long unseenMaxCo = Math.max(fetchA ? cursorA.coCount() : 0, fetchB ? cursorB.coCount() : 0);
-            if (best.size() == targetCount && (double) unseenMaxCo / centerUsage < best.peek().jaccardScore()) {
-                break;
-            }
-        }
-
-        List<RelationCandidate> ranked = best.stream().sorted(RELATION_RANKING).toList();
-        List<RelationCandidate> page = ranked.stream().limit(limit).toList();
-        String sourceId = "tag_" + tagName;
-        List<GraphNodeResponse> nodes = page.stream().map(candidate -> new GraphNodeResponse(
-                "tag_" + candidate.tagName(), candidate.tagName(), 3,
-                candidate.usageCount(), sourceId)).toList();
-        List<GraphLinkResponse> links = page.stream().map(candidate -> new GraphLinkResponse(
-                sourceId, "tag_" + candidate.tagName(), candidate.coCount(),
-                Math.round(candidate.jaccardScore() * 100.0) / 100.0)).toList();
-        return new GraphExpansionResponse(targetCategory, tagName, nodes, links, ranked.size() > limit);
+        return expandFromRankedData(targetCategory, tagName, excluded, limit);
     }
 
     private GraphExpansionResponse expandFromRankedData(Category category, String tagName,
@@ -216,20 +152,4 @@ public class GraphService {
         return new GraphExpansionResponse(category, tagName, nodes, links, rows.size() > limit);
     }
 
-    private void addCandidate(PriorityQueue<RelationCandidate> best, GraphStatsStore.Neighbor neighbor,
-                              long centerUsage, Set<String> excluded, int targetCount) {
-        if (excluded.contains(neighbor.name())) return;
-        long union = centerUsage + neighbor.usageCount() - neighbor.coCount();
-        double score = union > 0 ? (double) neighbor.coCount() / union : 0.0;
-        best.add(new RelationCandidate(neighbor.name(), neighbor.coCount(), neighbor.usageCount(), score));
-        if (best.size() > targetCount) best.poll();
-    }
-
-    private record RelationCandidate(
-            String tagName,
-            long coCount,
-            long usageCount,
-            double jaccardScore
-    ) {
-    }
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = {"graph.async.enabled", "graph.worker.enabled"}, havingValue = "true")
+@ConditionalOnProperty(name = "graph.worker.enabled", havingValue = "true")
 public class GraphRankPoller {
     private final GraphRankWorker worker;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useDraftList, NoteDraftItem } from '@/features/note/write-note/model/useNoteDraft';
 import { useNoteEditorStore } from '@/features/note/write-note/model/useNoteEditorStore';
 import NoteCard from '@/entities/note/ui/note-card/NoteCard';
@@ -18,9 +18,7 @@ import * as S from './MyNoteList.css';
  */
 export const DraftNoteList = () => {
   const router = useRouter();
-  const pathname = usePathname();
   const { drafts, deleteDraft, clearAllDrafts, isLoading, isLoggedIn } = useDraftList();
-  const initDraft = useNoteEditorStore((state) => state.initDraft);
 
   // 1. 로딩 상태 스켈레톤 노출
   if (isLoading) {
@@ -66,13 +64,10 @@ export const DraftNoteList = () => {
       if (!confirmLoad) return;
     }
 
-    initDraft({
-      ...draft,
-      id: String(draft.id),
-    });
+    state.setIsRestoringDraft(true);
 
     const target = draft.noteId ? `/notebook/${draft.noteId}/edit` : '/notebook/new';
-    if (pathname !== target) router.push(target);
+    router.push(`${target}?draftId=${draft.id}`);
   };
 
   const handleDelete = (e: React.MouseEvent, id: number) => {

@@ -19,6 +19,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   useAuthStore.setState({ isLoggedIn: true });
   useNoteEditorStore.getState().reset();
+  useNoteEditorStore.getState().setIsRestoringDraft(false);
   useNoteEditorStore.getState().initDraft({ id: '10', version: 3, title: 'local title', content: 'local body' });
 });
 

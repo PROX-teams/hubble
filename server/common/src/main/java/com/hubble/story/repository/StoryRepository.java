@@ -61,6 +61,11 @@ public interface StoryRepository extends JpaRepository<Story, Long>, StoryReposi
     @Query("SELECT s FROM Story s WHERE s.id = :id AND s.user.id = :userId")
     Optional<Story> findOwnedForUpdate(@Param("id") Long id, @Param("userId") Long userId);
 
+    // Reference-only operations may proceed together; story mutation/deletion still uses WRITE locks.
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_READ)
+    @Query("SELECT s FROM Story s WHERE s.id = :id AND s.user.id = :userId")
+    Optional<Story> findOwnedForReference(@Param("id") Long id, @Param("userId") Long userId);
+
     @Modifying(flushAutomatically = true)
     @Query(value = "INSERT INTO stories(title, description, category, user_id, is_default, created_at, updated_at, " +
             "view_count, like_count, bookmark_count) VALUES ('기본 폴더', '기본으로 생성된 폴더입니다.', 'OTHER', :userId, TRUE, " +

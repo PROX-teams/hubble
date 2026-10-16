@@ -22,7 +22,7 @@ export const usePublishNote = () => {
     // Allow pending-result reconciliation even when a draft was changed elsewhere.
     const actorId = useAuthStore.getState().user?.id;
     const hasPending = actorId ? Boolean(readPendingPublication(actorId)) : false;
-    if (useNoteEditorStore.getState().isPublishing || (useNoteEditorStore.getState().draftConflict && !hasPending)) return;
+    if (useNoteEditorStore.getState().isRestoringDraft || useNoteEditorStore.getState().isPublishing || (useNoteEditorStore.getState().draftConflict && !hasPending)) return;
 
     // 2. 네트워크 오프라인 상태 사전 감지
     if (typeof navigator !== 'undefined' && !navigator.onLine) {

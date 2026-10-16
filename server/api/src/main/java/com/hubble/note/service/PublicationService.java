@@ -46,13 +46,13 @@ public class PublicationService {
         if (key == null || !key.matches("[A-Za-z0-9_-]{1,100}")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "게시 요청 번호가 필요합니다.");
         }
-        users.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
+        DraftSaveTiming.measure("publish.user-query", () -> users.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.")));
         try {
             String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
                     .digest(mapper.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8)));
-            requests.reserve(userId, key, "pending");
-            var record = requests.findForUpdate(userId, key).orElseThrow();
+            DraftSaveTiming.measure("publish.request-reserve", () -> { requests.reserve(userId, key, "pending"); return null; });
+            var record = DraftSaveTiming.measure("publish.request-lock", () -> requests.findForUpdate(userId, key).orElseThrow());
             var previous = "pending".equals(record.getPayloadHash())
                     ? java.util.Optional.<PublicationRequest>empty() : java.util.Optional.of(record);
             if (previous.isPresent()) {
@@ -66,7 +66,7 @@ public class PublicationService {
             }
             NoteResponse response = notes.createNote(userId, payload);
             record.complete(hash, mapper.writeValueAsString(response));
-            requests.saveAndFlush(record);
+            DraftSaveTiming.measure("publish.result-flush", () -> requests.saveAndFlush(record));
             return response;
         } catch (ResponseStatusException exception) {
             throw exception;

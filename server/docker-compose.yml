@@ -54,7 +54,7 @@ services:
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
       - JWT_SECRET=${JWT_SECRET:-hubble-project-secret-key-for-jwt-token-generation-2024-03-10}
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:19092
-      - GRAPH_ASYNC_ENABLED=${GRAPH_ASYNC_ENABLED:-false}
+      - GRAPH_WORKER_ENABLED=false
     deploy:
       resources:
         limits:
@@ -65,8 +65,6 @@ services:
 
   graph-worker:
     image: hubble-server:local
-    profiles:
-      - graph-async
     container_name: hubble-graph-worker
     restart: always
     environment:
@@ -75,7 +73,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-hubble}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-hubble1234}
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:19092
-      - GRAPH_ASYNC_ENABLED=true
       - GRAPH_WORKER_ENABLED=true
       - JWT_SECRET=${JWT_SECRET:-hubble-project-secret-key-for-jwt-token-generation-2024-03-10}
     depends_on:

@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { Suspense, useCallback } from 'react';
 import { EditorContent } from '@tiptap/react';
 import * as s from './Editor.css';
 import { useNoteEditor } from '../model/useNoteEditor';
 import { useAutoSaveDraft } from '../model/useAutoSaveDraft';
 import { usePreventNavigation } from '../model/usePreventNavigation';
+import { useNoteEditorStore } from '../model/useNoteEditorStore';
+import { useDraftRecovery } from '../model/useDraftRecovery';
+import { EditorSkeleton } from './EditorSkeleton';
 import { TitleInput } from './TitleInput';
 
 interface EditorProps {
@@ -39,4 +42,19 @@ const Editor = ({ initialContent, initialTitle }: EditorProps) => {
 };
 
 
-export default Editor;
+function DraftRecoveryGate(props: EditorProps) {
+  const { isRestoring, error, retry } = useDraftRecovery();
+  if (error) {
+    return <div role="alert">{error} <button type="button" onClick={retry}>다시 불러오기</button></div>;
+  }
+  if (isRestoring) return <EditorSkeleton />;
+  const state = useNoteEditorStore.getState();
+  return <Editor {...props}
+    initialContent={state.activeDraftId ? state.content : props.initialContent}
+    initialTitle={state.activeDraftId ? state.title : props.initialTitle}
+  />;
+}
+
+export default function RecoverableEditor(props: EditorProps) {
+  return <Suspense fallback={<EditorSkeleton />}><DraftRecoveryGate {...props} /></Suspense>;
+}

@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = {"graph.async.enabled", "graph.worker.enabled"}, havingValue = "true")
+@ConditionalOnProperty(name = "graph.worker.enabled", havingValue = "true")
 public class GraphOutboxPublisher {
     private final JdbcTemplate jdbc;
     private final KafkaTemplate<String, String> kafka;
@@ -62,7 +62,7 @@ public class GraphOutboxPublisher {
 
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = {"graph.async.enabled", "graph.worker.enabled"}, havingValue = "true")
+@ConditionalOnProperty(name = "graph.worker.enabled", havingValue = "true")
 class GraphOutboxClaims {
     private final JdbcTemplate jdbc;
 
